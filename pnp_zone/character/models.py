@@ -60,30 +60,53 @@ class CharacterModel(models.Model):
         return self.name
 
 
-class SpellModel(models.Model):
-    name = CharField(max_length=255)
-    trial = CharField(max_length=255)
-    effect = CharField(max_length=255)
-    casting_time = CharField(max_length=255)
-    casting_cost = CharField(max_length=255)
-    range = CharField(max_length=255)
-    duration = CharField(max_length=255)
-    target_category = CharField(max_length=255)
-    aspect = CharField(max_length=255)
-    spread = CharField(max_length=255)
-    leveling_cost = CharField(max_length=1)
-    rule_book = CharField(max_length=255)
+class BaseSpellModel(models.Model):
+    class Meta:
+        abstract = True
+
+    name = CharField(max_length=255, default="")
+    description = CharField(max_length=1024, default="")
+    trial = CharField(max_length=255, default="")
+    effect = CharField(max_length=1024, default="")
+    casting_time = CharField(max_length=255, default="")
+    casting_cost = CharField(max_length=255, default="")
+    range = CharField(max_length=255, default="")
+    duration = CharField(max_length=255, default="")
+    target_category = CharField(max_length=255, default="")
+    aspect = CharField(max_length=255, default="")
+    spread = CharField(max_length=255, default="")
+    leveling_cost = CharField(max_length=255, default="")
+    rule_book = CharField(max_length=255, default="")
 
     def __str__(self):
         return self.name
 
 
-class SpellExtensionModel(models.Model):
+class ChantModel(BaseSpellModel):
+    pass
+
+
+class CeremonyModel(BaseSpellModel):
+    pass
+
+
+class BaseSpellExtensionModel(models.Model):
+    class Meta:
+        abstract = True
+
     name = CharField(max_length=255, null=False)
     description = CharField(max_length=255)
-    spell = ForeignKey(SpellModel, on_delete=models.CASCADE)
     required_skill_value = IntegerField()
     adventurer_point_cost = IntegerField()
+    rule_book = CharField(max_length=255, default="")
 
     def __str__(self):
         return self.name
+
+
+class ChantExtensionModel(BaseSpellExtensionModel):
+    chant = ForeignKey(ChantModel, on_delete=models.CASCADE)
+
+
+class CeremonyExtensionModel(BaseSpellExtensionModel):
+    ceremony = ForeignKey(CeremonyModel, on_delete=models.CASCADE)
