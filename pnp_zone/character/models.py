@@ -40,3 +40,25 @@ class CharacterModel(models.Model):
     culture = ForeignKey(CultureModel, on_delete=models.CASCADE)
     title = CharField(max_length=255, default="")
 
+
+class SpellModel(models.Model):
+    name = CharField(max_length=255, null=False)
+    trial = CharField(max_length=255)
+    effect = CharField(max_length=255)
+    casting_time = CharField(max_length=255)
+    casting_cost = CharField(max_length=255)
+    range = CharField(max_length=255)
+    duration = CharField(max_length=255)
+    target_category = CharField(max_length=255)
+    aspect = CharField(max_length=255)
+    spread = CharField(max_length=255)
+    leveling_cost = CharField(max_length=1)
+    rule_book = CharField(max_length=255)
+
+
+class SpellExtensionModel(models.Model):
+    _spell = ForeignKey(Model, on_delete=CASCADE)
+    name = CharField(max_length=255, null=False)
+    required_skill_value = IntegerField()
+    adventurer_point_cost = IntegerField()
+    description = CharField(max_length=255)
