@@ -65,9 +65,9 @@ class BaseSpellModel(models.Model):
         abstract = True
 
     name = CharField(max_length=255, default="")
-    description = CharField(max_length=1024, default="")
+    description = TextField(default="")
     trial = CharField(max_length=255, default="")
-    effect = CharField(max_length=1024, default="")
+    effect = TextField(default="")
     casting_time = CharField(max_length=255, default="")
     casting_cost = CharField(max_length=255, default="")
     range = CharField(max_length=255, default="")
@@ -94,8 +94,8 @@ class BaseSpellExtensionModel(models.Model):
     class Meta:
         abstract = True
 
-    name = CharField(max_length=255, null=False)
-    description = CharField(max_length=255)
+    name = CharField(max_length=255)
+    description = TextField()
 
 
 class ChantExtensionModel(BaseSpellExtensionModel):
