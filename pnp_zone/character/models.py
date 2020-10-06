@@ -1,10 +1,10 @@
 from django.db import models
-from django.db.models import CharField, ForeignKey, IntegerField, ManyToManyField
+from django.db.models import CharField, ForeignKey, IntegerField, ManyToManyField, TextField
 
 
 class DisadvantageModel(models.Model):
     name = CharField(max_length=255)
-    description = CharField(max_length=1024, default="")
+    description = TextField(default="")
     adventurer_point_cost = IntegerField()
 
     def __str__(self):
@@ -13,7 +13,7 @@ class DisadvantageModel(models.Model):
 
 class AdvantageModel(models.Model):
     name = CharField(max_length=255)
-    description = CharField(max_length=1024, default="")
+    description = TextField(default="")
     adventurer_point_cost = IntegerField()
 
     def __str__(self):
@@ -37,7 +37,7 @@ class SpeciesModel(models.Model):
 
 class CultureModel(models.Model):
     name = CharField(max_length=255)
-    description = CharField(max_length=1024, default="")
+    description = TextField(default="")
 
     def __str__(self):
         return self.name
@@ -96,12 +96,6 @@ class BaseSpellExtensionModel(models.Model):
 
     name = CharField(max_length=255, null=False)
     description = CharField(max_length=255)
-    required_skill_value = IntegerField()
-    adventurer_point_cost = IntegerField()
-    rule_book = CharField(max_length=255, default="")
-
-    def __str__(self):
-        return self.name
 
 
 class ChantExtensionModel(BaseSpellExtensionModel):
