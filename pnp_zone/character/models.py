@@ -60,6 +60,14 @@ class CharacterModel(models.Model):
         return self.name
 
 
+class RulebookModel(models.Model):
+    name = CharField(max_length=255, default="")
+    cover = CharField(max_length=255, default="", blank=True)
+
+    def __str__(self):
+        return self.name
+
+
 class BaseSpellModel(models.Model):
     class Meta:
         abstract = True
@@ -73,10 +81,10 @@ class BaseSpellModel(models.Model):
     range = CharField(max_length=255, default="")
     duration = CharField(max_length=255, default="")
     target_category = CharField(max_length=255, default="")
-    aspect = CharField(max_length=255, default="")
     spread = CharField(max_length=255, default="")
     leveling_cost = CharField(max_length=255, default="")
-    rule_book = CharField(max_length=255, default="")
+    rule_book = ForeignKey(RulebookModel, on_delete=models.CASCADE)
+    rule_book_page = IntegerField(default=-1)
 
     def __str__(self):
         return self.name
@@ -96,6 +104,8 @@ class BaseSpellExtensionModel(models.Model):
 
     name = CharField(max_length=255)
     description = TextField()
+    rule_book = ForeignKey(RulebookModel, on_delete=models.CASCADE)
+    rule_book_page = IntegerField(default=-1)
 
 
 class ChantExtensionModel(BaseSpellExtensionModel):
