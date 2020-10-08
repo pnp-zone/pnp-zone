@@ -80,9 +80,10 @@ class SourceModel(models.Model):
     page = ForeignKey(PageModel, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.book}, page {self.page}"
+        return f"{self.book}, page {self.page.page}"
 
 
+# Base for magic and holy casting
 class BaseSpellModel(models.Model):
     class Meta:
         abstract = True
@@ -104,14 +105,6 @@ class BaseSpellModel(models.Model):
         return self.name
 
 
-class ChantModel(BaseSpellModel):
-    pass
-
-
-class CeremonyModel(BaseSpellModel):
-    pass
-
-
 class BaseSpellExtensionModel(models.Model):
     class Meta:
         abstract = True
@@ -119,6 +112,52 @@ class BaseSpellExtensionModel(models.Model):
     name = CharField(max_length=255)
     description = TextField()
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
+
+
+class BaseCantripModel(models.Model):
+    class Meta:
+        abstract = True
+
+    name = CharField(max_length=255, default="")
+    effect = TextField()
+    range = CharField(max_length=255, default="")
+    duration = CharField(max_length=255, default="")
+    target_category = CharField(max_length=255, default="")
+    spread = CharField(max_length=255, default="")
+    source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+# Magical Stuff
+class SpellModel(BaseSpellModel):
+    attribute = CharField(max_length=255, default="")
+
+
+class RitualModel(BaseSpellModel):
+    attribute = CharField(max_length=255, default="")
+
+
+class SpellExtensionModel(BaseSpellExtensionModel):
+    spell = ForeignKey(SpellModel, on_delete=models.CASCADE)
+
+
+class RitualExtensionModel(BaseSpellExtensionModel):
+    ritual = ForeignKey(RitualModel, on_delete=models.CASCADE)
+
+
+class CantripModel(BaseCantripModel):
+    attribute = CharField(max_length=255, default="")
+
+
+# Holy Stuff
+class ChantModel(BaseSpellModel):
+    pass
+
+
+class CeremonyModel(BaseSpellModel):
+    pass
 
 
 class ChantExtensionModel(BaseSpellExtensionModel):
@@ -129,14 +168,5 @@ class CeremonyExtensionModel(BaseSpellExtensionModel):
     ceremony = ForeignKey(CeremonyModel, on_delete=models.CASCADE)
 
 
-class BlessingsModel(models.Model):
-    name = CharField(max_length=255, default="")
-    effect = TextField()
-    range = CharField(max_length=255, default="")
-    duration = CharField(max_length=255, default="")
-    target_category = CharField(max_length=255, default="")
-    aspect = CharField(max_length=255, default="")
-    source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return self.name
+class BlessingsModel(BaseCantripModel):
+    pass
