@@ -68,6 +68,21 @@ class RulebookModel(models.Model):
         return self.name
 
 
+class PageModel(models.Model):
+    page = IntegerField(unique=True)
+
+    def __str__(self):
+        return f"Page {self.page}"
+
+
+class SourceModel(models.Model):
+    book = ForeignKey(RulebookModel, on_delete=models.CASCADE)
+    page = ForeignKey(PageModel, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.book}, page {self.page}"
+
+
 class BaseSpellModel(models.Model):
     class Meta:
         abstract = True
@@ -83,8 +98,7 @@ class BaseSpellModel(models.Model):
     target_category = CharField(max_length=255, default="")
     spread = CharField(max_length=255, default="")
     leveling_cost = CharField(max_length=255, default="")
-    rule_book = ForeignKey(RulebookModel, on_delete=models.CASCADE)
-    rule_book_page = IntegerField(default=-1)
+    source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -104,8 +118,7 @@ class BaseSpellExtensionModel(models.Model):
 
     name = CharField(max_length=255)
     description = TextField()
-    rule_book = ForeignKey(RulebookModel, on_delete=models.CASCADE)
-    rule_book_page = IntegerField(default=-1)
+    source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
 
 class ChantExtensionModel(BaseSpellExtensionModel):
@@ -114,3 +127,16 @@ class ChantExtensionModel(BaseSpellExtensionModel):
 
 class CeremonyExtensionModel(BaseSpellExtensionModel):
     ceremony = ForeignKey(CeremonyModel, on_delete=models.CASCADE)
+
+
+class BlessingsModel(models.Model):
+    name = CharField(max_length=255, default="")
+    effect = TextField()
+    range = CharField(max_length=255, default="")
+    duration = CharField(max_length=255, default="")
+    target_category = CharField(max_length=255, default="")
+    aspect = CharField(max_length=255, default="")
+    source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.name
