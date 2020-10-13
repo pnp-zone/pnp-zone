@@ -5,13 +5,22 @@
     <title>{{ title }}</title>
     {% load static %}
     <link rel="stylesheet" href="{% static "css/main.css" %}">
-    {% if light %}
-    <link rel="stylesheet" href="{% static "css/light.css" %}">
-    {% else %}
-    <link rel="stylesheet" href="{% static "css/dark.css" %}">>
-    {% endif %}
 </head>
 <body>
-{% block body %}{% endblock %}
+    <aside class="sidebar">
+        <nav class="nav">
+            <ul>
+            {% for menu_item in menu.items %}
+            {% if menu_item.active %}
+                <li class="active"><a href="{{ menu_item.link }}">{{ menu_item.text }}</a></li>
+            {% else %}
+                <li><a href="{{ menu_item.link }}">{{ menu_item.text }}</a></li>
+            {% endif %}
+            {% endfor %}
+            </ul>
+        </nav>
+  </aside>
+{% block body %}
+{% endblock %}
 </body>
 </html>

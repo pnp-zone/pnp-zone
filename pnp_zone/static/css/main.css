@@ -1,3 +1,59 @@
+.sidebar {
+  position: fixed;
+  width: 15%;
+  height: 100vh;
+  background: #192734;
+  font-size: 0.65em;
+}
+
+.nav {
+  position: relative;
+  margin: 0 15%;
+  text-align: right;
+  top: 50%;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+  font-weight: bold;
+}
+
+.nav ul {
+  list-style: none;
+}
+.nav ul li {
+  position: relative;
+  margin: 3.2em 0;
+}
+.nav ul li a {
+  line-height: 5em;
+  text-transform: uppercase;
+  text-decoration: none;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.35);
+  display: block;
+  -webkit-transition: all ease-out 300ms;
+  transition: all ease-out 300ms;
+}
+.nav ul li.active a {
+  color: white;
+}
+.nav ul li:not(.active)::after {
+  opacity: 0.2;
+}
+.nav ul li:not(.active):hover a {
+  color: rgba(255, 255, 255, 0.75);
+}
+.nav ul li::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 0.2em;
+  background: black;
+  left: 0;
+  bottom: 0;
+  background-image: -webkit-gradient(linear, left top, right top, from(#5e42a6), to(#8899ac));
+  background-image: linear-gradient(to right, #5e42a6, #8899ac);
+}
+
 .flex-horizontal {
     display: flex;
     flex-direction: row;
@@ -19,7 +75,10 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  body {
-      background: black;
-  }
+    body {
+        background: #15202b;
+        color: #ffffff;
+        margin: 0;
+        font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+    }
 }
