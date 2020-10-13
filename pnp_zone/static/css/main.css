@@ -1,0 +1,25 @@
+.flex-horizontal {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-horizontal-reverse {
+    display: flex;
+    flex-direction: row-reverse;
+}
+
+.flex-vertical {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-vertical-reverse {
+    display: flex;
+    flex-direction: column-reverse;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+      background: black;
+  }
+}
