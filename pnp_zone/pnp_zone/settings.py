@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'dashboard',
     'blessings',
     'chants',
-    'ceremonies'
+    'ceremonies',
+    'wiki'
 ]
 
 MIDDLEWARE = [
