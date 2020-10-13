@@ -164,8 +164,3 @@ class RitualExtensionModel(BaseSpellExtensionModel):
 
 class CantripModel(BaseCantripModel):
     attribute = CharField(max_length=255, default="")
-
-
-# Holy Stuff
-class BlessingsModel(BaseCantripModel):
-    pass
