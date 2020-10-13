@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'channels',
     'character',
     'dashboard',
+    'chants',
 ]
 
 MIDDLEWARE = [
