@@ -1,8 +1,7 @@
 from django.http import JsonResponse
-from django.shortcuts import render
 from django.views.generic import TemplateView
 
-from character.models import ChantModel
+from chants.models import ChantModel
 from character import models
 
 
