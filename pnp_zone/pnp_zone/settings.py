@@ -41,7 +41,10 @@ INSTALLED_APPS = [
     'channels',
     'character',
     'dashboard',
+    'blessings',
     'chants',
+    'ceremonies',
+    'wiki'
 ]
 
 MIDDLEWARE = [

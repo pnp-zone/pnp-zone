@@ -86,10 +86,16 @@ class SourceModel(models.Model):
 class GodModel(models.Model):
     name = CharField(max_length=255, default="")
 
+    def __str__(self):
+        return self.name
+
 
 class GodAspectModel(models.Model):
     name = CharField(max_length=255, default="")
     god = ForeignKey(GodModel, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.god} ({self.name})"
 
 
 # Base for magic and holy casting
@@ -158,16 +164,3 @@ class RitualExtensionModel(BaseSpellExtensionModel):
 
 class CantripModel(BaseCantripModel):
     attribute = CharField(max_length=255, default="")
-
-
-# Holy Stuff
-class CeremonyModel(BaseSpellModel):
-    aspect = ManyToManyField(GodAspectModel)
-
-
-class CeremonyExtensionModel(BaseSpellExtensionModel):
-    ceremony = ForeignKey(CeremonyModel, on_delete=models.CASCADE)
-
-
-class BlessingsModel(BaseCantripModel):
-    pass
