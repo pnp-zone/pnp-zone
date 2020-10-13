@@ -83,6 +83,15 @@ class SourceModel(models.Model):
         return f"{self.book}, page {self.page.page}"
 
 
+class GodModel(models.Model):
+    name = CharField(max_length=255, default="")
+
+
+class GodAspectModel(models.Model):
+    name = CharField(max_length=255, default="")
+    god = ForeignKey(GodModel, on_delete=models.CASCADE)
+
+
 # Base for magic and holy casting
 class BaseSpellModel(models.Model):
     class Meta:
@@ -97,13 +106,11 @@ class BaseSpellModel(models.Model):
     range = CharField(max_length=255, default="")
     duration = CharField(max_length=255, default="")
     target_category = CharField(max_length=255, default="")
-    spread = CharField(max_length=255, default="")
     leveling_cost = CharField(max_length=255, default="")
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
-
 
 class BaseSpellExtensionModel(models.Model):
     class Meta:
@@ -132,10 +139,12 @@ class BaseCantripModel(models.Model):
 
 # Magical Stuff
 class SpellModel(BaseSpellModel):
+    spread = CharField(max_length=255, default="")
     attribute = CharField(max_length=255, default="")
 
 
 class RitualModel(BaseSpellModel):
+    spread = CharField(max_length=255, default="")
     attribute = CharField(max_length=255, default="")
 
 
@@ -152,16 +161,8 @@ class CantripModel(BaseCantripModel):
 
 
 # Holy Stuff
-class ChantModel(BaseSpellModel):
-    pass
-
-
 class CeremonyModel(BaseSpellModel):
-    pass
-
-
-class ChantExtensionModel(BaseSpellExtensionModel):
-    chant = ForeignKey(ChantModel, on_delete=models.CASCADE)
+    aspect = ManyToManyField(GodAspectModel)
 
 
 class CeremonyExtensionModel(BaseSpellExtensionModel):
