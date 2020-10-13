@@ -27,3 +27,6 @@ class ChantExtensionModel(models.Model):
     description = TextField()
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
     chant = ForeignKey(ChantModel, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
