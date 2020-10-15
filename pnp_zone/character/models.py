@@ -106,6 +106,20 @@ class AttributeModel(models.Model):
         return self.abbreviation
 
 
+class CheckModel(models.Model):
+    fst = ForeignKey(AttributeModel, related_name="fst_attribute", on_delete=models.CASCADE)
+    snd = ForeignKey(AttributeModel, related_name="snd_attribute", on_delete=models.CASCADE)
+    trd = ForeignKey(AttributeModel, related_name="trd_attribute", on_delete=models.CASCADE)
+
+    def __iter__(self):
+        yield self.fst
+        yield self.snd
+        yield self.trd
+
+    def __str__(self):
+        return "/".join(map(str, self))
+
+
 # Base for magic and holy casting
 class BaseSpellModel(models.Model):
     class Meta:
