@@ -127,7 +127,7 @@ class BaseSpellModel(models.Model):
 
     name = CharField(max_length=255, default="")
     description = TextField(default="")
-    trial = CharField(max_length=255, default="")
+    trial = ForeignKey(CheckModel, on_delete=models.CASCADE)
     effect = TextField(default="")
     casting_time = CharField(max_length=255, default="")
     casting_cost = CharField(max_length=255, default="")
