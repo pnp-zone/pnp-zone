@@ -1,0 +1,10 @@
+[
+  {"model": "character.attributemodel", "pk": 1, "fields": {"name": "Mut", "abbreviation": "MU"}},
+  {"model": "character.attributemodel", "pk": 2, "fields": {"name": "Klugheit", "abbreviation": "KL"}},
+  {"model": "character.attributemodel", "pk": 3, "fields": {"name": "Intuition", "abbreviation": "IN"}},
+  {"model": "character.attributemodel", "pk": 4, "fields": {"name": "Charisma", "abbreviation": "CH"}},
+  {"model": "character.attributemodel", "pk": 5, "fields": {"name": "Fingerfertigkeit", "abbreviation": "FF"}},
+  {"model": "character.attributemodel", "pk": 6, "fields": {"name": "Gewandheit", "abbreviation": "GE"}},
+  {"model": "character.attributemodel", "pk": 7, "fields": {"name": "Konstitution", "abbreviation": "KO"}},
+  {"model": "character.attributemodel", "pk": 8, "fields": {"name": "Körperkraft", "abbreviation": "KK"}}
+]

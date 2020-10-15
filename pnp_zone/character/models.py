@@ -98,6 +98,14 @@ class GodAspectModel(models.Model):
         return f"{self.god} ({self.name})"
 
 
+class AttributeModel(models.Model):
+    name = CharField(max_length=255, default="")
+    abbreviation = CharField(max_length=255, default="")
+
+    def __str__(self):
+        return self.abbreviation
+
+
 # Base for magic and holy casting
 class BaseSpellModel(models.Model):
     class Meta:
@@ -117,6 +125,7 @@ class BaseSpellModel(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class BaseSpellExtensionModel(models.Model):
     class Meta:
@@ -164,3 +173,4 @@ class RitualExtensionModel(BaseSpellExtensionModel):
 
 class CantripModel(BaseCantripModel):
     attribute = CharField(max_length=255, default="")
+
