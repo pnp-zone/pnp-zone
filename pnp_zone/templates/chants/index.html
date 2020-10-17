@@ -1,4 +1,12 @@
 {% extends "base.html" %}
-<div class="flex-horizontal">
+{% block body %}
+<div class="flex-vertical", style="left: 20%; position: absolute;">
+
+<ul>
+    {% for chant in chants %}
+        <li><a href="{{ chant.name }}">{{ chant.name }}</a></li>
+    {% endfor %}
+</ul>
 
 </div>
+{% endblock %}

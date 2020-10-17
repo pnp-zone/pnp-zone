@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="flex-vertical", style="left: 20%; position: absolute;">
+
+    <h1>{{ title }}</h1>
+    <p><strong>Probe:</strong> {{ trial }}</p>
+    <p><strong>Wirkung:</strong> {{ chant.effect }}</p>
+    <p><strong>Liturgiedauer:</strong> {{ chant.casting_time }}</p>
+    <p><strong>KaP-Kosten:</strong> {{ chant.casting_cost }}</p>
+    <p><strong>Reichweite:</strong> {{ chant.range }}</p>
+    <p><strong>Wirkungsdauer:</strong> {{ chant.duration }}</p>
+    <p><strong>Zielkategorie:</strong> {{ chant.target_category }}</p>
+    <p><strong>Verbreitung:</strong> {{ aspects }}</p>
+    <p><strong>Steigerungsfaktor:</strong> {{ chant.leveling_cost }}</p>
+    <hr>
+    <p><strong>Publikation:</strong> {{ publication }}</p>
+
+</div>
+{% endblock %}

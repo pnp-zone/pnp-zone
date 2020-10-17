@@ -4,5 +4,6 @@ from chants.views import *
 
 
 urlpatterns = [
-    path("", ChantView.as_view())
+    path("<str:chant>", ChantView.as_view()),
+    path("", IndexView.as_view())
 ]
