@@ -2,11 +2,18 @@
 {% block body %}
 <div class="flex-vertical", style="left: 20%; position: absolute;">
 
-<ul>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Probe</th>
+    </tr>
     {% for chant in chants %}
-        <li><a href="{{ chant.name }}">{{ chant.name }}</a></li>
+        <tr>
+            <td><a href="{{ chant.name }}">{{ chant.name }}</a><td>
+            <td>{{ chant.trial }}<td>
+        </tr>
     {% endfor %}
-</ul>
+</table>
 
 </div>
 {% endblock %}
