@@ -7,7 +7,8 @@ from character.models import SourceModel, GodAspectModel, CheckModel
 class ChantModel(models.Model):
     name = CharField(max_length=255, default="")
     description = TextField(default="")
-    trial = ForeignKey(CheckModel, on_delete=models.CASCADE)
+    trial = ForeignKey(CheckModel, on_delete=models.CASCADE, null=True)
+    trial_modifier = CharField(max_length=255, default="")
     effect = TextField(default="")
     casting_time = CharField(max_length=255, default="")
     casting_cost = CharField(max_length=255, default="")
