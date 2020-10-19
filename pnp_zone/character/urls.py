@@ -4,5 +4,4 @@ from character.views import *
 
 
 urlpatterns = [
-    path("export", ExportView.as_view())
 ]
