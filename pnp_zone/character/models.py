@@ -120,6 +120,21 @@ class CheckModel(models.Model):
         return "/".join(map(str, self))
 
 
+class LevelingCostModel(models.Model):
+    label = CharField(max_length=255, default="")
+    increase_after = IntegerField()
+    base = IntegerField()
+
+    def for_level(self, lvl):
+        if lvl < self.increase_after:
+            return self.base * (lvl - self.increase_after + 1)
+        else:
+            return self.base
+
+    def __str__(self):
+        return self.label
+
+
 # Base for magic and holy casting
 class BaseSpellModel(models.Model):
     class Meta:

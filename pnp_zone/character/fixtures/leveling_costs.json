@@ -1,0 +1,47 @@
+[
+  {
+    "model": "character.levelingcostmodel",
+    "pk": 1,
+    "fields": {
+      "label": "A",
+      "increase_after": 12,
+      "base": 1
+    }
+  },
+  {
+    "model": "character.levelingcostmodel",
+    "pk": 2,
+    "fields": {
+      "label": "B",
+      "increase_after": 12,
+      "base": 2
+    }
+  },
+  {
+    "model": "character.levelingcostmodel",
+    "pk": 3,
+    "fields": {
+      "label": "C",
+      "increase_after": 12,
+      "base": 3
+    }
+  },
+  {
+    "model": "character.levelingcostmodel",
+    "pk": 4,
+    "fields": {
+      "label": "D",
+      "increase_after": 12,
+      "base": 4
+    }
+  },
+  {
+    "model": "character.levelingcostmodel",
+    "pk": 5,
+    "fields": {
+      "label": "E",
+      "increase_after": 14,
+      "base": 15
+    }
+  }
+]

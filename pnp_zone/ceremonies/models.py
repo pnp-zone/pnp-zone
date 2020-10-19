@@ -1,7 +1,7 @@
 from django.db import models
 from django.db.models import CharField, TextField, ForeignKey, ManyToManyField
 
-from character.models import SourceModel, GodAspectModel, CheckModel
+from character.models import SourceModel, GodAspectModel, CheckModel, LevelingCostModel
 
 
 class CeremonyModel(models.Model):
@@ -16,7 +16,7 @@ class CeremonyModel(models.Model):
     duration = CharField(max_length=255, default="")
     target_category = CharField(max_length=255, default="")
     aspect = ManyToManyField(GodAspectModel)
-    leveling_cost = CharField(max_length=255, default="")
+    leveling_cost = ForeignKey(LevelingCostModel, on_delete=models.CASCADE)
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
