@@ -16,7 +16,7 @@ class CeremonyModel(models.Model):
     duration = CharField(max_length=255, default="")
     target_category = CharField(max_length=255, default="")
     aspect = ManyToManyField(GodAspectModel)
-    leveling_cost = ForeignKey(LevelingCostModel, on_delete=models.CASCADE)
+    leveling_cost = ForeignKey(LevelingCostModel, on_delete=models.CASCADE, null=True)
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
