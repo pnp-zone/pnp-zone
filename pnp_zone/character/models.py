@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import CharField, ForeignKey, IntegerField, ManyToManyField, TextField
+from django.db.models import CharField, ForeignKey, IntegerField, ManyToManyField, TextField, BooleanField
 
 
 class DisadvantageModel(models.Model):
@@ -133,3 +133,34 @@ class LevelingCostModel(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class SkillTypeModel(models.Model):
+    name = CharField(max_length=255, default="")
+
+    def __str__(self):
+        return self.name
+
+
+class SkillModel(models.Model):
+    name = CharField(max_length=255, default="")
+    type = ForeignKey(SkillTypeModel, on_delete=models.CASCADE, null=True)
+
+    trial = ForeignKey(CheckModel, on_delete=models.CASCADE, null=True)
+    """what to roll on"""
+    applications = CharField(max_length=255, default="")
+    """comma separated list of subfield this skill applies to"""
+    encumbrance = BooleanField(default=False)
+    """whether the skill is affected by encumbrance"""
+    quality = CharField(max_length=255, default="")
+    """what better quality means for a success"""
+    failed_check = CharField(max_length=255, default="")
+    """what happens on a failed check"""
+    critical_success = CharField(max_length=255, default="")
+    """what happens on a critical success"""
+    critical_failure = CharField(max_length=255, default="")
+    """what happens on a critical failure"""
+    leveling_cost = ForeignKey(LevelingCostModel, on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return self.name
