@@ -150,8 +150,10 @@ class SkillModel(models.Model):
     """what to roll on"""
     applications = CharField(max_length=255, default="")
     """comma separated list of subfield this skill applies to"""
-    encumbrance = BooleanField(default=False)
+    encumbrance = CharField(max_length=255, default="")
     """whether the skill is affected by encumbrance"""
+    tools = CharField(max_length=255, default="")
+    """"""
     quality = CharField(max_length=255, default="")
     """what better quality means for a success"""
     failed_check = CharField(max_length=255, default="")
