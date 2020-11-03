@@ -1,6 +1,6 @@
 from django.urls import path
 
-from player.views import *
+from wiki.views import *
 
 
 urlpatterns = [

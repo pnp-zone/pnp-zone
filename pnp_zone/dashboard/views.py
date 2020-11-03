@@ -6,5 +6,9 @@ class DashboardView(TemplateView):
     template_name = "dashboard/index.html"
 
     def get(self, request, *args, **kwargs):
-        return render(request, template_name=self.template_name)
+        return render(request, self.template_name, {"title": "here be dragons",
+                                                    "menu": [{"active": True, "link": "/", "text": "Dashboard"},
+                                                             {"link": "/player/", "text": "Player Tools"},
+                                                             {"link": "/dm/", "text": "DM Tools"},
+                                                             {"link": "/wiki/", "text": "Wiki"}, ]})
 
