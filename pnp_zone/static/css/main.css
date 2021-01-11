@@ -74,11 +74,13 @@
     flex-direction: column-reverse;
 }
 
+body {
+    margin: 0;
+    font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+}
 @media (prefers-color-scheme: dark) {
     body {
         background: #15202b;
         color: #ffffff;
-        margin: 0;
-        font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
     }
 }
