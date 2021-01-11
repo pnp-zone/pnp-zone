@@ -28,6 +28,9 @@
                 obj.style.left = message.x + "px";
                 obj.style.top = message.y + "px";
                 break;
+            case "reload":
+                window.location.reload(true);
+                break;
             default:
                 console.error("Unknown message type:", message.type);
                 break;

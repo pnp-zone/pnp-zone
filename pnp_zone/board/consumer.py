@@ -26,7 +26,8 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def receive_json(self, content, **kwargs):
-        await self._move_character(room=self.room, **content)
+        if content["type"] == "move":
+            await self._move_character(room=self.room, **content)
         await self.channel_layer.group_send(self.room, {"type": "board.event", "event": content})
 
     async def board_event(self, obj):
