@@ -1,5 +1,8 @@
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
+from channels.db import database_sync_to_async
+
+from board.models import Character
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
@@ -22,8 +25,16 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
         await self.accept()
 
-    async def receive(self, text_data=None, bytes_data=None, **kwargs):
-        await self.channel_layer.group_send(self.room, {"type": "chat.message", "message": text_data})
+    async def receive_json(self, content, **kwargs):
+        await self._move_character(room=self.room, **content)
+        await self.channel_layer.group_send(self.room, {"type": "board.event", "event": content})
 
-    async def chat_message(self, obj):
-        await self.send(obj["message"])
+    async def board_event(self, obj):
+        await self.send_json(obj["event"])
+
+    @database_sync_to_async
+    def _move_character(self, /, room, id, x, y, **kwargs):
+        character = Character.objects.get(room=room, identifier=id)
+        character.x = x
+        character.y = y
+        character.save()

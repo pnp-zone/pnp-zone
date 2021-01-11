@@ -1,3 +1,14 @@
 from django.db import models
 
-# Create your models here.
+
+class Character(models.Model):
+    room = models.CharField(max_length=255)
+    identifier = models.CharField(max_length=255)
+    x = models.IntegerField()
+    y = models.IntegerField()
+
+    class Meta:
+        unique_together = ("room", "identifier")
+
+    def __str__(self):
+        return self.identifier

@@ -11,11 +11,9 @@
 </head>
 <body>
 
-<div id="character" class="character">
-    <svg height="100" width="100">
-        <circle cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="red"></circle>
-    </svg>
-</div>
+{% for character in characters %}
+    {{ character }}
+{% endfor %}
 
 <script>
     const url = window.location;
@@ -27,7 +25,8 @@
         switch (message.type) {
             case "move":
                 const obj = document.getElementById(message.id);
-                move(obj, message.x, message.y);
+                obj.style.left = message.x + "px";
+                obj.style.top = message.y + "px";
                 break;
             default:
                 console.error("Unknown message type:", message.type);
@@ -38,25 +37,28 @@
         socket = new WebSocket(endpoint);
     };
 
-    function move(obj, x, y) {
-        obj.style.left = x - (obj.offsetWidth/2) + "px";
-        obj.style.top = y - (obj.offsetHeight/2) + "px";
+    function center(obj, x, y) {
+        return {x: x - (obj.offsetWidth/2), y: y - (obj.offsetHeight/2)};
     }
 
     let selected = null;
     document.onmousemove = function (event) {
         if (selected != null) {
-            move(selected, event.pageX, event.pageY);
+            const { x, y } = center(selected, event.pageX, event.pageY);
+            selected.style.left = x + "px";
+            selected.style.top = y + "px";
         }
     };
+
     const character = document.getElementById("character");
     character.onclick = function(event) {
        if (selected === character) {
+           const { x, y } = center(selected, event.pageX, event.pageY);
            socket.send(JSON.stringify({
                type: "move",
-               id: "character",
-               x: event.pageX,
-               y: event.pageY,
+               id: selected.id,
+               x: x,
+               y: y,
            }));
            selected = null;
        } else {
