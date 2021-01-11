@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'chants',
     'ceremonies',
     'wiki',
-    'board'
+    'board',
+    'dm',
 ]
 
 MIDDLEWARE = [
