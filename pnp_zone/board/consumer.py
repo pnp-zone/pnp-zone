@@ -1,11 +1,14 @@
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.contrib.auth.models import AnonymousUser
 
 from board.models import Character
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
+
+    requires_auth = ["reload"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,15 +26,23 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             )
         self.groups.append(self.room)
 
+        print(self.scope["user"])
+
         await self.accept()
 
-    async def receive_json(self, content, **kwargs):
-        if content["type"] == "move":
-            await self._move_character(room=self.room, **content)
-        await self.channel_layer.group_send(self.room, {"type": "board.event", "event": content})
+    async def receive_json(self, event, **kwargs):
+        event_type = event["type"]
+        if event_type in self.requires_auth and isinstance(self.scope["user"], AnonymousUser):
+            await self.send_json({"type": "error", "message": f"'{event_type}' requires authentication"})
+            return
 
-    async def board_event(self, obj):
-        await self.send_json(obj["event"])
+        if event_type == "move":
+            await self._move_character(room=self.room, **event)
+
+        await self.channel_layer.group_send(self.room, {"type": "board.event", "event": event})
+
+    async def board_event(self, message):
+        await self.send_json(message["event"])
 
     @database_sync_to_async
     def _move_character(self, /, room, id, x, y, **kwargs):

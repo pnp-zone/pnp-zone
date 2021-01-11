@@ -31,13 +31,13 @@
             case "reload":
                 window.location.reload(true);
                 break;
+            case "error":
+                console.error(message.message);
+                break;
             default:
                 console.error("Unknown message type:", message.type);
                 break;
         }
-    };
-    socket.onclose = function() {
-        socket = new WebSocket(endpoint);
     };
 
     function center(obj, x, y) {
