@@ -24,30 +24,20 @@
     {{ character }}
 {% endfor %}
 
+<script src="/static/js/socket.js"></script>
 <script>
-    const url = window.location;
-    const endpoint = "ws://" + url.host + url.pathname;
-
-    let socket = new WebSocket(endpoint);
-    socket.onmessage = function (event) {
-        const message = JSON.parse(event.data);
-        switch (message.type) {
-            case "move":
-                const obj = document.getElementById(message.id);
-                obj.style.left = message.x + "px";
-                obj.style.top = message.y + "px";
-                break;
-            case "reload":
-                window.location.reload(true);
-                break;
-            case "error":
-                console.error(message.message);
-                break;
-            default:
-                console.error("Unknown message type:", message.type);
-                break;
-        }
-    };
+    let socket = new Socket();
+    socket.register_event("move", (event) => {
+        const obj = document.getElementById(event.id);
+        obj.style.left = event.x + "px";
+        obj.style.top = event.y + "px";
+    });
+    socket.register_event("reload", () => {
+        window.location.reload(true);
+    });
+    socket.register_event("error", (event) => {
+        console.error(event.message);
+    });
 
     function center(obj, x, y) {
         return {x: x - (obj.offsetWidth/2), y: y - (obj.offsetHeight/2)};
@@ -68,12 +58,12 @@
         character.onclick = function(event) {
             if (selected === character) {
                 const { x, y } = center(selected, event.pageX, event.pageY);
-                socket.send(JSON.stringify({
+                socket.send({
                     type: "move",
                     id: selected.id,
                     x: x,
                     y: y,
-                }));
+                });
                 selected = null;
             } else {
                 selected = character;
