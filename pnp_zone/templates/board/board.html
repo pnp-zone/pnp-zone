@@ -1,76 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ title }}</title>
-    <style>
-        .character {
-            position: absolute;
-        }
-        .character svg {
-            width: 3vw;
-            height: 3vw;
-        }
-        body {
-            background-image: url(https://lh5.ggpht.com/_5yMgWrqQYak/TKOZZMxRgOI/AAAAAAAAAII/hFMiwQMID5c/full%2520hex%2520grid.jpg);
-            background-repeat: no-repeat;
-            background-size: cover;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block body %}
+<style>
+    .character {
+        position: absolute;
+    }
+    .character svg {
+        width: 3vw;
+        height: 3vw;
+    }
+    body {
+        background-image: url(https://lh5.ggpht.com/_5yMgWrqQYak/TKOZZMxRgOI/AAAAAAAAAII/hFMiwQMID5c/full%2520hex%2520grid.jpg);
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
 
 {% for character in characters %}
     {{ character }}
 {% endfor %}
 
-<script src="/static/js/socket.js"></script>
-<script>
-    let socket = new Socket();
-    socket.register_event("move", (event) => {
-        const obj = document.getElementById(event.id);
-        obj.style.left = event.x + "px";
-        obj.style.top = event.y + "px";
-    });
-    socket.register_event("reload", () => {
-        window.location.reload(true);
-    });
-    socket.register_event("error", (event) => {
-        console.error(event.message);
-    });
-
-    function center(obj, x, y) {
-        return {x: x - (obj.offsetWidth/2), y: y - (obj.offsetHeight/2)};
-    }
-
-    let selected = null;
-    document.onmousemove = function (event) {
-        if (selected != null) {
-            const { x, y } = center(selected, event.pageX, event.pageY);
-            selected.style.left = x + "px";
-            selected.style.top = y + "px";
-        }
-    };
-
-    const characters = document.getElementsByClassName("character");
-    for (let i = 0; i < characters.length; i++) {
-        const character = characters[i];
-        character.onclick = function(event) {
-            if (selected === character) {
-                const { x, y } = center(selected, event.pageX, event.pageY);
-                socket.send({
-                    type: "move",
-                    id: selected.id,
-                    x: x,
-                    y: y,
-                });
-                selected = null;
-            } else {
-                selected = character;
-            }
-        };
-    }
-
-</script>
-</body>
-</html>
+{% load static %}
+<script src="{% static "js/socket.js" %}"></script>
+<script src="{% static "js/board.js" %}"></script>
+{% endblock %}
