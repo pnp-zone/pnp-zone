@@ -10,6 +10,10 @@ class Room(models.Model):
     def get_absolute_url(self):
         return "/board/" + self.identifier
 
+    @property
+    def url(self):
+        return self.get_absolute_url()
+
     def __str__(self):
         return self.name
 

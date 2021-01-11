@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="flex-vertical", style="left: 20%; position: absolute;">
+        <h1>Rooms:</h1>
+        {% for room in rooms %}
+            <a href="{{ room.url }}">{{ room.name }}</a>
+        {% endfor %}
+    </div>
+{% endblock %}
