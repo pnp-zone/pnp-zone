@@ -50,21 +50,25 @@
         }
     };
 
-    const character = document.getElementById("character");
-    character.onclick = function(event) {
-       if (selected === character) {
-           const { x, y } = center(selected, event.pageX, event.pageY);
-           socket.send(JSON.stringify({
-               type: "move",
-               id: selected.id,
-               x: x,
-               y: y,
-           }));
-           selected = null;
-       } else {
-           selected = character;
-       }
-    };
+    const characters = document.getElementsByClassName("character");
+    for (let i = 0; i < characters.length; i++) {
+        const character = characters[i];
+        character.onclick = function(event) {
+            if (selected === character) {
+                const { x, y } = center(selected, event.pageX, event.pageY);
+                socket.send(JSON.stringify({
+                    type: "move",
+                    id: selected.id,
+                    x: x,
+                    y: y,
+                }));
+                selected = null;
+            } else {
+                selected = character;
+            }
+        };
+    }
+
 </script>
 </body>
 </html>

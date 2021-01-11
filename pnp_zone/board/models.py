@@ -6,6 +6,7 @@ class Character(models.Model):
     identifier = models.CharField(max_length=255)
     x = models.IntegerField()
     y = models.IntegerField()
+    color = models.CharField(max_length=255)
 
     class Meta:
         unique_together = ("room", "identifier")
