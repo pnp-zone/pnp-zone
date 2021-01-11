@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 from django.http.response import Http404
 
 from board.models import Room
+from pnp_zone import menu
 
 
 class IndexView(TemplateView):
@@ -11,7 +12,9 @@ class IndexView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         return render(request, template_name=self.template_name, context={
-            "title": "Boards", "rooms": Room.objects.all()
+            "title": "Boards",
+            "menu": menu.get("/board/"),
+            "rooms": Room.objects.all()
         })
 
 
@@ -38,6 +41,8 @@ class BoardView(TemplateView):
         bool_list = list(map(lambda x: x % 2 == 0, range(25)))
 
         return render(request, template_name=self.template_name, context={
-            "characters": characters, "title": room.name,
+            "title": room.name,
+            "menu": menu.get(),
+            "characters": characters,
             "x_range": bool_list, "y_range": bool_list,
         })
