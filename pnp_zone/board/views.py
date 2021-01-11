@@ -3,7 +3,7 @@ from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 from django.http.response import Http404
 
-from board.models import Character, Room
+from board.models import Room
 
 
 class BoardView(TemplateView):
@@ -23,6 +23,10 @@ class BoardView(TemplateView):
                 request=request,
             ))
 
+        # A list of alternating booleans the template iterates over to generate the grid
+        bool_list = list(map(lambda x: x % 2 == 0, range(26)))
+
         return render(request, template_name=self.template_name, context={
-            "characters": characters, "title": room.name
+            "characters": characters, "title": room.name,
+            "x_range": bool_list, "y_range": bool_list,
         })

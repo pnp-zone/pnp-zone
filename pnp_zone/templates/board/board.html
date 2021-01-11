@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 
 {% block body %}
+{% load static %}
+<link rel="stylesheet" href="{% static "css/hex_tiles.css" %}">
+
 <style>
     .character {
         position: absolute;
@@ -9,18 +12,35 @@
         width: 3vw;
         height: 3vw;
     }
-    body {
-        background-image: url(https://lh5.ggpht.com/_5yMgWrqQYak/TKOZZMxRgOI/AAAAAAAAAII/hFMiwQMID5c/full%2520hex%2520grid.jpg);
-        background-repeat: no-repeat;
-        background-size: cover;
+    #grid {
+        float: right;
     }
 </style>
+
+<div id="grid">
+    <div class="flex-vertical">
+        {% for y_is_even in y_range %}
+            <div class="flex-horizontal">
+                {% if y_is_even %}
+                    <div class="hex-left"></div>
+                {% endif %}
+
+                {% for x_is_even in x_range %}
+                    <div class="hex"></div>
+                {% endfor %}
+
+                {% if not y_is_even %}
+                    <div class="hex-right"></div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% for character in characters %}
     {{ character }}
 {% endfor %}
 
-{% load static %}
 <script src="{% static "js/socket.js" %}"></script>
 <script src="{% static "js/board.js" %}"></script>
 {% endblock %}
