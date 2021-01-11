@@ -18,9 +18,12 @@ from django.urls import path, include
 
 import dashboard.urls
 import chants.urls
+import ripper.urls
+import board.urls
 
 urlpatterns = [
     path("", include(dashboard.urls)),
     path("admin/", admin.site.urls),
-    path("chants/", include(chants.urls))
+    path("chants/", include(chants.urls)),
+    path("board/", include(board.urls)),
 ]

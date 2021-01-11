@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Board</title>
+</head>
+<body>
+<script>
+    const url = window.location;
+    const endpoint = "ws://" + url.host + url.pathname;
+
+    let socket = new WebSocket(endpoint);
+    socket.onmessage = console.log;
+    socket.onclose = function() {
+        socket = new WebSocket(endpoint);
+    }
+</script>
+</body>
+</html>
