@@ -13,8 +13,15 @@
         height: 3vw;
     }
     #grid {
-        float: right;
         background-color: #000;
+        top: 0;
+        right: 0;
+        position: absolute;
+        z-index: -100;
+    }
+    #moderator {
+        background: #192734;
+        padding: 1vw;
     }
 </style>
 
@@ -37,6 +44,19 @@
         {% endfor %}
     </div>
 </div>
+
+{% if is_moderator %}
+    <div id="moderator" style="float:right">
+        <form id="new_character">
+            <h2>Create new character</h2>
+            <p><label>Identifier: <input name="id" type="text"></label></p>
+            <p><label>X: <input name="x" type="number"></label></p>
+            <p><label>Y: <input name="y" type="number"></label></p>
+            <p><label>Color: <input name="color" type="text"></label></p>
+        </form>
+        <p><button onclick="createCharacter();">New</button></p>
+    </div>
+{% endif %}
 
 <div id="characters">
     {% for character in characters %}

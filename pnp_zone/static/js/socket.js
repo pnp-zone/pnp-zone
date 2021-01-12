@@ -24,7 +24,7 @@ class Socket {
         };
 
         this.socket.onclose = (event) => {
-            setTimeout(this.open, 1000);
+            setTimeout(this.open.bind(this), 1000);
         };
     }
 

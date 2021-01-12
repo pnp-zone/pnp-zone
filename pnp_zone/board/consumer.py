@@ -39,6 +39,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             await self._move_character(**event)
 
         if event_type == "new":
+            print(event)
             await self._new_character(**event)
 
         await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": event})

@@ -39,12 +39,13 @@ class BoardView(TemplateView):
             ))
 
         # A list of alternating booleans the template iterates over to generate the grid
-        bool_list = list(map(lambda x: x % 2 == 0, range(25)))
+        bool_list = list(map(lambda x: x % 2 == 0, range(30)))
 
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
             "characters": characters,
+            "is_moderator": request.user in room.moderators.all(),
             "x_range": bool_list, "y_range": bool_list,
         })
 

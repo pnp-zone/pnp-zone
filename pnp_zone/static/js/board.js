@@ -67,3 +67,13 @@ const characters = document.getElementsByClassName("character");
 for (let i = 0; i < characters.length; i++) {
     addCharacter(characters[i]);
 }
+
+function createCharacter() {
+    const form = document.forms["new_character"]
+    socket.send({type: "new",
+        id: form["id"].value,
+        x: form["x"].value,
+        y: form["y"].value,
+        color:form["color"].value
+    });
+}
