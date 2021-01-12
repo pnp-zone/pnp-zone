@@ -47,6 +47,8 @@
 
 {% if is_moderator %}
     <div id="moderator" style="float:right">
+        <h1>Moderator Tools</h1>
+        <hr>
         <form id="new_character">
             <h2>Create new character</h2>
             <p><label>Identifier: <input name="id" type="text"></label></p>
@@ -55,6 +57,9 @@
             <p><label>Color: <input name="color" type="text"></label></p>
         </form>
         <p><button onclick="createCharacter();">New</button></p>
+        <hr>
+        <h2>Force page reload</h2>
+        <p><button onclick="socket.send({type: 'reload'})">Reload</button></p>
     </div>
 {% endif %}
 
