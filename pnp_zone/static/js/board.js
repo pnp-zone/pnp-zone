@@ -31,8 +31,8 @@ socket.registerEvent("delete", (event) => {
 });
 
 function moveObj(obj, x, y) {
-    obj.style.left = x - (obj.offsetWidth/2) + "px";
-    obj.style.top = y - (obj.offsetHeight/2) + "px";
+    obj.style.left = (x - obj.offsetWidth/2) / window.innerWidth * 100 + "vw";
+    obj.style.top = (y - obj.offsetHeight/2) / window.innerWidth * 100 + "vw";
 }
 
 let selected = null;

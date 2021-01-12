@@ -6,7 +6,7 @@
 
 <style>
     .character {
-        position: absolute;
+        position: relative;
     }
     .character svg {
         width: 3vw;
@@ -15,9 +15,15 @@
     #grid {
         background-color: #000;
         top: 0;
-        right: 0;
+        left: 0;
         position: absolute;
         z-index: -100;
+    }
+    #characters {
+        top: 0;
+        left: 0;
+        position: absolute;
+        z-index: -50;
     }
     #moderator {
         background: #192734;
