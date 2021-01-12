@@ -5,7 +5,7 @@ class Socket {
     }
 
     open() {
-        this.socket = new WebSocket(this.get_endpoint());
+        this.socket = new WebSocket(this.getEndpoint());
 
         this.socket.onopen = (event) => {
         };
@@ -28,7 +28,7 @@ class Socket {
         };
     }
 
-    register_event(type, handler) {
+    registerEvent(type, handler) {
         this.event_handlers.set(type, handler);
     }
 
@@ -36,7 +36,7 @@ class Socket {
         this.socket.send(JSON.stringify(obj))
     }
 
-    get_endpoint() {
+    getEndpoint() {
         const url = window.location;
         return "ws://" + url.host + url.pathname;
     }

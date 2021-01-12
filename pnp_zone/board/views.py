@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.template.loader import render_to_string
 from django.views.generic import TemplateView
 from django.http.response import Http404
+from django.core.exceptions import SuspiciousOperation
 
-from board.models import Room
+from board.models import Room, Character
 from pnp_zone import menu
 
 
@@ -46,3 +47,18 @@ class BoardView(TemplateView):
             "characters": characters,
             "x_range": bool_list, "y_range": bool_list,
         })
+
+
+class CharacterView(TemplateView):
+    template_name = "board/character.html"
+
+    def get(self, request, *args, **kwargs):
+        if "room" not in request.GET and "character" not in request.GET:
+            raise SuspiciousOperation("Missing parameters: 'room' and 'character' required")
+        else:
+            try:
+                return render(request, template_name=self.template_name, context={
+                    "model": Character.objects.get(room__identifier=request.GET["room"], identifier=request.GET["character"])
+                })
+            except:
+                raise Http404

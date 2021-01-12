@@ -1,44 +1,69 @@
+const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+
 let socket = new Socket();
-socket.register_event("move", (event) => {
+socket.registerEvent("move", (event) => {
     const obj = document.getElementById(event.id);
-    obj.style.left = event.x + "px";
-    obj.style.top = event.y + "px";
+    moveObj(obj, event.x, event.y);
 });
-socket.register_event("reload", () => {
+socket.registerEvent("new", (event) => {
+    const request = new XMLHttpRequest();
+    request.onreadystatechange = () => {
+        if (request.readyState === 4) {
+            if (request.status === 200) {
+                addCharacter(request.responseText);
+            } else {
+                console.error("Couldn't load character: ", event.id);
+            }
+        }
+    };
+    request.open("GET", "/board/load_character?room="+room+"&character="+event.id, true);
+    request.send()
+});
+socket.registerEvent("reload", () => {
     window.location.reload(true);
 });
-socket.register_event("error", (event) => {
+socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
 
-function center(obj, x, y) {
-    return {x: x - (obj.offsetWidth/2), y: y - (obj.offsetHeight/2)};
+function moveObj(obj, x, y) {
+    obj.style.left = x - (obj.offsetWidth/2) + "px";
+    obj.style.top = y - (obj.offsetHeight/2) + "px";
 }
 
 let selected = null;
 document.onmousemove = function (event) {
     if (selected != null) {
-        const { x, y } = center(selected, event.pageX, event.pageY);
-        selected.style.left = x + "px";
-        selected.style.top = y + "px";
+        moveObj(selected, event.pageX, event.pageY);
     }
 };
 
-const characters = document.getElementsByClassName("character");
-for (let i = 0; i < characters.length; i++) {
-    const character = characters[i];
+function addCharacter(character) {
+    if (typeof character === "string") {
+        const parser = document.createElement("div");
+        parser.innerHTML = character;
+        character = parser.firstChild;
+        document.getElementById("characters").appendChild(character);
+    }
+
+    moveObj(character, character.offsetLeft, character.offsetTop);
+
     character.onclick = function(event) {
         if (selected === character) {
-            const { x, y } = center(selected, event.pageX, event.pageY);
             socket.send({
                 type: "move",
                 id: selected.id,
-                x: x,
-                y: y,
+                x: event.pageX,
+                y: event.pageY,
             });
             selected = null;
         } else {
             selected = character;
         }
     };
+}
+
+const characters = document.getElementsByClassName("character");
+for (let i = 0; i < characters.length; i++) {
+    addCharacter(characters[i]);
 }

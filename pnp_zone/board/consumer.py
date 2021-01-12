@@ -7,7 +7,7 @@ from board.models import Character, Room
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
 
-    requires_moderator = ["reload"]
+    requires_moderator = ["reload", "new"]
 
     # attributes are not initialized in __init__ but in connect via database_lookups to wait for scope
     room: Room
@@ -38,6 +38,9 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         if event_type == "move":
             await self._move_character(**event)
 
+        if event_type == "new":
+            await self._new_character(**event)
+
         await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": event})
 
     async def board_event(self, message):
@@ -48,6 +51,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         character = Character.objects.get(room=self.room, identifier=id)
         character.x = x
         character.y = y
+        character.save()
+
+    @database_sync_to_async
+    def _new_character(self, /, id, x, y, color, **_):
+        character = Character(identifier=id, x=x, y=y, color=color, room=self.room)
         character.save()
 
     @database_sync_to_async
