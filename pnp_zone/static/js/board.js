@@ -26,6 +26,10 @@ socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
 
+socket.registerEvent("delete", (event) => {
+    document.getElementById(event.id).remove();
+});
+
 function moveObj(obj, x, y) {
     obj.style.left = x - (obj.offsetWidth/2) + "px";
     obj.style.top = y - (obj.offsetHeight/2) + "px";
@@ -74,6 +78,13 @@ function createCharacter() {
         id: form["id"].value,
         x: form["x"].value,
         y: form["y"].value,
-        color:form["color"].value
+        color:form["color"].value,
+    });
+}
+
+function deleteCharacter() {
+    const form = document.forms["delete_character"];
+    socket.send({type: "delete",
+        id: form["id"].value,
     });
 }

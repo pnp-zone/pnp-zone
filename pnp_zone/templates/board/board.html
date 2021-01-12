@@ -58,6 +58,12 @@
         </form>
         <p><button onclick="createCharacter();">New</button></p>
         <hr>
+        <form id="delete_character">
+            <h2>Delete a character</h2>
+            <p><label>Identifier: <input name="id" type="text"></label></p>
+        </form>
+        <p><button onclick="deleteCharacter();">Delete</button></p>
+        <hr>
         <h2>Force page reload</h2>
         <p><button onclick="socket.send({type: 'reload'})">Reload</button></p>
     </div>

@@ -39,8 +39,10 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             await self._move_character(**event)
 
         if event_type == "new":
-            print(event)
             await self._new_character(**event)
+
+        if event_type == "delete":
+            await self._delete_character(**event)
 
         await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": event})
 
@@ -58,6 +60,10 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     def _new_character(self, /, id, x, y, color, **_):
         character = Character(identifier=id, x=x, y=y, color=color, room=self.room)
         character.save()
+
+    @database_sync_to_async
+    def _delete_character(self, /, id, **_):
+        Character.objects.get(identifier=id, room=self.room).delete()
 
     @database_sync_to_async
     def database_lookups(self):
