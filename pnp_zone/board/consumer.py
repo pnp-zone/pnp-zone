@@ -50,19 +50,19 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json(message["event"])
 
     @database_sync_to_async
-    def _move_character(self, /, id, x, y, **_):
+    def _move_character(self, id, x, y, **_):
         character = Character.objects.get(room=self.room, identifier=id)
         character.x = x
         character.y = y
         character.save()
 
     @database_sync_to_async
-    def _new_character(self, /, id, x, y, color, **_):
+    def _new_character(self, id, x, y, color, **_):
         character = Character(identifier=id, x=x, y=y, color=color, room=self.room)
         character.save()
 
     @database_sync_to_async
-    def _delete_character(self, /, id, **_):
+    def _delete_character(self, id, **_):
         Character.objects.get(identifier=id, room=self.room).delete()
 
     @database_sync_to_async
