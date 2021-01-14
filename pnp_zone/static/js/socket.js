@@ -38,6 +38,6 @@ class Socket {
 
     getEndpoint() {
         const url = window.location;
-        return "ws://" + url.host + url.pathname;
+        return url.protocol.replace("http", "ws") + "//" + url.host + url.pathname;
     }
 }
