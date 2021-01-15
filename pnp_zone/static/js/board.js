@@ -16,7 +16,7 @@ socket.registerEvent("new", (event) => {
             }
         }
     };
-    request.open("GET", "/board/load_character?room="+room+"&character="+event.id, true);
+    request.open("GET", "/board/load_character?room="+encodeURIComponent(room)+"&character="+encodeURIComponent(event.id), true);
     request.send()
 });
 socket.registerEvent("reload", () => {
