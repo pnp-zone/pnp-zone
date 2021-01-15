@@ -1,3 +1,9 @@
+.content {
+    position: fixed;
+    left: 15%;
+    width: 85%;
+}
+
 .sidebar {
   position: fixed;
   width: 15%;
