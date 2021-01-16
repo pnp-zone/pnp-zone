@@ -88,3 +88,20 @@ function deleteCharacter() {
         id: form["id"].value,
     });
 }
+
+/* WIP: */
+
+function field_coords(field) {
+    const match = field.id.match(/grid-(\d+)-(\d+)/);
+    const x = parseInt(match[1]);
+    const y = parseInt(match[2]);
+    return { x: x, y: y};
+}
+
+const fields = document.getElementsByClassName("grid-field");
+for (let i = 0; i < fields.length; i++) {
+    const field = fields[i];
+    field.onclick = (event) => {
+        console.log("Clicked field: ", field_coords(field));
+    }
+}
