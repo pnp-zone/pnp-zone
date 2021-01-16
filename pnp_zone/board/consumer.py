@@ -2,14 +2,16 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from board.models import Character, Room
+from board.events import Event
+from board.models import Room
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     requires_moderator = ["reload", "new"]
 
-    # attributes are not initialized in __init__ but in connect via database_lookups to wait for scope
+    # attributes are not initialized in `__init__`,
+    # but in `connect` via `database_lookups` to wait for the scope attribute
     room: Room
     is_moderator: bool
 
@@ -30,40 +32,45 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         self.groups.append(self.room.identifier)
 
     async def receive_json(self, event, **kwargs):
+        # Get the event's type
+        if "type" not in event:
+            await self.send_json({"type": "error", "message": "Missing type attribute"})
+            return
         event_type = event["type"]
-        if event_type in self.requires_moderator and not self.is_moderator:
-            await self.send_json({"type": "error", "message": f"'{event_type}' can only be used by moderators"})
+
+        # Wrap the data with the type's class
+        try:
+            event_cls = Event[event_type]
+        except KeyError:
+            await self.send_json({"type": "error", "message": f"Unknown event type: {event_type}"})
             return
 
-        if event_type == "move":
-            await self._move_character(**event)
+        try:
+            event = event_cls(event, room=self.room)
+        except ValueError as error:
+            await self.send_json({"type": "error", "message": str(error)})
+            return
 
-        if event_type == "new":
-            await self._new_character(**event)
+        # Check if sender has required privileges
+        if event.type in self.requires_moderator and not self.is_moderator:
+            await self.send_json({"type": "error", "message": f"'{event.type}' can only be used by moderators"})
+            return
 
-        if event_type == "delete":
-            await self._delete_character(**event)
+        # Perform db operations
+        await event.update_db()
 
-        await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": event})
+        # Respond to sender
+        response = event.response_sender()
+        if response:
+            await self.send_json(response)
+
+        # Respond to / notify all users
+        response = event.response_all_users()
+        if response:
+            await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": response})
 
     async def board_event(self, message):
         await self.send_json(message["event"])
-
-    @database_sync_to_async
-    def _move_character(self, id, x, y, **_):
-        character = Character.objects.get(room=self.room, identifier=id)
-        character.x = x
-        character.y = y
-        character.save()
-
-    @database_sync_to_async
-    def _new_character(self, id, x, y, color, **_):
-        character = Character(identifier=id, x=x, y=y, color=color, room=self.room)
-        character.save()
-
-    @database_sync_to_async
-    def _delete_character(self, id, **_):
-        Character.objects.get(identifier=id, room=self.room).delete()
 
     @database_sync_to_async
     def database_lookups(self):
