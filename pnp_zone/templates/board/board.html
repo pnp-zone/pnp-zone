@@ -6,7 +6,7 @@
 
 <style>
     .character {
-        position: absolute;
+        position: fixed;
     }
     .character svg {
         width: 3vw;
@@ -31,6 +31,8 @@
     #moderator {
         background: #192734;
         padding: 1vw;
+        float: right;
+        width: 15vw;
     }
 </style>
 
@@ -61,7 +63,7 @@
 </div>
 
 {% if is_moderator %}
-    <div id="moderator" style="float:right">
+    <div id="moderator">
         <h1>Moderator Tools</h1>
         <hr>
         <form id="new_character">
