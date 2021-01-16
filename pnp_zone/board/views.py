@@ -38,15 +38,12 @@ class BoardView(TemplateView):
                 request=request,
             ))
 
-        # A list of indices the template iterates over to generate the grid
-        i_list = list(range(30))
-
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
             "characters": characters,
             "is_moderator": request.user in room.moderators.all(),
-            "x_range": i_list, "y_range": i_list,
+            "x_range": list(range(26)), "y_range": list(range(17)),
         })
 
 
