@@ -2,7 +2,7 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from board.events import Event
+from board.events import Event, EventError
 from board.models import Room
 
 
@@ -32,42 +32,32 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         self.groups.append(self.room.identifier)
 
     async def receive_json(self, event, **kwargs):
-        # Get the event's type
-        if "type" not in event:
-            await self.send_json({"type": "error", "message": "Missing type attribute"})
-            return
-        event_type = event["type"]
-
-        # Wrap the data with the type's class
         try:
-            event_cls = Event[event_type]
-        except KeyError:
-            await self.send_json({"type": "error", "message": f"Unknown event type: {event_type}"})
-            return
+            # Wrap event data with matching event class
+            if "type" not in event:
+                raise EventError("Missing type attribute")
+            event = Event[event["type"]](event, room=self.room)
 
-        try:
-            event = event_cls(event, room=self.room)
-        except ValueError as error:
-            await self.send_json({"type": "error", "message": str(error)})
-            return
+            # Check if sender has required privileges
+            if event.type in self.requires_moderator and not self.is_moderator:
+                await self.send_json({"type": "error", "message": f"'{event.type}' can only be used by moderators"})
+                return
 
-        # Check if sender has required privileges
-        if event.type in self.requires_moderator and not self.is_moderator:
-            await self.send_json({"type": "error", "message": f"'{event.type}' can only be used by moderators"})
-            return
+            # Perform db operations
+            await event.update_db()
 
-        # Perform db operations
-        await event.update_db()
+            # Respond to sender
+            response = event.response_sender()
+            if response:
+                await self.send_json(response)
 
-        # Respond to sender
-        response = event.response_sender()
-        if response:
-            await self.send_json(response)
+            # Respond to / notify all users
+            response = event.response_all_users()
+            if response:
+                await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": response})
 
-        # Respond to / notify all users
-        response = event.response_all_users()
-        if response:
-            await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": response})
+        except EventError as err:
+            await self.send_json({"type": "error", "message": str(err)})
 
     async def board_event(self, message):
         await self.send_json(message["event"])

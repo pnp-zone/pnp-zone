@@ -18,6 +18,10 @@ from channels.db import database_sync_to_async
 from board.models import Character, Room
 
 
+class EventError(RuntimeError):
+    pass
+
+
 class _EventRegistry(type):
     """
     This meta class registers classes with their type attribute in a dictionary.
@@ -39,7 +43,10 @@ class _EventRegistry(type):
             cls.__annotations__.update(base.__annotations__)
 
     def __getitem__(cls, key):
-        return _EventRegistry._types[key]
+        try:
+            return _EventRegistry._types[key]
+        except KeyError:
+            raise EventError(f"Unknown event type: {key}") from None
 
 
 class Event(metaclass=_EventRegistry):
@@ -58,11 +65,11 @@ class Event(metaclass=_EventRegistry):
     def __init__(self, data):
         for key, value in data.items():
             if key not in self.__annotations__:
-                raise ValueError(f"Unknown attribute '{key}' for type '{self.type}'")
+                raise EventError(f"Unknown attribute '{key}' for type '{self.type}'")
 
         for key in self.__annotations__:
             if key not in data:
-                raise ValueError(f"Missing attribute '{key}' for type '{self.type}'")
+                raise EventError(f"Missing attribute '{key}' for type '{self.type}'")
 
         self._data = data
 
@@ -106,6 +113,13 @@ class RoomEvent(Event):
     def __init__(self, data, room):
         super().__init__(data)
         self.room = room
+
+
+class ReloadEvent(RoomEvent):
+    """
+    This event forces all users to reload their page.
+    """
+    type = "reload"
 
 
 class CharacterEvent(RoomEvent):
@@ -159,4 +173,8 @@ class DeleteEvent(CharacterEvent):
 
     @database_sync_to_async
     def update_db(self):
-        Character.objects.get(identifier=self.id, room=self.room).delete()
+        try:
+            Character.objects.get(identifier=self.id, room=self.room).delete()
+        except Character.DoesNotExist:
+            raise EventError(f"No character with id: {self.id}") from None
+
