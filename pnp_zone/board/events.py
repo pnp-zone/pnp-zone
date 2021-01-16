@@ -15,7 +15,7 @@ An event class defines attributes the event requires and associate a type with i
 
 from channels.db import database_sync_to_async
 
-from board.models import Character, Room
+from board.models import Character
 
 
 class EventError(RuntimeError):
@@ -79,7 +79,7 @@ class Event(metaclass=_EventRegistry):
         """
         return self._data[key]
 
-    def response_sender(self):
+    async def response_sender(self):
         """
         Get the response for the sender.
 
@@ -87,7 +87,7 @@ class Event(metaclass=_EventRegistry):
         """
         return None
 
-    def response_all_users(self):
+    async def response_all_users(self):
         """
         Get the response for all users.
         This also includes the sender even if `response_sender` has already returned something.
@@ -156,7 +156,7 @@ class NewEvent(CharacterEvent):
     y: int
     color: str
 
-    def response_all_users(self):
+    async def response_all_users(self):
         return {"type": "new", "id": self.id}
 
     @database_sync_to_async

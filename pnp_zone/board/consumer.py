@@ -15,6 +15,15 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     room: Room
     is_moderator: bool
 
+    @database_sync_to_async
+    def database_lookups(self):
+        """
+        This method is called in `connect` after the scope attribute was set and should
+        initialise all attributes which require a database lookup.
+        """
+        self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
+        self.is_moderator = self.user in self.room.moderators.all()
+
     @property
     def user(self):
         return self.scope["user"]
@@ -47,12 +56,12 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             await event.update_db()
 
             # Respond to sender
-            response = event.response_sender()
+            response = await event.response_sender()
             if response:
                 await self.send_json(response)
 
             # Respond to / notify all users
-            response = event.response_all_users()
+            response = await event.response_all_users()
             if response:
                 await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": response})
 
@@ -61,8 +70,3 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     async def board_event(self, message):
         await self.send_json(message["event"])
-
-    @database_sync_to_async
-    def database_lookups(self):
-        self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user in self.room.moderators.all()
