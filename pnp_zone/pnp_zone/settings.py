@@ -45,7 +45,8 @@ INSTALLED_APPS = [
     'chants',
     'ceremonies',
     'wiki',
-    'dm'
+    'board',
+    'dm',
 ]
 
 MIDDLEWARE = [
@@ -78,6 +79,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pnp_zone.wsgi.application'
 ASGI_APPLICATION = "pnp_zone.routing.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database

@@ -1,0 +1,37 @@
+[
+{
+    "model": "character.skilltypemodel",
+    "pk": 1,
+    "fields": {
+        "name": "Koerpertalente"
+    }
+},
+{
+    "model": "character.skilltypemodel",
+    "pk": 2,
+    "fields": {
+        "name": "Gesellschaftstalente"
+    }
+},
+{
+    "model": "character.skilltypemodel",
+    "pk": 3,
+    "fields": {
+        "name": "Naturtalente"
+    }
+},
+{
+    "model": "character.skilltypemodel",
+    "pk": 4,
+    "fields": {
+        "name": "Wissenstalente"
+    }
+},
+{
+    "model": "character.skilltypemodel",
+    "pk": 5,
+    "fields": {
+        "name": "Handwerkstalente"
+    }
+}
+]

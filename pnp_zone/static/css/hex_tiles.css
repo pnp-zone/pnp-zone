@@ -1,0 +1,77 @@
+/*
+What's going on here?
+-> https://jtauber.github.io/articles/css-hexagon.html
+*/
+
+.hex:before {
+    content: "";
+    border-bottom: 0.87vw solid #fff;
+    border-left: 1.5vw solid transparent;
+    border-right: 1.5vw solid transparent;
+    position: absolute;
+    top: -0.87vw;
+}
+.hex {
+    margin: 0.53vw 0.1vw;
+    width: 3vw;
+    height: 1.73vw;
+    background-color: #fff;
+    position: relative;
+}
+.hex:after {
+    content: "";
+    border-top: 0.87vw solid #fff;
+    border-left: 1.5vw solid transparent;
+    border-right: 1.5vw solid transparent;
+    position: absolute;
+    bottom: -0.87vw;
+}
+.hex-spacer {
+    width: 1.6vw;
+}
+
+
+.hex-left:before {
+    content: "";
+    border-bottom: 0.87vw solid #fff;
+    border-right: 1.5vw solid transparent;
+    position: absolute;
+    top: -0.87vw;
+}
+.hex-left {
+    margin: 0.53vw 0.1vw 0.53vw 0.05vw;
+    width: 1.4vw;
+    height: 1.73vw;
+    background-color: #fff;
+    position: relative;
+}
+.hex-left:after {
+    content: "";
+    border-top: 0.87vw solid #fff;
+    border-right: 1.5vw solid transparent;
+    position: absolute;
+    bottom: -0.87vw;
+}
+
+
+.hex-right:before {
+    content: "";
+    border-bottom: 0.87vw solid #fff;
+    border-left: 1.5vw solid transparent;
+    position: absolute;
+    top: -0.87vw;
+}
+.hex-right {
+    margin: 0.53vw 0.05vw 0.53vw 0.1vw;
+    width: 1.4vw;
+    height: 1.73vw;
+    background-color: #fff;
+    position: relative;
+}
+.hex-right:after {
+    content: "";
+    border-top: 0.87vw solid #fff;
+    border-left: 1.5vw solid transparent;
+    position: absolute;
+    bottom: -0.87vw;
+}

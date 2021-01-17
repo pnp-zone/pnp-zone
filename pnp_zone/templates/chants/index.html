@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% block body %}
-<div class="flex-vertical", style="left: 20%; position: absolute;">
 
 <table>
     <tr>
@@ -9,11 +8,10 @@
     </tr>
     {% for chant in chants %}
         <tr>
-            <td><a href="{{ chant.name }}">{{ chant.name }}</a><td>
+            <td><a href="{{ chant.url }}">{{ chant.name }}</a><td>
             <td>{{ chant.trial }}<td>
         </tr>
     {% endfor %}
 </table>
 
-</div>
 {% endblock %}

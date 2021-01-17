@@ -1,13 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
+from pnp_zone import menu
+
 
 class IndexView(TemplateView):
     template_name = "wiki/index.html"
 
     def get(self, request, *args, **kwargs):
         return render(request, self.template_name, {"title": "here be dragons",
-                                                    "menu": [{"link": "/", "text": "Dashboard"},
-                                                             {"link": "/player/", "text": "Player Tools"},
-                                                             {"link": "/dm/", "text": "DM Tools"},
-                                                             {"active": True, "link": "/wiki/", "text": "Wiki"}, ]})
+                                                    "menu": menu.get("/wiki/")})

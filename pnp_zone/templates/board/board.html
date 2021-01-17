@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block body %}
+{% load static %}
+<link rel="stylesheet" href="{% static "css/hex_tiles.css" %}">
+
+<style>
+    .character {
+        position: fixed;
+    }
+    .character svg {
+        width: 3vw;
+        height: 3vw;
+    }
+    #grid {
+        background-color: #000;
+        top: 0;
+        left: 0;
+        position: absolute;
+        z-index: -100;
+    }
+    #grid .flex-horizontal {
+        margin-bottom: -0.75vw;
+    }
+    #characters {
+        top: 0;
+        left: 0;
+        position: absolute;
+        z-index: -50;
+    }
+    #moderator {
+        background: #192734;
+        padding: 1vw;
+        float: right;
+        width: 15vw;
+    }
+</style>
+
+<div id="grid" class="flex-vertical">
+    {% for y in y_range %}
+        {% cycle True False as y_is_even silent %}
+        <div class="flex-horizontal">
+            {% if y_is_even %}
+                <div style="width: 1.6vw"></div>
+            {% endif %}
+
+            {% for x in x_range %}
+                {% cycle True False as x_is_even silent %}
+                <svg id="grid-{{ x }}-{{ y }}" class="grid-field" width="3vw" viewBox="0 -1 100 117.5"
+                     style="fill:#fff;stroke:#000;margin:0 0.1vw;"
+                     xmlns="http://www.w3.org/2000/svg" version="1.1">
+                    <polygon points="0,28.86751345948129 50.0,0 100.0,28.86751345948129 100.0,86.60254037844386 50.0,115.47005383792515 0,86.60254037844386"></polygon>
+                </svg>
+            {% endfor %}
+       </div>
+    {% endfor %}
+</div>
+
+{% if is_moderator %}
+    <div id="moderator">
+        <h1>Moderator Tools</h1>
+        <hr>
+        <form id="new_character">
+            <h2>Create new character</h2>
+            <p><label>Identifier: <input name="id" type="text"></label></p>
+            <p><label>X: <input name="x" type="number"></label></p>
+            <p><label>Y: <input name="y" type="number"></label></p>
+            <p><label>Color: <input name="color" type="text"></label></p>
+        </form>
+        <p><button onclick="createCharacter();">New</button></p>
+        <hr>
+        <form id="delete_character">
+            <h2>Delete a character</h2>
+            <p><label>Identifier: <input name="id" type="text"></label></p>
+        </form>
+        <p><button onclick="deleteCharacter();">Delete</button></p>
+        <hr>
+        <h2>Force page reload</h2>
+        <p><button onclick="socket.send({type: 'reload'})">Reload</button></p>
+    </div>
+{% endif %}
+
+<div id="characters">
+    {% for character in characters %}
+        {{ character }}
+    {% endfor %}
+</div>
+
+<script src="{% static "js/socket.js" %}"></script>
+<script src="{% static "js/board.js" %}"></script>
+{% endblock %}

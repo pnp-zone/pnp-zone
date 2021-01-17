@@ -19,6 +19,13 @@ class ChantModel(models.Model):
     leveling_cost = ForeignKey(LevelingCostModel, on_delete=models.CASCADE, null=True)
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
+    def get_absolute_url(self):
+        return "/chants/" + self.name
+
+    @property
+    def url(self):
+        return self.get_absolute_url()
+
     def __str__(self):
         return self.name
 

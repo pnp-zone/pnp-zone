@@ -5,6 +5,12 @@ body {
     font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
 }
 
+.content {
+    position: fixed;
+    left: 15%;
+    width: 85%;
+}
+
 .sidebar {
   position: fixed;
   width: 18%;
@@ -94,5 +100,6 @@ body {
 
     .sidebar {
         background: #192734;
+        color: #ffffff;
     }
 }

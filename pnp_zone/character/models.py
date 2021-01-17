@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 from django.db.models import CharField, ForeignKey, IntegerField, ManyToManyField, TextField, BooleanField
 
@@ -118,6 +120,22 @@ class CheckModel(models.Model):
 
     def __str__(self):
         return "/".join(map(str, self))
+
+    @staticmethod
+    def from_string(string):
+        match = re.findall("(\w+)/(\w+)/(\w+)", string)
+        if match is None:
+            raise ValueError()
+
+        fst, snd, trd = match[0]
+        check, new = CheckModel.objects.get_or_create(
+            fst=AttributeModel.objects.get(abbreviation=fst),
+            snd=AttributeModel.objects.get(abbreviation=snd),
+            trd=AttributeModel.objects.get(abbreviation=trd)
+        )
+        if new:
+            check.save()
+        return check
 
 
 class LevelingCostModel(models.Model):
