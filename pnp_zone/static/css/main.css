@@ -1,6 +1,13 @@
+body {
+    background: #15202b;
+    color: #ffffff;
+    margin: 0;
+    font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+}
+
 .sidebar {
   position: fixed;
-  width: 15%;
+  width: 18%;
   height: 100vh;
   background: #192734;
   font-size: 0.65em;
@@ -8,7 +15,7 @@
 
 .nav {
   position: relative;
-  margin: 0 15%;
+  margin: 0 10% 0 5%;
   text-align: right;
   top: 50%;
   -webkit-transform: translateY(-50%);
@@ -21,13 +28,13 @@
 }
 .nav ul li {
   position: relative;
-  margin: 3.2em 0;
+  margin: 2.2em 0;
 }
 .nav ul li a {
   line-height: 5em;
   text-transform: uppercase;
   text-decoration: none;
-  letter-spacing: 0.4em;
+  letter-spacing: 0.2em;
   color: rgba(255, 255, 255, 0.35);
   display: block;
   -webkit-transition: all ease-out 300ms;
@@ -75,10 +82,17 @@
 }
 
 @media (prefers-color-scheme: dark) {
+
     body {
         background: #15202b;
-        color: #ffffff;
-        margin: 0;
-        font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+        color: black;
+    }
+
+    .nav ul li.active a {
+        color: white;
+    }
+
+    .sidebar {
+        background: #192734;
     }
 }
