@@ -43,7 +43,7 @@ class BoardView(TemplateView):
             "menu": menu.get(),
             "characters": characters,
             "is_moderator": request.user in room.moderators.all(),
-            "x_range": list(range(26)), "y_range": list(range(17)),
+            "x_range": list(range(25)), "y_range": list(range(17)),
         })
 
 
