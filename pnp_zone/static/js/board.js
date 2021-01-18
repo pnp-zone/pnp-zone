@@ -3,7 +3,36 @@ const room = window.location.pathname.substring(window.location.pathname.lastInd
 let socket = new Socket();
 socket.registerEvent("move", (event) => {
     const obj = document.getElementById(event.id);
-    moveObj(obj, event.x, event.y);
+    const targetX = (event.x - obj.offsetWidth/2) / window.innerWidth * 100;
+    const targetY = (event.y - obj.offsetHeight/2) / window.innerWidth * 100;
+    let currentX = parseFloat(obj.style.left.replace("vw", ""));
+    let currentY = parseFloat(obj.style.top.replace("vw", ""));
+    let currentD = Math.sqrt(Math.pow(targetX-currentX, 2) + Math.pow(targetY-currentY, 2));
+    const stepSize = 0.1;
+    const stepNumber = currentD / stepSize;
+    const stepX = (targetX-currentX)/currentD*stepSize;
+    const stepY = (targetY-currentY)/currentD*stepSize;
+
+    let i = 0;
+    function doStep() {
+        if (i <= stepNumber) {
+            if (currentD < stepSize) {
+                currentX = targetX;
+                currentY = targetY;
+                currentD = 0;
+            } else {
+                currentX += stepX;
+                currentY += stepY;
+                currentD += stepSize;
+            }
+            obj.style.left = currentX + "vw";
+            obj.style.top = currentY + "vw";
+
+            i++;
+            setTimeout(doStep, 1);
+        }
+    }
+    doStep();
 });
 socket.registerEvent("new", (event) => {
     const request = new XMLHttpRequest();
