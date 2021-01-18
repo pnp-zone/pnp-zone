@@ -52,18 +52,17 @@ function addCharacter(character) {
 
     moveObj(character, character.offsetLeft, character.offsetTop);
 
-    character.onclick = function(event) {
-        if (selected === character) {
-            socket.send({
-                type: "move",
-                id: selected.id,
-                x: event.pageX,
-                y: event.pageY,
-            });
-            selected = null;
-        } else {
-            selected = character;
-        }
+    character.onmousedown = (event) => {
+        selected = character;
+    };
+    character.onmouseup = (event) => {
+        socket.send({
+            type: "move",
+            id: selected.id,
+            x: event.pageX,
+            y: event.pageY,
+        });
+        selected = null;
     };
 }
 
