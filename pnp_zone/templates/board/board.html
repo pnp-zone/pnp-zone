@@ -19,7 +19,7 @@
         z-index: -100;
     }
     #grid .flex-horizontal {
-        margin-bottom: -0.75vw;
+        margin-bottom: -1vw;
     }
     #characters {
         top: 0;
@@ -45,11 +45,13 @@
 
             {% for x in x_range %}
                 {% cycle True False as x_is_even silent %}
-                <svg id="grid-{{ x }}-{{ y }}" class="grid-field" width="3vw" viewBox="0 -1 100 117.5"
-                     style="fill:#fff;stroke:#000;margin:0 0.1vw;"
-                     xmlns="http://www.w3.org/2000/svg" version="1.1">
-                    <polygon points="0,28.86751345948129 50.0,0 100.0,28.86751345948129 100.0,86.60254037844386 50.0,115.47005383792515 0,86.60254037844386"></polygon>
-                </svg>
+                <div id="grid-{{ x }}-{{ y }}" class="grid-field">
+                    <svg width="3vw" viewBox="0 -1 100 117.5"
+                         style="fill:#fff;stroke:#000;margin:0 0.1vw;"
+                         xmlns="http://www.w3.org/2000/svg" version="1.1">
+                        <polygon points="0,28.86751345948129 50.0,0 100.0,28.86751345948129 100.0,86.60254037844386 50.0,115.47005383792515 0,86.60254037844386"></polygon>
+                    </svg>
+                </div>
             {% endfor %}
        </div>
     {% endfor %}

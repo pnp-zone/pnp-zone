@@ -43,18 +43,24 @@ class Character {
         this.x = this.coords.x;
         this.y = this.coords.y;
 
-        this.obj.onmousedown = () => {
-            Character.selected = this;
-        };
-        this.obj.onmouseup = () => {
-            socket.send({
-                type: "move",
-                id: this.id,
-                x: this.x,
-                y: this.y,
-            });
-            Character.selected = null;
-        };
+        if (this.obj.draggable) {
+            this.obj.ondragstart = (event) => {
+                event.dataTransfer.setData("plain/text", this.id);
+            };
+        } else {
+            this.obj.onmousedown = () => {
+                Character.selected = this;
+            };
+            this.obj.onmouseup = () => {
+                socket.send({
+                    type: "move",
+                    id: this.id,
+                    x: this.x,
+                    y: this.y,
+                });
+                Character.selected = null;
+            };
+        }
     }
 
     get x() {
@@ -73,5 +79,26 @@ class Character {
     set y(value) {
         this.coords.y = value;
         this.obj.style.top = value - this.height/2 + Character.UNIT;
+    }
+
+    static registerDropTarget(obj) {
+        const rect = obj.getBoundingClientRect();
+        const x = Character._px2unit(rect.left + rect.width/2);
+        const y = Character._px2unit(rect.top + rect.height/2);
+
+        obj.ondragenter = (event) => {
+            event.preventDefault();
+        };
+        obj.ondragover = (event) => {
+            event.preventDefault();
+        };
+        obj.ondrop = (event) => {
+            event.preventDefault();
+            const id = event.dataTransfer.getData("plain/text");
+            socket.send({type: "move", id: id, x: x, y: y});
+        };
+        obj.ondragleave = (event) => {
+            event.preventDefault();
+        };
     }
 }

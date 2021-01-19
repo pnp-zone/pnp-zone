@@ -82,4 +82,5 @@ for (let i = 0; i < fields.length; i++) {
     field.onclick = (event) => {
         console.log("Clicked field: ", field_coords(field));
     }
+    Character.registerDropTarget(field);
 }

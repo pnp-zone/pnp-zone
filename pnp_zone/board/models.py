@@ -24,6 +24,7 @@ class Character(models.Model):
     x = models.FloatField()
     y = models.FloatField()
     color = models.CharField(max_length=255)
+    snap = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ("room", "identifier")
