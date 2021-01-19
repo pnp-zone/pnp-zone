@@ -8,9 +8,7 @@ for (let i = 0; i < Character.DIV.children.length; i++) {
 
 const socket = new Socket();
 socket.registerEvent("move", (event) => {
-    const obj = characters[event.id];
-    obj.x = event.x;
-    obj.y = event.y;
+    characters[event.id].moveTo(event.x, event.y);
 });
 socket.registerEvent("new", (event) => {
     characters[event.id] = new Character(event.id);

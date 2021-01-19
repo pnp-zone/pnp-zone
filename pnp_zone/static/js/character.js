@@ -1,18 +1,5 @@
-document.addEventListener("mousemove", function (event) {
-    if (Character.selected != null) {
-        Character.selected.x = Character._px2unit(event.pageX);
-        Character.selected.y = Character._px2unit(event.pageY);
-    }
-});
-
 class Character {
-    static UNIT = "vw";
     static DIV = document.getElementById("characters");
-    static selected = null;
-
-    static _px2unit(coord) {
-        return coord / window.innerWidth * 100;
-    }
 
     constructor(id) {
         this.id = id;
@@ -33,58 +20,43 @@ class Character {
             this.obj = document.getElementById(this.id);
         }
 
-        this.width = Character._px2unit(this.obj.offsetWidth);
-        this.height  = Character._px2unit(this.obj.offsetHeight);
-        this.coords = {
-            x: parseFloat(this.obj.style.left.replace(Character.UNIT, "")),
-            y: parseFloat(this.obj.style.top.replace(Character.UNIT, "")),
-        };
-        // Readjust the coordinates given by django template
-        this.x = this.coords.x;
-        this.y = this.coords.y;
+        console.log(this.obj.style);
+        this._x = parseInt(this.obj.style.left.replace("px", ""));
+        this._y = parseInt(this.obj.style.top.replace("px", ""));
+        console.log(this._x);
+        this.moveTo(this._x, this._y);
 
-        if (this.obj.draggable) {
-            this.obj.ondragstart = (event) => {
-                event.dataTransfer.setData("plain/text", this.id);
-            };
-        } else {
-            this.obj.onmousedown = () => {
-                Character.selected = this;
-            };
-            this.obj.onmouseup = () => {
-                socket.send({
-                    type: "move",
-                    id: this.id,
-                    x: this.x,
-                    y: this.y,
-                });
-                Character.selected = null;
-            };
-        }
+        this.obj.ondragstart = (event) => {
+            event.dataTransfer.setData("plain/text", this.id);
+        };
     }
 
     get x() {
-        return this.coords.x;
+        return this._x;
     }
 
     get y() {
-        return this.coords.y;
+        return this._y;
     }
 
-    set x(value) {
-        this.coords.x = value;
-        this.obj.style.left = value - this.width/2 + Character.UNIT;
-    }
-
-    set y(value) {
-        this.coords.y = value;
-        this.obj.style.top = value - this.height/2 + Character.UNIT;
+    moveTo(x, y) {
+        this._x = x;
+        this._y = y;
+        const field = document.getElementById("grid-"+x+"-"+y);
+        if (field) {
+            const target = field.getBoundingClientRect();
+            const self = this.obj.getBoundingClientRect();
+            this.obj.style.left = target.x + target.width/2 - self.width/2 + "px";
+            this.obj.style.top = target.y + target.height/2 - self.height/2 + "px";
+        } else {
+            console.error("Coordinates are out of range:", x, y);
+        }
     }
 
     static registerDropTarget(obj) {
-        const rect = obj.getBoundingClientRect();
-        const x = Character._px2unit(rect.left + rect.width/2);
-        const y = Character._px2unit(rect.top + rect.height/2);
+        const match = obj.id.match(/^grid-(\d+)-(\d+)$/);
+        const x = parseInt(match[1]);
+        const y = parseInt(match[2]);
 
         obj.ondragenter = (event) => {
             event.preventDefault();
