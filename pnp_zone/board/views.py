@@ -31,18 +31,9 @@ class BoardView(TemplateView):
         except Room.DoesNotExist:
             raise Http404
 
-        characters = []
-        for character in room.character_set.all():
-            characters.append(render_to_string(
-                template_name="board/character.html",
-                context={"model": character},
-                request=request,
-            ))
-
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
-            "characters": characters,
             "is_moderator": request.user in room.moderators.all(),
             "x_range": list(range(25)), "y_range": list(range(17)),
         })

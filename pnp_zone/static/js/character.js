@@ -1,47 +1,37 @@
 class Character {
     static DIV = document.getElementById("characters");
 
-    constructor(id) {
+    constructor({id, x, y}) {
         this.id = id;
-        this.obj = document.getElementById(this.id);
 
-        if (this.obj === null) {
-            const request = new XMLHttpRequest();
-            request.open(
-                "GET",
-                "/board/load_character?room="+encodeURIComponent(room)+"&character="+encodeURIComponent(this.id),
-                false);
-            request.send();
+        const request = new XMLHttpRequest();
+        request.open(
+            "GET",
+            "/board/load_character?room="+encodeURIComponent(room)+"&character="+encodeURIComponent(this.id),
+            true);
+        request.onreadystatechange = () => {
+            if (request.readyState === 4) {
+                if (request.status === 200) {
+                    const parser = document.createElement("div");
+                    parser.innerHTML = request.responseText;
+                    Character.DIV.appendChild(parser.firstChild);
 
-            const parser = document.createElement("div");
-            parser.innerHTML = request.responseText;
-            Character.DIV.appendChild(parser.firstChild);
+                    this.obj = document.getElementById(this.id);
 
-            this.obj = document.getElementById(this.id);
-        }
+                    this.moveTo(x, y);
 
-        console.log(this.obj.style);
-        this._x = parseInt(this.obj.style.left.replace("px", ""));
-        this._y = parseInt(this.obj.style.top.replace("px", ""));
-        console.log(this._x);
-        this.moveTo(this._x, this._y);
-
-        this.obj.ondragstart = (event) => {
-            event.dataTransfer.setData("plain/text", this.id);
+                    this.obj.ondragstart = (event) => {
+                        event.dataTransfer.setData("plain/text", this.id);
+                    };
+                } else {
+                    throw Error("Couldn't load character: " + id);
+                }
+            }
         };
-    }
-
-    get x() {
-        return this._x;
-    }
-
-    get y() {
-        return this._y;
+        request.send();
     }
 
     moveTo(x, y) {
-        this._x = x;
-        this._y = y;
         const field = document.getElementById("grid-"+x+"-"+y);
         if (field) {
             const target = field.getBoundingClientRect();

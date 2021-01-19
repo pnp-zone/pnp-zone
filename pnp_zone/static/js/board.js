@@ -1,17 +1,26 @@
 const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 
 let characters = {};
-for (let i = 0; i < Character.DIV.children.length; i++) {
-    const id = Character.DIV.children[i].id;
-    characters[id] = new Character(id);
-}
+const request = new XMLHttpRequest();
+request.open("GET", "/board/load_room?room="+encodeURIComponent(room), true);
+request.responseType = "json";
+request.onreadystatechange = () => {
+    if (request.readyState === 4) {
+        if (request.status === 200) {
+            request.response.characters.forEach((character) => {
+                characters[character.id] = new Character(character);
+            });
+        }
+    }
+};
+request.send();
 
 const socket = new Socket();
 socket.registerEvent("move", (event) => {
     characters[event.id].moveTo(event.x, event.y);
 });
 socket.registerEvent("new", (event) => {
-    characters[event.id] = new Character(event.id);
+    characters[event.id] = new Character({id: event.id, x: event.x, y: event.y});
 });
 socket.registerEvent("reload", () => {
     window.location.reload(true);
@@ -20,8 +29,7 @@ socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
 socket.registerEvent("delete", (event) => {
-    characters[event.id].obj.delete();
-    characters[event.id] = new Character(event.id);
+    characters[event.id].obj.remove();
 });
 
 function createCharacter() {
