@@ -9,32 +9,8 @@ for (let i = 0; i < Character.DIV.children.length; i++) {
 const socket = new Socket();
 socket.registerEvent("move", (event) => {
     const obj = characters[event.id];
-    const deltaX = event.x - obj.x;
-    const deltaY = event.y - obj.y;
-    let currentD = Math.sqrt(Math.pow(deltaX, 2) + Math.pow(deltaY, 2));
-    const stepSize = 0.1;
-    const stepNumber = currentD / stepSize;
-    const stepX = deltaX/currentD*stepSize;
-    const stepY = deltaY/currentD*stepSize;
-
-    let i = 0;
-    function doStep() {
-        if (i <= stepNumber) {
-            if (currentD < stepSize) {
-                obj.x = event.x;
-                obj.y = event.y;
-                currentD = 0;
-            } else {
-                obj.x += stepX;
-                obj.y += stepY;
-                currentD += stepSize;
-            }
-
-            i++;
-            setTimeout(doStep, 1);
-        }
-    }
-    doStep();
+    obj.x = event.x;
+    obj.y = event.y;
 });
 socket.registerEvent("new", (event) => {
     characters[event.id] = new Character(event.id);
