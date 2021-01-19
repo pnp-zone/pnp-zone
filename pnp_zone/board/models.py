@@ -21,8 +21,8 @@ class Room(models.Model):
 class Character(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255)
-    x = models.IntegerField()
-    y = models.IntegerField()
+    x = models.FloatField()
+    y = models.FloatField()
     color = models.CharField(max_length=255)
 
     class Meta:
