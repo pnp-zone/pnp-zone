@@ -6,13 +6,6 @@ for (let i = 0; i < Character.DIV.children.length; i++) {
     characters[id] = new Character(id);
 }
 
-document.onmousemove = function (event) {
-    if (Character.selected != null) {
-        Character.selected.x = Character._px2unit(event.pageX);
-        Character.selected.y = Character._px2unit(event.pageY);
-    }
-};
-
 const socket = new Socket();
 socket.registerEvent("move", (event) => {
     const obj = characters[event.id];

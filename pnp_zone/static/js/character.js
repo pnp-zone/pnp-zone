@@ -1,3 +1,10 @@
+document.addEventListener("mousemove", function (event) {
+    if (Character.selected != null) {
+        Character.selected.x = Character._px2unit(event.pageX);
+        Character.selected.y = Character._px2unit(event.pageY);
+    }
+});
+
 class Character {
     static UNIT = "vw";
     static DIV = document.getElementById("characters");
@@ -66,12 +73,5 @@ class Character {
     set y(value) {
         this.coords.y = value;
         this.obj.style.top = value - this.height/2 + Character.UNIT;
-    }
-
-    _coordsFromStyle() {
-        return {
-            x: parseFloat(this.obj.style.left.replace(Character.UNIT, "")) + this.width/2,
-            y: parseFloat(this.obj.style.top.replace(Character.UNIT, "")) + this.height/2,
-        };
     }
 }
