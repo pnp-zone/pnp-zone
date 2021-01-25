@@ -41,7 +41,6 @@ INSTALLED_APPS = [
     'channels',
     'character',
     'dashboard',
-    'blessings',
     'wiki',
     'board',
     'dm',
