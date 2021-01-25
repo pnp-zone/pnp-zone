@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'character',
     'dashboard',
     'blessings',
-    'chants',
     'ceremonies',
     'wiki',
     'board',

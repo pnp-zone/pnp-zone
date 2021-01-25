@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block body %}
     <h1>{{ title }}</h1>
-    <p><strong>Probe:</strong> {{ trial }}</p>
+    <p><strong>Probe:</strong> {{ chant.trial }} {{ chant.trial_modifier }}</p>
     <p><strong>Wirkung:</strong> {{ chant.effect }}</p>
     <p><strong>Liturgiedauer:</strong> {{ chant.casting_time }}</p>
     <p><strong>KaP-Kosten:</strong> {{ chant.casting_cost }}</p>
@@ -11,5 +11,5 @@
     <p><strong>Verbreitung:</strong> {{ aspects }}</p>
     <p><strong>Steigerungsfaktor:</strong> {{ chant.leveling_cost }}</p>
     <hr>
-    <p><strong>Publikation:</strong> {{ publication }}</p>
+    <p><strong>Publikation:</strong> {{ chant.source.book }}, Seite {{ chant.source.page.page }}</p>
 {% endblock %}
