@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.template.loader import render_to_string
+from django.views import View
 from django.views.generic import TemplateView
-from django.http.response import Http404
+from django.http.response import Http404, JsonResponse
 from django.core.exceptions import SuspiciousOperation
 
 from board.models import Room, Character
@@ -30,20 +31,11 @@ class BoardView(TemplateView):
         except Room.DoesNotExist:
             raise Http404
 
-        characters = []
-        for character in room.character_set.all():
-            characters.append(render_to_string(
-                template_name="board/character.html",
-                context={"model": character},
-                request=request,
-            ))
-
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
-            "characters": characters,
             "is_moderator": request.user in room.moderators.all(),
-            "x_range": list(range(26)), "y_range": list(range(17)),
+            "x_range": list(range(25)), "y_range": list(range(17)),
         })
 
 
@@ -59,4 +51,19 @@ class CharacterView(TemplateView):
                     "model": Character.objects.get(room__identifier=request.GET["room"], identifier=request.GET["character"])
                 })
             except Character.DoesNotExist:
+                raise Http404
+
+
+class RoomInfoView(View):
+
+    def get(self, request, *args, **kwargs):
+        if "room" not in request.GET:
+            raise SuspiciousOperation("Missing parameter: 'room'")
+        else:
+            try:
+                room = Room.objects.get(identifier=request.GET["room"])
+                return JsonResponse({
+                    "characters": [{"id": c.identifier, "x": c.x, "y": c.y} for c in room.character_set.all()]
+                })
+            except Room.DoesNotExist:
                 raise Http404

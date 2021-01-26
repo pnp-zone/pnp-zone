@@ -140,10 +140,13 @@ class MoveEvent(CharacterEvent):
 
     @database_sync_to_async
     def update_db(self):
-        character = Character.objects.get(room=self.room, identifier=self.id)
-        character.x = self.x
-        character.y = self.y
-        character.save()
+        if Character.objects.filter(x=self.x, y=self.y).count() > 0:
+            raise EventError("This space is already occupied!")
+        else:
+            character = Character.objects.get(room=self.room, identifier=self.id)
+            character.x = self.x
+            character.y = self.y
+            character.save()
 
 
 class NewEvent(CharacterEvent):
@@ -157,7 +160,7 @@ class NewEvent(CharacterEvent):
     color: str
 
     async def response_all_users(self):
-        return {"type": "new", "id": self.id}
+        return {"type": "new", "id": self.id, "x": self.x, "y": self.y}
 
     @database_sync_to_async
     def update_db(self):

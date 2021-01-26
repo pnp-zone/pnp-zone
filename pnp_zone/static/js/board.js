@@ -1,23 +1,26 @@
 const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 
-let socket = new Socket();
+let characters = {};
+const request = new XMLHttpRequest();
+request.open("GET", "/board/load_room?room="+encodeURIComponent(room), true);
+request.responseType = "json";
+request.onreadystatechange = () => {
+    if (request.readyState === 4) {
+        if (request.status === 200) {
+            request.response.characters.forEach((character) => {
+                characters[character.id] = new Character(character);
+            });
+        }
+    }
+};
+request.send();
+
+const socket = new Socket();
 socket.registerEvent("move", (event) => {
-    const obj = document.getElementById(event.id);
-    moveObj(obj, event.x, event.y);
+    characters[event.id].moveTo(event.x, event.y);
 });
 socket.registerEvent("new", (event) => {
-    const request = new XMLHttpRequest();
-    request.onreadystatechange = () => {
-        if (request.readyState === 4) {
-            if (request.status === 200) {
-                addCharacter(request.responseText);
-            } else {
-                console.error("Couldn't load character: ", event.id);
-            }
-        }
-    };
-    request.open("GET", "/board/load_character?room="+encodeURIComponent(room)+"&character="+encodeURIComponent(event.id), true);
-    request.send()
+    characters[event.id] = new Character({id: event.id, x: event.x, y: event.y});
 });
 socket.registerEvent("reload", () => {
     window.location.reload(true);
@@ -25,52 +28,9 @@ socket.registerEvent("reload", () => {
 socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
-
 socket.registerEvent("delete", (event) => {
-    document.getElementById(event.id).remove();
+    characters[event.id].obj.remove();
 });
-
-function moveObj(obj, x, y) {
-    obj.style.left = (x - obj.offsetWidth/2) / window.innerWidth * 100 + "vw";
-    obj.style.top = (y - obj.offsetHeight/2) / window.innerWidth * 100 + "vw";
-}
-
-let selected = null;
-document.onmousemove = function (event) {
-    if (selected != null) {
-        moveObj(selected, event.pageX, event.pageY);
-    }
-};
-
-function addCharacter(character) {
-    if (typeof character === "string") {
-        const parser = document.createElement("div");
-        parser.innerHTML = character;
-        character = parser.firstChild;
-        document.getElementById("characters").appendChild(character);
-    }
-
-    moveObj(character, character.offsetLeft, character.offsetTop);
-
-    character.onclick = function(event) {
-        if (selected === character) {
-            socket.send({
-                type: "move",
-                id: selected.id,
-                x: event.pageX,
-                y: event.pageY,
-            });
-            selected = null;
-        } else {
-            selected = character;
-        }
-    };
-}
-
-const characters = document.getElementsByClassName("character");
-for (let i = 0; i < characters.length; i++) {
-    addCharacter(characters[i]);
-}
 
 function createCharacter() {
     const form = document.forms["new_character"]
@@ -104,4 +64,5 @@ for (let i = 0; i < fields.length; i++) {
     field.onclick = (event) => {
         console.log("Clicked field: ", field_coords(field));
     }
+    Character.registerDropTarget(field);
 }
