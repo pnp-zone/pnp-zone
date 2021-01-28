@@ -13,4 +13,9 @@ from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pnp_zone.settings')
 
-application = get_asgi_application()
+# Fetch Django ASGI application early to ensure AppRegistry is populated
+# before importing consumers and AuthMiddlewareStack that may import ORM
+# models.
+get_asgi_application()
+
+from pnp_zone.routing import application

@@ -39,6 +39,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'channels',
+    'character',
+    'dashboard',
+    'blessings',
+    'chants',
+    'ceremonies',
+    'wiki',
+    'board',
+    'dm',
 ]
 
 MIDDLEWARE = [
@@ -56,8 +64,7 @@ ROOT_URLCONF = 'pnp_zone.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,6 +79,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pnp_zone.wsgi.application'
 ASGI_APPLICATION = "pnp_zone.routing.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 
 # Database
@@ -122,3 +134,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    "static"
+]
