@@ -6,58 +6,38 @@
 
 <style>
     .character {
-        position: fixed;
+        position: absolute;
         transition-property: left, top;
         transition-duration: 1s;
-        width: 3.2vw;
-        height: 3.2vw;
+        width: 100px;
+        height: 100px;
     }
     .character svg {
-        margin: 0 0.35vw;
+        margin: 0 10px;
     }
     #grid {
-        top: 0;
-        left: 0;
-        position: absolute;
         z-index: -100;
     }
     #grid .flex-horizontal {
-        margin-bottom: -1vw;
+        margin-bottom: -38px;
     }
-    #characters {
+    .board-layer {
+        position: absolute;
         top: 0;
         left: 0;
-        position: absolute;
-        z-index: -50;
     }
     #moderator {
         background: #192734;
         padding: 1vw;
         float: right;
         width: 15vw;
+        z-index: 100;
     }
 </style>
 
-<div id="grid" class="flex-vertical">
-    {% for y in y_range %}
-        {% cycle True False as y_is_even silent %}
-        <div class="flex-horizontal">
-            {% if y_is_even %}
-                <div style="width: 1.6vw"></div>
-            {% endif %}
-
-            {% for x in x_range %}
-                {% cycle True False as x_is_even silent %}
-                <div id="grid-{{ x }}-{{ y }}" class="grid-field">
-                    <svg width="3vw" viewBox="0 -1 100 117.5"
-                         style="fill:#fff;stroke:#000;margin:0 0.1vw;"
-                         xmlns="http://www.w3.org/2000/svg" version="1.1">
-                        <polygon points="0,28.86751345948129 50.0,0 100.0,28.86751345948129 100.0,86.60254037844386 50.0,115.47005383792515 0,86.60254037844386"></polygon>
-                    </svg>
-                </div>
-            {% endfor %}
-       </div>
-    {% endfor %}
+<div id="board">
+    <div id="characters" class="board-layer"></div>
+    <div id="grid" class="board-layer"></div>
 </div>
 
 {% if is_moderator %}
@@ -84,10 +64,8 @@
     </div>
 {% endif %}
 
-<div id="characters">
-</div>
-
 <script src="{% static "js/socket.js" %}"></script>
 <script src="{% static "js/character.js" %}"></script>
+<script src="{% static "js/tagFactory.js" %}"></script>
 <script src="{% static "js/board.js" %}"></script>
 {% endblock %}
