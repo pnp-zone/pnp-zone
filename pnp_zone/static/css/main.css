@@ -5,6 +5,39 @@ body {
     font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
 }
 
+button {
+    color: white;
+    background-color: #15202b;
+    padding: 0.5em 1em 0.5em 1em;
+    border: 1px solid #422d78;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background-color: #233549;
+}
+
+button:active {
+    transform: translateY(2px);
+}
+
+input {
+    background-color: #15202b;
+    padding: 0.5em 1em 0.5em 1em;
+    color: white;
+    border-radius: 5px;
+    border: 1px solid #422d78;
+}
+
+input:active {
+    border: 1px solid #5e42a6;
+}
+
+input[type=number] {
+
+}
+
 .sidebar {
     background: #192734;
     color: #ffffff;
@@ -98,3 +131,23 @@ body {
     flex-direction: column-reverse;
 }
 
+.loginContent {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.loginBox {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 20vh;
+    background-color: #192734;
+    padding: 2vw;
+    box-shadow: 2px 2px 2px 2px #131313;
+}
+
+.loginBox p {
+    display: flex;
+    flex-direction: column;
+}
