@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-from pnp_zone.views import LoginView
+from pnp_zone.views import Login, Logout
 import dashboard.urls
 import chants.urls
 import board.urls
@@ -32,5 +32,6 @@ urlpatterns = [
     path("player/", include(player.urls)),
     path("dm/", include(dm.urls)),
     path("wiki/", include(wiki.urls)),
-    path("login", LoginView.as_view()),
+    path("login", Login.as_view()),
+    path("logout", Logout.as_view()),
 ]
