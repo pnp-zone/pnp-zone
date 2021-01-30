@@ -39,6 +39,21 @@ socket.registerEvent("delete", (event) => {
     if (deleteCharacter) {
         Character.registerDeleteTarget(deleteCharacter);
     }
+
+    const SCALE_SPEED = 0.01
+    const board = document.getElementById("board");
+    board.style.scale = "1";
+    board.onwheel = (event) => {
+        // down
+        if (event.deltaY > 0) {
+            board.style.scale = ""+(parseFloat(board.style.scale) - SCALE_SPEED);
+        }
+
+        // up
+        else {
+            board.style.scale = ""+(parseFloat(board.style.scale) + SCALE_SPEED);
+        }
+    };
 })();
 
 function createCharacter() {
@@ -53,14 +68,14 @@ function createCharacter() {
 
 function createGrid() {
     const board = tags.div({id: "grid", class: "board-layer"});
-    for (let y = 0; y < 10; y++) {
+    for (let y = 0; y < 32; y++) {
         const row = tags.div({class: "flex-horizontal"});
         if (y%2 === 0) {
             row.appendChild(
                 tags.div({style: "width: 50px"})
             );
         }
-        for (let x = 0; x < 10; x++) {
+        for (let x = 0; x < 32; x++) {
             const field =
                 tags.div({id: "grid-"+x+"-"+y, class: "grid-field", children: [
                     tags.img({
