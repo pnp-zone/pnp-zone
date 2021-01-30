@@ -5,6 +5,11 @@ body {
     font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
 }
 
+.sidebar {
+    background: #192734;
+    color: #ffffff;
+}
+
 .content {
     position: fixed;
     left: 18%;
@@ -32,10 +37,12 @@ body {
 .nav ul {
   list-style: none;
 }
+
 .nav ul li {
   position: relative;
   margin: 2.2em 0;
 }
+
 .nav ul li a {
   line-height: 5em;
   text-transform: uppercase;
@@ -46,15 +53,19 @@ body {
   -webkit-transition: all ease-out 300ms;
   transition: all ease-out 300ms;
 }
+
 .nav ul li.active a {
   color: white;
 }
+
 .nav ul li:not(.active)::after {
   opacity: 0.2;
 }
+
 .nav ul li:not(.active):hover a {
   color: rgba(255, 255, 255, 0.75);
 }
+
 .nav ul li::after {
   content: "";
   position: absolute;
@@ -87,19 +98,3 @@ body {
     flex-direction: column-reverse;
 }
 
-@media (prefers-color-scheme: dark) {
-
-    body {
-        background: #15202b;
-        color: black;
-    }
-
-    .nav ul li.active a {
-        color: white;
-    }
-
-    .sidebar {
-        background: #192734;
-        color: #ffffff;
-    }
-}
