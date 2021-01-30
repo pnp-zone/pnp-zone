@@ -44,20 +44,19 @@
     <div id="moderator">
         <h1>Moderator Tools</h1>
         <hr>
-        <form id="new_character">
+        <form id="new_character" onsubmit="createCharacter(); return false;">
             <h2>Create new character</h2>
             <p><label>Identifier: <input name="id" type="text"></label></p>
             <p><label>X: <input name="x" type="number"></label></p>
             <p><label>Y: <input name="y" type="number"></label></p>
             <p><label>Color: <input name="color" type="text"></label></p>
+            <p><input value="New" type="submit"></p>
         </form>
-        <p><button onclick="createCharacter();">New</button></p>
         <hr>
-        <form id="delete_character">
+        <div id="deleteCharacter">
             <h2>Delete a character</h2>
-            <p><label>Identifier: <input name="id" type="text"></label></p>
-        </form>
-        <p><button onclick="deleteCharacter();">Delete</button></p>
+            <p>Drop here to delete</p>
+        </div>
         <hr>
         <h2>Force page reload</h2>
         <p><button onclick="socket.send({type: 'reload'})">Reload</button></p>

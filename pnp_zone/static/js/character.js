@@ -44,10 +44,19 @@ class Character {
         }
     }
 
-    static registerDropTarget(obj) {
-        const match = obj.id.match(/^grid-(\d+)-(\d+)$/);
-        const x = parseInt(match[1]);
-        const y = parseInt(match[2]);
+    static registerDropTarget(obj, ondrop=null) {
+        if (ondrop) {
+            obj.ondrop = (event) => {
+                event.preventDefault();
+                const id = event.dataTransfer.getData("plain/text");
+                ondrop(id);
+            }
+        } else {
+            obj.ondrop = (event) => {
+                event.preventDefault();
+            }
+
+        }
 
         obj.ondragenter = (event) => {
             event.preventDefault();
@@ -55,13 +64,24 @@ class Character {
         obj.ondragover = (event) => {
             event.preventDefault();
         };
-        obj.ondrop = (event) => {
-            event.preventDefault();
-            const id = event.dataTransfer.getData("plain/text");
-            socket.send({type: "move", id: id, x: x, y: y});
-        };
         obj.ondragleave = (event) => {
             event.preventDefault();
         };
+    }
+
+    static registerMoveTarget(obj) {
+        const match = obj.id.match(/^grid-(\d+)-(\d+)$/);
+        const x = parseInt(match[1]);
+        const y = parseInt(match[2]);
+
+        Character.registerDropTarget(obj, (id) => {
+            socket.send({type: "move", id: id, x: x, y: y});
+        });
+    }
+
+    static registerDeleteTarget(obj) {
+        Character.registerDropTarget(obj, (id) => {
+            socket.send({type: "delete", id: id});
+        });
     }
 }

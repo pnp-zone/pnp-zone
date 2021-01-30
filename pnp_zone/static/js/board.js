@@ -34,6 +34,13 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 
+(() => {
+    const deleteCharacter = document.getElementById("deleteCharacter");
+    if (deleteCharacter) {
+        Character.registerDeleteTarget(deleteCharacter);
+    }
+})();
+
 function createCharacter() {
     const form = document.forms["new_character"]
     socket.send({type: "new",
@@ -41,13 +48,6 @@ function createCharacter() {
         x: form["x"].value,
         y: form["y"].value,
         color:form["color"].value,
-    });
-}
-
-function deleteCharacter() {
-    const form = document.forms["delete_character"];
-    socket.send({type: "delete",
-        id: form["id"].value,
     });
 }
 
@@ -71,7 +71,7 @@ function createGrid() {
                     })
                 ]});
             row.appendChild(field);
-            Character.registerDropTarget(field);
+            Character.registerMoveTarget(field);
         }
         board.appendChild(row);
     }
