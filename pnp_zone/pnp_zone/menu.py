@@ -3,7 +3,6 @@ _menu = [{"link": "/", "text": "Dashboard"},
          {"link": "/dm/", "text": "DM Tools"},
          {"link": "/wiki/", "text": "Wiki"},
          {"link": "/board/", "text": "Game boards"},
-         {"link": "/chants/", "text": "Chants"},
          ]
 
 

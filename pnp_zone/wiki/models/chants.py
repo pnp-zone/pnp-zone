@@ -20,7 +20,7 @@ class ChantModel(models.Model):
     source = ForeignKey(SourceModel, on_delete=models.CASCADE, null=True)
 
     def get_absolute_url(self):
-        return "/chants/" + self.name
+        return "/wiki/chants/" + self.name
 
     @property
     def url(self):
