@@ -6,6 +6,7 @@ class Room(models.Model):
     name = models.CharField(max_length=255)
     identifier = models.CharField(max_length=255, unique=True)
     moderators = models.ManyToManyField(User)
+    background = models.CharField(max_length=255, default="")
 
     def get_absolute_url(self):
         return "/board/" + self.identifier

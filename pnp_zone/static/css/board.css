@@ -4,3 +4,12 @@
     top: 0;
     left: 0;
 }
+#background {
+    z-index: -150;
+}
+#grid {
+    z-index: -100;
+}
+#characters {
+    z-index: -50;
+}

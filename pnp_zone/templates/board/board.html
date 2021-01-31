@@ -6,7 +6,6 @@
 
 <style>
     .character {
-        position: absolute;
         transition-property: left, top;
         transition-duration: 1s;
         width: 100px;
@@ -20,12 +19,6 @@
         height: 100vw;
         background-color: white;
     }
-    #board {
-        z-index: 0;
-    }
-    #grid {
-        z-index: -100;
-    }
     #moderator {
         background: #192734;
         padding: 1vw;
@@ -38,8 +31,9 @@
 
 <div id="board-view">
     <div id="board" class="board-element">
-        <div id="characters" class="board-element"></div>
+        <img id="background" class="board-element" src="{{ background_image }}">
         <div id="grid" class="board-element"></div>
+        <div id="characters" class="board-element"></div>
     </div>
 </div>
 
