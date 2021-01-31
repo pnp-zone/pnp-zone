@@ -20,10 +20,23 @@ class TagFactory {
                     break;
 
                 case "style":
-                    const rows = value.split(",");
-                    for (let i = 0; i < rows.length; i++) {
-                        let row = rows[i].trim().split(":");
-                        elem.style[row[0].trim()] = row[1].trim();
+                    if (typeof value === "string") {
+                        const rows = value.split(/[,;] ?/);
+                        for (let i = 0; i < rows.length; i++) {
+                            const row = rows[i].trim().split(/: ?/);
+                            const styleKey = row[0].trim();
+                            const styleValue = row[1].trim();
+
+                            elem.style[styleKey] = styleValue;
+                        }
+                    } else if (typeof value === "object") {
+                        for (let styleKey in value) {
+                            const styleValue = value[styleKey];
+
+                            elem.style[styleKey] = styleValue;
+                        }
+                    } else {
+                        throw TypeError("style must be a string or object");
                     }
                     break;
 
