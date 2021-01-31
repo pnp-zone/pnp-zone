@@ -55,7 +55,7 @@
 
 <div id="board-view">
     <div id="board" class="board-element">
-        <img id="background" class="board-element" src="{{ background_image }}">
+        <img id="background" class="board-element" src="{{ room.background }}">
         <div id="grid" class="board-element"></div>
         <div id="characters" class="board-element"></div>
     </div>
@@ -65,4 +65,5 @@
 <script src="{% static "js/character.js" %}"></script>
 <script src="{% static "js/tagFactory.js" %}"></script>
 <script src="{% static "js/board.js" %}"></script>
+<script>init({boardWidth: {{room.width}} });</script>
 {% endblock %}

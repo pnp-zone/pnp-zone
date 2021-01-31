@@ -34,7 +34,7 @@ class BoardView(TemplateView):
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
-            "background_image": room.background,
+            "room": room,
             "is_moderator": request.user in room.moderators.all(),
             "x_range": list(range(25)), "y_range": list(range(17)),
         })
