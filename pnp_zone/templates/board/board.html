@@ -29,14 +29,6 @@
 </style>
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 
-<div id="board-view">
-    <div id="board" class="board-element">
-        <img id="background" class="board-element" src="{{ background_image }}">
-        <div id="grid" class="board-element"></div>
-        <div id="characters" class="board-element"></div>
-    </div>
-</div>
-
 {% if is_moderator %}
     <div id="moderator">
         <h1>Moderator Tools</h1>
@@ -59,6 +51,14 @@
         <p><button onclick="socket.send({type: 'reload'})">Reload</button></p>
     </div>
 {% endif %}
+
+<div id="board-view">
+    <div id="board" class="board-element">
+        <img id="background" class="board-element" src="{{ background_image }}">
+        <div id="grid" class="board-element"></div>
+        <div id="characters" class="board-element"></div>
+    </div>
+</div>
 
 <script src="{% static "js/socket.js" %}"></script>
 <script src="{% static "js/character.js" %}"></script>
