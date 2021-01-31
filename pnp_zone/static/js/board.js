@@ -56,6 +56,23 @@ socket.registerEvent("delete", (event) => {
     };
 })();
 
+function createField(x, y) {
+    const offset = (y%2 === 0) ? 50 : 0;
+    const left = 100*x + offset;
+    const top = 86*y;
+    return tags.div({
+        id: "grid-"+x+"-"+y, class: "grid-field",
+        style: "left: "+left+"px, top: "+top+"px",
+        children: [
+            tags.img({
+                //src: "https://upload.wikimedia.org/wikipedia/commons/4/41/Regular_hexagon.svg",
+                src: "/static/svg/standing_hexagon.svg",
+                style: "height: auto, width: 100px",
+                draggable: false
+            })
+    ]});
+}
+
 function createCharacter() {
     const form = document.forms["new_character"]
     socket.send({type: "new",
@@ -69,26 +86,11 @@ function createCharacter() {
 function createGrid() {
     const board = tags.div({id: "grid", class: "board-layer"});
     for (let y = 0; y < 32; y++) {
-        const row = tags.div({class: "flex-horizontal"});
-        if (y%2 === 0) {
-            row.appendChild(
-                tags.div({style: "width: 50px"})
-            );
-        }
         for (let x = 0; x < 32; x++) {
-            const field =
-                tags.div({id: "grid-"+x+"-"+y, class: "grid-field", children: [
-                    tags.img({
-                        //src: "https://upload.wikimedia.org/wikipedia/commons/4/41/Regular_hexagon.svg",
-                        src: "/static/svg/standing_hexagon.svg",
-                        style: "height: auto, width: 100px",
-                        draggable: false
-                    })
-                ]});
-            row.appendChild(field);
+            const field = createField(x, y);
             Character.registerMoveTarget(field);
+            board.appendChild(field);
         }
-        board.appendChild(row);
     }
     document.getElementById("grid").replaceWith(board);
 }
