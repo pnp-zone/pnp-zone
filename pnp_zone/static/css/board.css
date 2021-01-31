@@ -1,0 +1,6 @@
+.board-element {
+    position: absolute;
+    z-index: inherit;
+    top: 0;
+    left: 0;
+}

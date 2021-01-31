@@ -15,16 +15,16 @@
     .character svg {
         margin: 0 10px;
     }
-    .grid-field {
-        position: absolute;
+    #board-view {
+        width: 100%;
+        height: 100vw;
+        background-color: white;
+    }
+    #board {
+        z-index: 0;
     }
     #grid {
         z-index: -100;
-    }
-    .board-layer {
-        position: absolute;
-        top: 0;
-        left: 0;
     }
     #moderator {
         background: #192734;
@@ -34,10 +34,13 @@
         z-index: 100;
     }
 </style>
+<link rel="stylesheet" href="{% static "css/board.css" %}">
 
-<div id="board">
-    <div id="characters" class="board-layer"></div>
-    <div id="grid" class="board-layer"></div>
+<div id="board-view">
+    <div id="board" class="board-element">
+        <div id="characters" class="board-element"></div>
+        <div id="grid" class="board-element"></div>
+    </div>
 </div>
 
 {% if is_moderator %}

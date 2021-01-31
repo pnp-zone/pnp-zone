@@ -55,6 +55,7 @@ input[type=number] {
   height: 100vh;
   background: #192734;
   font-size: 0.65em;
+  z-index: 100;
 }
 
 .nav {
