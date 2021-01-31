@@ -60,7 +60,7 @@ function createField(x, y) {
     return tags.div({
         id: "grid-"+x+"-"+y, class: "board-element",
         style: {
-            left: (100*x - ((y%2 === 0) ? 50 : 0))+"px",
+            left: (100*x + ((y%2 === 0) ? 0 : 50))+"px",
             top: (86*y)+"px"
         },
         children: [
