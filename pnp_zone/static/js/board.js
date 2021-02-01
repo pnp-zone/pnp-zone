@@ -3,7 +3,7 @@ const characters = {};
 const socket = new Socket();
 const FIELD_WIDTH = 100;
 const FIELD_HEIGHT = FIELD_WIDTH*0.865;
-const SCALE_SPEED = 0.01;
+const SCALE_SPEED = 1.1;
 
 function init({ boardWidth }) {
     // Create grid
@@ -132,12 +132,12 @@ class Board {
         this.obj.onwheel = (event) => {
             // down
             if (event.deltaY > 0) {
-                this.scale -= SCALE_SPEED;
+                this.scale /= SCALE_SPEED;
             }
 
             // up
             else {
-                this.scale += SCALE_SPEED;
+                this.scale *= SCALE_SPEED;
             }
         };
     }
