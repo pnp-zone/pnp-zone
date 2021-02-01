@@ -5,11 +5,11 @@
     left: 0;
 }
 #background {
-    z-index: -150;
+    z-index: -50;
 }
 #grid {
-    z-index: -100;
+    z-index: 0;
 }
 #characters {
-    z-index: -50;
+    z-index: 50;
 }

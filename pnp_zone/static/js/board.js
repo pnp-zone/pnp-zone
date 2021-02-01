@@ -6,8 +6,6 @@ const FIELD_HEIGHT = FIELD_WIDTH*0.865;
 const SCALE_SPEED = 0.01;
 
 function init({ boardWidth }) {
-    new Board();
-
     // Create grid
     const grid = tags.div({id: "grid", class: "board-element"});
     for (let y = 0; y < 32; y++) {
@@ -18,6 +16,8 @@ function init({ boardWidth }) {
         }
     }
     document.getElementById("grid").replaceWith(grid);
+
+    new Board();
 
     // Scale background image
     document.addEventListener("DOMContentLoaded", () => {
@@ -108,12 +108,13 @@ class Board {
         let mouseStart;
         let boardStart;
 
-        this.obj.addEventListener("mousedown", (event) => {
+        const grid = document.getElementById("grid");
+        grid.addEventListener("mousedown", (event) => {
             this.selected = true;
             mouseStart = {x: event.pageX, y: event.pageY};
             boardStart = {x: this.x, y: this.y};
         });
-        this.obj.addEventListener("mouseleave", () => {
+        grid.addEventListener("mouseleave", () => {
             this.selected = false;
         });
         document.addEventListener("mouseup", () => {
