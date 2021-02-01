@@ -72,6 +72,7 @@ function createField(x, y) {
             left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
             top: (FIELD_HEIGHT*y)+"px"
         },
+        ondragstart: () => { return false; },
         children: [
             tags.img({
                 src: "/static/svg/standing_hexagon.svg",
