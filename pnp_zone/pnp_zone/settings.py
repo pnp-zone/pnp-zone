@@ -14,6 +14,9 @@ from pathlib import Path
 import channels
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import ldap
+from django_auth_ldap.config import LDAPSearch
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -141,3 +144,37 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     "static"
 ]
+
+# LDAP
+AUTHENTICATION_BACKENDS = [
+    "django_auth_ldap.backend.LDAPBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# If using LDAPS, start the uri with ldaps://
+AUTH_LDAP_SERVER_URI = "ldap://ldap.example.com"
+# When using LDAP with StartTLS set the following:
+# AUTH_LDAP_START_TLS = True
+
+# Self signed certs
+# ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+
+AUTH_LDAP_BIND_DN = ""
+AUTH_LDAP_BIND_PASSWORD = ""
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    "cn=Members,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+)
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    "first_name": "givenName",
+    "last_name": "sn",
+    "email": "mail",
+}
+
+# Logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
+    "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
+}
