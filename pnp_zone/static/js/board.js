@@ -6,10 +6,12 @@ const FIELD_HEIGHT = FIELD_WIDTH*0.865;
 const SCALE_SPEED = 0.01;
 
 function init({ boardWidth }) {
+    new Board();
+
     // Create grid
     const grid = tags.div({id: "grid", class: "board-element"});
     for (let y = 0; y < 32; y++) {
-        for (let x = 0; x < boardWidth; x++) {
+        for (let x = 0; x < 32; x++) {
             const field = createField(x, y);
             Character.registerMoveTarget(field);
             grid.appendChild(field);
@@ -17,20 +19,12 @@ function init({ boardWidth }) {
     }
     document.getElementById("grid").replaceWith(grid);
 
-    // Make board scalable
-    const board = document.getElementById("board");
-    board.style.scale = "1";
-    board.onwheel = (event) => {
-        // down
-        if (event.deltaY > 0) {
-            board.style.scale = ""+(parseFloat(board.style.scale) - SCALE_SPEED);
-        }
-
-        // up
-        else {
-            board.style.scale = ""+(parseFloat(board.style.scale) + SCALE_SPEED);
-        }
-    };
+    // Scale background image
+    document.addEventListener("DOMContentLoaded", () => {
+        const background = document.getElementById("background");
+        background.style.transform = "scale("+((boardWidth*FIELD_WIDTH + 0.5*FIELD_WIDTH)/background.width)+")";
+        background.style.transformOrigin = "left top";
+    });
 
     // Get and add characters
     const request = new XMLHttpRequest();
@@ -99,4 +93,71 @@ function createCharacter() {
         y: form["y"].value,
         color:form["color"].value,
     });
+}
+
+class Board {
+    constructor() {
+        this.obj = document.getElementById("board");
+        this.selected = false;
+
+        this.x = 0;
+        this.y = 0;
+
+        // Values shared across event handlers
+        let mouseStart;
+        let boardStart;
+
+        this.obj.addEventListener("mousedown", (event) => {
+            this.selected = true;
+            mouseStart = {x: event.pageX, y: event.pageY};
+            boardStart = {x: this.x, y: this.y};
+        });
+        this.obj.addEventListener("mouseleave", () => {
+            this.selected = false;
+        });
+        document.addEventListener("mouseup", () => {
+            this.selected = false
+        });
+        document.addEventListener("mousemove", (event) => {
+            if (this.selected) {
+                this.x = event.pageX - mouseStart.x + boardStart.x;
+                this.y = event.pageY - mouseStart.y + boardStart.y;
+            }
+        });
+
+        // Make board scalable
+        this.scale = 1
+        this.obj.onwheel = (event) => {
+            // down
+            if (event.deltaY > 0) {
+                this.scale -= SCALE_SPEED;
+            }
+
+            // up
+            else {
+                this.scale += SCALE_SPEED;
+            }
+        };
+    }
+
+    get scale() {
+        //return parseFloat(this.obj.style.transform.match(/scale\(([\d.]+)\)/)[1]);
+        return parseFloat(this.obj.style.scale);
+    }
+    get x() {
+        return parseInt(this.obj.style.left.replace("px", ""));
+    }
+    get y() {
+        return parseInt(this.obj.style.top.replace("px", ""));
+    }
+    set scale(value) {
+        //this.obj.style.transform = "scale("+value+")";
+        this.obj.style.scale = "" + value;
+    }
+    set x(value) {
+        this.obj.style.left = "" + value + "px";
+    }
+    set y(value) {
+        this.obj.style.top = "" + value + "px";
+    }
 }
