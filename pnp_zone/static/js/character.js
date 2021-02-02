@@ -32,15 +32,10 @@ class Character {
     }
 
     moveTo(x, y) {
-        const field = document.getElementById("grid-"+x+"-"+y);
-        if (field) {
-            const target = {x: field.offsetLeft, y: field.offsetTop, width: field.offsetWidth, height: field.offsetHeight};
-            const self = {width: this.obj.offsetWidth, height: this.obj.offsetHeight};
-            this.obj.style.left = target.x + target.width/2 - self.width/2 + "px";
-            this.obj.style.top = target.y + target.height/2 - self.height/2 + "px";
-        } else {
-            console.error("Coordinates are out of range:", x, y);
-        }
+        const target = index2px({x, y});
+        const self = {width: this.obj.offsetWidth, height: this.obj.offsetHeight};
+        this.obj.style.left = target.x - self.width/2 + "px";
+        this.obj.style.top = target.y - self.height/2 + "px";
     }
 
     static registerDropTarget(obj, ondrop=null) {

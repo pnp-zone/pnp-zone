@@ -2,11 +2,14 @@ const room = window.location.pathname.substring(window.location.pathname.lastInd
 const characters = {};
 const socket = new Socket();
 const FIELD_WIDTH = 100;
-const FIELD_HEIGHT = FIELD_WIDTH*0.865;
+const FIELD_HEIGHT = 124;
+const ROW_HEIGHT = FIELD_WIDTH*0.865;
 const SCALE_SPEED = 1.1;
 
+
+let board;
 function init({ boardWidth }) {
-    new Board();
+    board = new Board();
 
     // Scale background image
     document.addEventListener("DOMContentLoaded", () => {
@@ -130,8 +133,15 @@ class Board {
     }
 }
 
+function index2px({x, y}) {
+    const left = FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2);
+    const top = ROW_HEIGHT*y;
+    return {x: left+FIELD_WIDTH/2, y: top+FIELD_HEIGHT/2};
+}
+
 class Grid {
     constructor() {
+        this.fields = [];
         this.obj = document.getElementById("grid");
         for (let y = 0; y < 32; y++) {
             for (let x = 0; x < 32; x++) {
@@ -145,7 +155,7 @@ class Grid {
             id: "grid-"+x+"-"+y, class: "board-element",
             style: {
                 left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
-                top: (FIELD_HEIGHT*y)+"px"
+                top: (ROW_HEIGHT*y)+"px"
             },
             ondragstart: () => { return false; },
             children: [
@@ -159,6 +169,23 @@ class Grid {
                 })
             ]});
         this.obj.appendChild(field);
+        this.setField(x, y, field)
         Character.registerMoveTarget(field);
+    }
+
+    getField(x, y) {
+        if (this.fields.hasOwnProperty(x) && this.fields[x].hasOwnProperty(y)) {
+            return this.fields[x][y];
+        } else {
+            return null;
+        }
+    }
+    setField(x, y, field) {
+        let column = this.fields[x];
+        if (!column) {
+            column = [];
+            this.fields[x] = column;
+        }
+        column[y] = field;
     }
 }
