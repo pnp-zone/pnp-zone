@@ -32,10 +32,10 @@ class Character {
     }
 
     moveTo(x, y) {
-        const target = index2px({x, y});
+        const coord = Coord.fromIndex(x, y);
         const self = {width: this.obj.offsetWidth, height: this.obj.offsetHeight};
-        this.obj.style.left = target.x - self.width/2 + "px";
-        this.obj.style.top = target.y - self.height/2 + "px";
+        this.obj.style.left = coord.xPixel - self.width/2 + "px";
+        this.obj.style.top = coord.yPixel - self.height/2 + "px";
     }
 
     static registerDropTarget(obj, ondrop=null) {
@@ -63,11 +63,7 @@ class Character {
         };
     }
 
-    static registerMoveTarget(obj) {
-        const match = obj.id.match(/^grid-(\d+)-(\d+)$/);
-        const x = parseInt(match[1]);
-        const y = parseInt(match[2]);
-
+    static registerMoveTarget(obj, x, y) {
         Character.registerDropTarget(obj, (id) => {
             socket.send({type: "move", id: id, x: x, y: y});
         });
