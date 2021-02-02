@@ -1,60 +1,33 @@
-const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
-const characters = {};
-const socket = new Socket();
 const FIELD_WIDTH = 100;
 const FIELD_HEIGHT = 124;
 const ROW_HEIGHT = FIELD_WIDTH*0.865;
 const SCALE_SPEED = 1.1;
 
+const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
+const characters = {};
 
-let board;
-function init({ boardWidth }) {
-    board = new Board();
+// Setup socket
+const socket = new Socket();
+socket.registerEvent("move", (event) => {
+    characters[event.id].moveTo(event.x, event.y);
+});
+socket.registerEvent("new", (event) => {
+    characters[event.id] = new Character({id: event.id, x: event.x, y: event.y});
+});
+socket.registerEvent("reload", () => {
+    window.location.reload(true);
+});
+socket.registerEvent("error", (event) => {
+    console.error(event.message);
+});
+socket.registerEvent("delete", (event) => {
+    characters[event.id].obj.remove();
+});
 
-    // Scale background image
-    document.addEventListener("DOMContentLoaded", () => {
-        const background = document.getElementById("background");
-        background.style.transform = "scale("+((boardWidth*FIELD_WIDTH + 0.5*FIELD_WIDTH)/background.width)+")";
-        background.style.transformOrigin = "left top";
-    });
-
-    // Get and add characters
-    const request = new XMLHttpRequest();
-    request.open("GET", "/board/load_room?room="+encodeURIComponent(room), true);
-    request.responseType = "json";
-    request.onreadystatechange = () => {
-        if (request.readyState === 4) {
-            if (request.status === 200) {
-                request.response.characters.forEach((character) => {
-                    characters[character.id] = new Character(character);
-                });
-            }
-        }
-    };
-    request.send();
-
-    // Add delete functionality
-    const deleteCharacter = document.getElementById("deleteCharacter");
-    if (deleteCharacter) {
-        Character.registerDeleteTarget(deleteCharacter);
-    }
-
-    // Setup socket
-    socket.registerEvent("move", (event) => {
-        characters[event.id].moveTo(event.x, event.y);
-    });
-    socket.registerEvent("new", (event) => {
-        characters[event.id] = new Character({id: event.id, x: event.x, y: event.y});
-    });
-    socket.registerEvent("reload", () => {
-        window.location.reload(true);
-    });
-    socket.registerEvent("error", (event) => {
-        console.error(event.message);
-    });
-    socket.registerEvent("delete", (event) => {
-        characters[event.id].obj.remove();
-    });
+// Add delete functionality
+const deleteCharacter = document.getElementById("deleteCharacter");
+if (deleteCharacter) {
+    Character.registerDeleteTarget(deleteCharacter);
 }
 
 // Function for moderator's create button
@@ -109,6 +82,21 @@ class Board {
                 this.scale *= SCALE_SPEED;
             }
         };
+
+        // Send request to get characters
+        const request = new XMLHttpRequest();
+        request.open("GET", "/board/load_room?room="+encodeURIComponent(room), true);
+        request.responseType = "json";
+        request.onreadystatechange = () => {
+            if (request.readyState === 4) {
+                if (request.status === 200) {
+                    request.response.characters.forEach((character) => {
+                        characters[character.id] = new Character(character);
+                    });
+                }
+            }
+        };
+        request.send();
     }
 
     get scale() {
@@ -170,49 +158,8 @@ class Coord {
         // Point lies in the triangle part
         // and might have to be adjusted
         if (y % ROW_HEIGHT < ROW_HEIGHT - FIELD_HEIGHT/2) {
-            // triangle points A, B, C
-            //
-            // v0 = C - A
-            // v1 = B - A
-            // v2 = P - A
-            //
-            // dot00 = dot(v0, v0)
-            // dot01 = dot(v0, v1)
-            // dot02 = dot(v0, v2)
-            // dot11 = dot(v1, v1)
-            // dot12 = dot(v1, v2)
-            //
-            // invDenom = 1 / (dot00 * dot11 - dot01 * dot01)
-            // u = (dot11 * dot02 - dot01 * dot12) * invDenom
-            // v = (dot00 * dot12 - dot01 * dot02) * invDenom
-            //
-            // return (u >= 0) && (v >= 0) && (u + v < 1)
-            console.error("Not implemented");
-            const A = {x: coord.left + FIELD_WIDTH, y: coord.top + FIELD_HEIGHT - ROW_HEIGHT};
-            const B = {x: coord.left, y: coord.top + FIELD_HEIGHT - ROW_HEIGHT};
-            const C = {x: coord.left + FIELD_WIDTH/2, y: coord.top};
-            const P = {x: x, y: y}
-
-            const v0 = {x: C.x - A.x, y: C.y - A.y};
-            const v1 = {x: B.x - A.x, y: B.y - A.y};
-            const v2 = {x: P.x - A.x, y: P.y - A.y};
-
-            const dot00 = v0.x * v0.x + v0.y * v0.y;
-            const dot01 = v0.x * v1.x + v0.y * v1.y;
-            const dot02 = v0.x * v2.x + v0.y * v2.y;
-            const dot11 = v1.x * v1.x + v1.y * v1.y;
-            const dot12 = v1.x * v2.x + v1.y * v2.y;
-
-            const invDenom = 1 / (dot00 * dot11 - dot01 * dot01);
-            const u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            const v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-            console.log((u >= 0) && (v >= 0) && (u + v < 1) ? "drin": "draus");
-            /*
-            TODO:
-                test whether the point lies in the top triangle of the hexagon.
-                if it does not readjust it
-            */
+            throw Error("Not Implemented");
+            // TODO Requires a hexagon tiling
         }
 
         return coord;
@@ -269,3 +216,5 @@ class Grid {
         column[y] = field;
     }
 }
+
+const board = new Board();
