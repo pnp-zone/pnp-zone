@@ -6,17 +6,6 @@ const FIELD_HEIGHT = FIELD_WIDTH*0.865;
 const SCALE_SPEED = 1.1;
 
 function init({ boardWidth }) {
-    // Create grid
-    const grid = tags.div({id: "grid", class: "board-element"});
-    for (let y = 0; y < 32; y++) {
-        for (let x = 0; x < 32; x++) {
-            const field = createField(x, y);
-            Character.registerMoveTarget(field);
-            grid.appendChild(field);
-        }
-    }
-    document.getElementById("grid").replaceWith(grid);
-
     new Board();
 
     // Scale background image
@@ -65,26 +54,6 @@ function init({ boardWidth }) {
     });
 }
 
-function createField(x, y) {
-    return tags.div({
-        id: "grid-"+x+"-"+y, class: "board-element",
-        style: {
-            left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
-            top: (FIELD_HEIGHT*y)+"px"
-        },
-        ondragstart: () => { return false; },
-        children: [
-            tags.img({
-                src: "/static/svg/standing_hexagon.svg",
-                style: {
-                    width: FIELD_WIDTH+"px",
-                    height: "auto"
-                },
-                draggable: false
-            })
-    ]});
-}
-
 // Function for moderator's create button
 function createCharacter() {
     const form = document.forms["new_character"]
@@ -99,23 +68,20 @@ function createCharacter() {
 class Board {
     constructor() {
         this.obj = document.getElementById("board");
+        this.grid = new Grid();
         this.selected = false;
 
         this.x = 0;
         this.y = 0;
 
-        // Values shared across event handlers
+        /* Make board draggable */
         let mouseStart;
-        let boardStart;
+        let boardStart;  // values shared across event handlers
 
-        const grid = document.getElementById("grid");
-        grid.addEventListener("mousedown", (event) => {
+        this.grid.obj.addEventListener("mousedown", (event) => {
             this.selected = true;
             mouseStart = {x: event.pageX, y: event.pageY};
             boardStart = {x: this.x, y: this.y};
-        });
-        grid.addEventListener("mouseleave", () => {
-            this.selected = false;
         });
         document.addEventListener("mouseup", () => {
             this.selected = false
@@ -127,7 +93,7 @@ class Board {
             }
         });
 
-        // Make board scalable
+        /* Make board scalable */
         this.scale = 1
         this.obj.onwheel = (event) => {
             // down
@@ -161,5 +127,38 @@ class Board {
     }
     set y(value) {
         this.obj.style.top = "" + value + "px";
+    }
+}
+
+class Grid {
+    constructor() {
+        this.obj = document.getElementById("grid");
+        for (let y = 0; y < 32; y++) {
+            for (let x = 0; x < 32; x++) {
+                this.appendField(x, y);
+            }
+        }
+    }
+
+    appendField(x, y) {
+        const field = tags.div({
+            id: "grid-"+x+"-"+y, class: "board-element",
+            style: {
+                left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
+                top: (FIELD_HEIGHT*y)+"px"
+            },
+            ondragstart: () => { return false; },
+            children: [
+                tags.img({
+                    src: "/static/svg/standing_hexagon.svg",
+                    style: {
+                        width: FIELD_WIDTH+"px",
+                        height: "auto"
+                    },
+                    draggable: false
+                })
+            ]});
+        this.obj.appendChild(field);
+        Character.registerMoveTarget(field);
     }
 }

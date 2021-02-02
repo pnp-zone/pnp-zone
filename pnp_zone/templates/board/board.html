@@ -25,6 +25,12 @@
         width: 15vw;
         z-index: 100;
     }
+    #board-view {
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+    }
 </style>
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 
@@ -51,10 +57,12 @@
     </div>
 {% endif %}
 
-<div id="board" class="board-element noselect">
-    <img id="background" class="board-element" src="{{ room.background }}" alt="Background">
-    <div id="grid" class="board-element"></div>
-    <div id="characters" class="board-element"></div>
+<div id="board-view">
+    <div id="board" class="board-element noselect">
+        <img id="background" class="board-element" src="{{ room.background }}" alt="Background">
+        <div id="grid" class="board-element"></div>
+        <div id="characters" class="board-element"></div>
+    </div>
 </div>
 
 <script src="{% static "js/socket.js" %}"></script>
