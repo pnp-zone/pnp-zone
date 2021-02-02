@@ -140,7 +140,7 @@ class MoveEvent(CharacterEvent):
 
     @database_sync_to_async
     def update_db(self):
-        if Character.objects.filter(x=self.x, y=self.y).count() > 0:
+        if self.room.character_set.filter(x=self.x, y=self.y).count() > 0:
             raise EventError("This space is already occupied!")
         else:
             character = Character.objects.get(room=self.room, identifier=self.id)
