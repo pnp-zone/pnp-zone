@@ -1,6 +1,7 @@
-const FIELD_WIDTH = 100;
-const FIELD_HEIGHT = 124;
-const ROW_HEIGHT = FIELD_WIDTH*0.865;
+const FIELD = new Hexagon(100);
+const FIELD_WIDTH = FIELD.width;
+const FIELD_HEIGHT = FIELD.height;
+const ROW_HEIGHT = FIELD.height - FIELD.b;
 const SCALE_SPEED = 1.1;
 
 const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
@@ -163,57 +164,6 @@ class Coord {
         }
 
         return coord;
-    }
-}
-
-class Grid {
-    constructor() {
-        this.fields = [];
-        this.obj = document.getElementById("grid");
-        for (let y = 0; y < 32; y++) {
-            for (let x = 0; x < 32; x++) {
-                this.appendField(x, y);
-            }
-        }
-    }
-
-    appendField(x, y) {
-        const field = tags.div({
-            class: "board-element",
-            style: {
-                left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
-                top: (ROW_HEIGHT*y)+"px"
-            },
-            ondragstart: () => { return false; },
-            children: [
-                tags.img({
-                    src: "/static/svg/standing_hexagon.svg",
-                    style: {
-                        width: FIELD_WIDTH+"px",
-                        height: "auto"
-                    },
-                    draggable: false
-                })
-            ]});
-        this.obj.appendChild(field);
-        this.setField(x, y, field)
-        Character.registerMoveTarget(field, x, y);
-    }
-
-    getField(x, y) {
-        if (this.fields.hasOwnProperty(x) && this.fields[x].hasOwnProperty(y)) {
-            return this.fields[x][y];
-        } else {
-            return null;
-        }
-    }
-    setField(x, y, field) {
-        let column = this.fields[x];
-        if (!column) {
-            column = [];
-            this.fields[x] = column;
-        }
-        column[y] = field;
     }
 }
 

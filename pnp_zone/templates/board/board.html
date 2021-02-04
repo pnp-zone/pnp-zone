@@ -31,6 +31,12 @@
         overflow: hidden;
         position: absolute;
     }
+    .field polygon {
+        fill: none;
+    }
+    .field path {
+        fill: black;
+    }
 </style>
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 
@@ -68,5 +74,6 @@
 <script src="{% static "js/socket.js" %}"></script>
 <script src="{% static "js/character.js" %}"></script>
 <script src="{% static "js/tagFactory.js" %}"></script>
+<script src="{% static "js/grid.js" %}"></script>
 <script src="{% static "js/board.js" %}"></script>
 {% endblock %}
