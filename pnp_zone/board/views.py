@@ -40,21 +40,6 @@ class BoardView(TemplateView):
         })
 
 
-class CharacterView(TemplateView):
-    template_name = "board/character.html"
-
-    def get(self, request, *args, **kwargs):
-        if "room" not in request.GET and "character" not in request.GET:
-            raise SuspiciousOperation("Missing parameters: 'room' and 'character' required")
-        else:
-            try:
-                return render(request, template_name=self.template_name, context={
-                    "model": Character.objects.get(room__identifier=request.GET["room"], identifier=request.GET["character"])
-                })
-            except Character.DoesNotExist:
-                raise Http404
-
-
 class RoomInfoView(View):
 
     def get(self, request, *args, **kwargs):

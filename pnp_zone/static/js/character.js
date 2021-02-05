@@ -9,49 +9,32 @@ class Character {
     constructor({id, x, y, color}) {
         this.id = id;
 
-        const request = new XMLHttpRequest();
-        request.open(
-            "GET",
-            "/board/load_character?room="+encodeURIComponent(room)+"&character="+encodeURIComponent(this.id),
-            true);
-        request.onreadystatechange = () => {
-            if (request.readyState === 4) {
-                if (request.status === 200) {
-                    const parser = document.createElement("div");
-                    parser.innerHTML = request.responseText;
-                    //Character.DIV.appendChild(parser.firstChild);
-                    const svg = parseHTML(Character.hexString);
-                    svg.firstChild.style.fill = color;
-                    this.obj = tags.div({
-                        id: this.id,
-                        class: "character board-element",
-                        draggable: true,
-                        style: {
-                            width: CHARACTER_WIDTH + "px",
-                            height: CHARACTER_HEIGHT + "px",
-                            transitionProperty: "left, top",
-                            transitionDuration: "1s",
-                        },
-                        children: [
-                            svg,
-                            tags.p({
-                                class: "board-element",
-                                innerText: this.id
-                            }),
-                        ],
-                        ondragstart: (event) => {
-                            event.dataTransfer.setData("plain/text", this.id);
-                        }
-                    });
-                    Character.DIV.appendChild(this.obj);
-
-                    this.moveTo(x, y);
-                } else {
-                    throw Error("Couldn't load character: " + id);
-                }
+        const svg = parseHTML(Character.hexString);
+        svg.firstChild.style.fill = color;
+        this.obj = tags.div({
+            id: this.id,
+            class: "character board-element",
+            draggable: true,
+            style: {
+                width: CHARACTER_WIDTH + "px",
+                height: CHARACTER_HEIGHT + "px",
+                transitionProperty: "left, top",
+                transitionDuration: "1s",
+            },
+            children: [
+                svg,
+                tags.p({
+                    class: "board-element",
+                    innerText: this.id
+                }),
+            ],
+            ondragstart: (event) => {
+                event.dataTransfer.setData("plain/text", this.id);
             }
-        };
-        request.send();
+        });
+        Character.DIV.appendChild(this.obj);
+
+        this.moveTo(x, y);
     }
 
     moveTo(x, y) {
