@@ -6,7 +6,7 @@ class Character {
     static hexString = Hexagon.svgString(512, 12);
     static DIV = document.getElementById("characters");
 
-    constructor({id, x, y}) {
+    constructor({id, x, y, color}) {
         this.id = id;
 
         const request = new XMLHttpRequest();
@@ -20,7 +20,8 @@ class Character {
                     const parser = document.createElement("div");
                     parser.innerHTML = request.responseText;
                     //Character.DIV.appendChild(parser.firstChild);
-
+                    const svg = parseHTML(Character.hexString);
+                    svg.firstChild.style.fill = color;
                     this.obj = tags.div({
                         id: this.id,
                         class: "character board-element",
@@ -32,7 +33,7 @@ class Character {
                             transitionDuration: "1s",
                         },
                         children: [
-                            parseHTML(Character.hexString),
+                            svg,
                             tags.p({
                                 class: "board-element",
                                 innerText: this.id

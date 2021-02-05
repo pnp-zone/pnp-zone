@@ -64,7 +64,8 @@ class RoomInfoView(View):
             try:
                 room = Room.objects.get(identifier=request.GET["room"])
                 return JsonResponse({
-                    "characters": [{"id": c.identifier, "x": c.x, "y": c.y} for c in room.character_set.all()]
+                    "characters": [{"id": c.identifier, "x": c.x, "y": c.y, "color": c.color}
+                                   for c in room.character_set.all()]
                 })
             except Room.DoesNotExist:
                 raise Http404

@@ -159,9 +159,6 @@ class NewEvent(CharacterEvent):
     y: int
     color: str
 
-    async def response_all_users(self):
-        return {"type": "new", "id": self.id, "x": self.x, "y": self.y}
-
     @database_sync_to_async
     def update_db(self):
         character = Character(identifier=self.id, x=self.x, y=self.y, color=self.color, room=self.room)
