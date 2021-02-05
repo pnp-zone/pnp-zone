@@ -26,6 +26,7 @@ class Hexagon {
     }
 }
 
+const parser = tags.div({});
 function hexagonSVG(width, borderWidth) {
     const bigH = new Hexagon(width);
     const smallH = new Hexagon(width - 2*borderWidth);
@@ -36,11 +37,12 @@ function hexagonSVG(width, borderWidth) {
     const polygon = "<polygon points='" +
         smallH.points.map((p) => p.join(",")).join(" ") +
         "'></polygon>";
-    return "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
+    parser.innerHTML = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
         "viewBox='-"+bigH.width/2+" -"+bigH.height/2+" "+bigH.width+" "+bigH.height+"'>" +
         border +
         polygon +
         "</svg>";
+    return parser.firstChild;
 }
 
 class Grid {
@@ -64,7 +66,7 @@ class Grid {
                 height: FIELD_HEIGHT+"px",
             },
             ondragstart: () => { return false; },
-            innerHTML: hexagonSVG(100, 2),
+            children: [hexagonSVG(100, 2)],
             /*children: [
                 tags.img({
                     src: "/static/svg/standing_hexagon.svg",
