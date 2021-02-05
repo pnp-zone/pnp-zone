@@ -24,28 +24,37 @@ class Hexagon {
     get asPolygon() {
         return this.points.map((p) => p.join(",")).join(" ");
     }
+
+    static svgString(width, borderWidth) {
+        const bigH = new Hexagon(width);
+        const smallH = new Hexagon(width - 2*borderWidth);
+
+        const border = `<path fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`;
+        const polygon = `<polygon points='${bigH.asPolygon}'></polygon>`;
+
+        return "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
+            "viewBox='-"+bigH.width/2+" -"+bigH.height/2+" "+bigH.width+" "+bigH.height+"'>" +
+            polygon +
+            border +
+            "</svg>";
+    }
 }
 
-const parser = tags.div({});
+const parseHTML = (() => {
+    const parser = document.createElement("div");
+    return (html) => {
+        parser.innerHTML = html;
+        return parser.firstChild;
+    };
+})();
+
 function hexagonSVG(width, borderWidth) {
-    const bigH = new Hexagon(width);
-    const smallH = new Hexagon(width - 2*borderWidth);
-    const border = "<path fill-rule='evenodd' d='" +
-        bigH.asPath +
-        smallH.asPath +
-        "'></path>"
-    const polygon = "<polygon points='" +
-        smallH.asPolygon +
-        "'></polygon>";
-    parser.innerHTML = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
-        "viewBox='-"+bigH.width/2+" -"+bigH.height/2+" "+bigH.width+" "+bigH.height+"'>" +
-        border +
-        polygon +
-        "</svg>";
-    return parser.firstChild;
+    return parseHTML(Hexagon.svgString(width, borderWidth));
 }
 
 class Grid {
+    static hexString = Hexagon.svgString(100, 2);
+
     constructor() {
         this.fields = [];
         this.obj = document.getElementById("grid");
@@ -66,17 +75,8 @@ class Grid {
                 height: FIELD_HEIGHT+"px",
             },
             ondragstart: () => { return false; },
-            children: [hexagonSVG(100, 2)],
-            /*children: [
-                tags.img({
-                    src: "/static/svg/standing_hexagon.svg",
-                    style: {
-                        width: FIELD_WIDTH+"px",
-                        height: "auto"
-                    },
-                    draggable: false
-                })
-            ]*/});
+            children: [parseHTML(Grid.hexString)],
+        });
         this.obj.appendChild(field);
         this.setField(x, y, field)
         Character.registerMoveTarget(field, x, y);
