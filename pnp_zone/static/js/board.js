@@ -1,7 +1,7 @@
 const FIELD = new Hexagon(100);
-const FIELD_WIDTH = FIELD.width;
-const FIELD_HEIGHT = FIELD.height;
-const ROW_HEIGHT = FIELD.height - FIELD.b;
+const FIELD_WIDTH = Math.floor(FIELD.width);
+const FIELD_HEIGHT = Math.floor(FIELD.height);
+const ROW_HEIGHT = Math.floor(FIELD.height - FIELD.b);
 const SCALE_SPEED = 1.1;
 
 const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
