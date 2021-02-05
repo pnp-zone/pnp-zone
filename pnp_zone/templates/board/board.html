@@ -8,15 +8,6 @@
     body {
         background-color: white;
     }
-    .character {
-        transition-property: left, top;
-        transition-duration: 1s;
-        width: 100px;
-        height: 100px;
-    }
-    .character svg {
-        margin: 0 10px;
-    }
     #moderator {
         position: sticky;
         background: #192734;
@@ -30,6 +21,17 @@
         width: 100%;
         overflow: hidden;
         position: absolute;
+    }
+    .character {
+    }
+    .character p {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: inherit;
+        height: inherit;
+        margin: 0;
+        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
     }
     .field polygon {
         fill: none;
@@ -72,8 +74,8 @@
 </div>
 
 <script src="{% static "js/socket.js" %}"></script>
-<script src="{% static "js/character.js" %}"></script>
 <script src="{% static "js/tagFactory.js" %}"></script>
 <script src="{% static "js/grid.js" %}"></script>
+<script src="{% static "js/character.js" %}"></script>
 <script src="{% static "js/board.js" %}"></script>
 {% endblock %}

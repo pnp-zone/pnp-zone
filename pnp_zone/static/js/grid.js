@@ -53,7 +53,7 @@ function hexagonSVG(width, borderWidth) {
 }
 
 class Grid {
-    static hexString = Hexagon.svgString(100, 2);
+    static hexString = Hexagon.svgString(512, 8);
 
     constructor() {
         this.fields = [];

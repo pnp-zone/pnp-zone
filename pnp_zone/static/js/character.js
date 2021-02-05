@@ -1,4 +1,9 @@
+const CHARACTER = new Hexagon(80);
+const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
+const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
+
 class Character {
+    static hexString = Hexagon.svgString(512, 12);
     static DIV = document.getElementById("characters");
 
     constructor({id, x, y}) {
@@ -14,15 +19,32 @@ class Character {
                 if (request.status === 200) {
                     const parser = document.createElement("div");
                     parser.innerHTML = request.responseText;
-                    Character.DIV.appendChild(parser.firstChild);
+                    //Character.DIV.appendChild(parser.firstChild);
 
-                    this.obj = document.getElementById(this.id);
+                    this.obj = tags.div({
+                        id: this.id,
+                        class: "character board-element",
+                        draggable: true,
+                        style: {
+                            width: CHARACTER_WIDTH + "px",
+                            height: CHARACTER_HEIGHT + "px",
+                            transitionProperty: "left, top",
+                            transitionDuration: "1s",
+                        },
+                        children: [
+                            parseHTML(Character.hexString),
+                            tags.p({
+                                class: "board-element",
+                                innerText: this.id
+                            }),
+                        ],
+                        ondragstart: (event) => {
+                            event.dataTransfer.setData("plain/text", this.id);
+                        }
+                    });
+                    Character.DIV.appendChild(this.obj);
 
                     this.moveTo(x, y);
-
-                    this.obj.ondragstart = (event) => {
-                        event.dataTransfer.setData("plain/text", this.id);
-                    };
                 } else {
                     throw Error("Couldn't load character: " + id);
                 }
