@@ -17,12 +17,12 @@ class Hexagon {
         ];
     }
 
-    translatedBy(point) {
-        return this.points.map((p) => [p[0]+point[0], p[1]+point[1]]);
+    get asPath() {
+        return "M" + this.points.map((p) => p.join(",")).join(" L") + " Z";
     }
 
-    get translated() {
-        return this.translatedBy([this.width/2, this.height/2]);
+    get asPolygon() {
+        return this.points.map((p) => p.join(",")).join(" ");
     }
 }
 
@@ -31,11 +31,11 @@ function hexagonSVG(width, borderWidth) {
     const bigH = new Hexagon(width);
     const smallH = new Hexagon(width - 2*borderWidth);
     const border = "<path fill-rule='evenodd' d='" +
-        "M" + bigH.points.map((p) => p.join(",")).join(" L") + " Z" +
-        "M" + smallH.points.map((p) => p.join(",")).join(" L") + " Z" +
+        bigH.asPath +
+        smallH.asPath +
         "'></path>"
     const polygon = "<polygon points='" +
-        smallH.points.map((p) => p.join(",")).join(" ") +
+        smallH.asPolygon +
         "'></polygon>";
     parser.innerHTML = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
         "viewBox='-"+bigH.width/2+" -"+bigH.height/2+" "+bigH.width+" "+bigH.height+"'>" +
