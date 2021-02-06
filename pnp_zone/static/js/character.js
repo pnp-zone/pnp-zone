@@ -18,8 +18,6 @@ class Character {
             style: {
                 width: CHARACTER_WIDTH + "px",
                 height: CHARACTER_HEIGHT + "px",
-                transitionProperty: "left, top",
-                transitionDuration: "1s",
             },
             children: [
                 svg,
