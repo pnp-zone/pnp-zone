@@ -13,7 +13,7 @@ class Character {
         svg.firstChild.style.fill = color;
         this.obj = tags.div({
             id: this.id,
-            class: "character board-element",
+            class: "character",// board-element",
             draggable: true,
             style: {
                 width: CHARACTER_WIDTH + "px",
