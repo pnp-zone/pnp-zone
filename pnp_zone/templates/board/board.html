@@ -2,48 +2,6 @@
 
 {% block body %}
 {% load static %}
-<link rel="stylesheet" href="{% static "css/hex_tiles.css" %}">
-
-<style>
-    body {
-        background-color: white;
-    }
-    #moderator {
-        position: sticky;
-        background: #192734;
-        padding: 1vw;
-        float: right;
-        width: 15vw;
-        z-index: 100;
-    }
-    #board-view {
-        height: 100vh;
-        width: 100%;
-        overflow: hidden;
-        position: absolute;
-    }
-    .character {
-        transition-property: left, top;
-        transition-duration: 1s;
-        position: absolute;
-        z-index: inherit;
-    }
-    .character p {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        width: inherit;
-        height: inherit;
-        margin: 0;
-        text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
-    }
-    .field polygon {
-        fill: none;
-    }
-    .field path {
-        fill: black;
-    }
-</style>
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 
 {% if is_moderator %}
