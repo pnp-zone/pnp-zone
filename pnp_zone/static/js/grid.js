@@ -60,41 +60,36 @@ class Grid {
         this.obj = document.getElementById("grid");
         for (let y = 0; y < 32; y++) {
             for (let x = 0; x < 32; x++) {
-                this.appendField(x, y);
+                this.getField(x, y);
             }
         }
     }
 
-    appendField(x, y) {
-        const field = tags.div({
-            class: "board-element",
-            style: {
-                left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
-                top: (ROW_HEIGHT*y)+"px",
-                width: FIELD_WIDTH+"px",
-                height: FIELD_HEIGHT+"px",
-            },
-            ondragstart: () => { return false; },
-            children: [parseHTML(Grid.hexString)],
-        });
-        this.obj.appendChild(field);
-        this.setField(x, y, field)
-        Character.registerMoveTarget(field, x, y);
-    }
-
     getField(x, y) {
-        if (this.fields.hasOwnProperty(x) && this.fields[x].hasOwnProperty(y)) {
-            return this.fields[x][y];
-        } else {
-            return null;
-        }
-    }
-    setField(x, y, field) {
         let column = this.fields[x];
         if (!column) {
             column = [];
             this.fields[x] = column;
         }
-        column[y] = field;
+
+        let field = column[y];
+        if (!field) {
+            field = tags.div({
+                class: "board-element",
+                style: {
+                    left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
+                    top: (ROW_HEIGHT*y)+"px",
+                    width: FIELD_WIDTH+"px",
+                    height: FIELD_HEIGHT+"px",
+                },
+                ondragstart: () => { return false; },
+                children: [parseHTML(Grid.hexString)],
+            });
+            this.obj.appendChild(field);
+            Character.registerMoveTarget(field, x, y);
+            column[y] = field;
+        }
+
+        return field;
     }
 }
