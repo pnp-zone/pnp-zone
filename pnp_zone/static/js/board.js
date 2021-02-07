@@ -46,6 +46,9 @@ class Board {
     constructor() {
         this.obj = document.getElementById("board");
         this.grid = new Grid();
+        document.addEventListener("DOMContentLoaded", () => {
+            this.generateVisible();
+        });
         this.selected = false;
 
         this.x = 0;
@@ -53,7 +56,7 @@ class Board {
 
         /* Make board draggable */
         let mouseStart;
-        let boardStart;  // values shared across event handlers
+        let boardStart = {x: 0, y: 0};  // values shared across event handlers
 
         this.grid.obj.addEventListener("mousedown", (event) => {
             this.selected = true;
@@ -61,7 +64,10 @@ class Board {
             boardStart = {x: this.x, y: this.y};
         });
         document.addEventListener("mouseup", () => {
-            this.selected = false
+            this.selected = false;
+            if (boardStart.x !== this.x || boardStart.y !== this.y) {
+                board.generateVisible();
+            }
         });
         document.addEventListener("mousemove", (event) => {
             if (this.selected) {
@@ -119,6 +125,30 @@ class Board {
     }
     set y(value) {
         this.obj.style.top = "" + value + "px";
+    }
+
+    /*
+     * The boundary rect of what is visible
+     * (in pixel; use `Coord.fromPixel` if you need indices)
+     */
+    get visibleRect() {
+        return {
+            left: Math.floor((-this.x)/this.scale),
+            top: Math.floor((-this.y)/this.scale),
+            right: Math.ceil((this.obj.parentElement.offsetWidth-this.x)/this.scale),
+            bottom: Math.ceil((this.obj.parentElement.offsetHeight-this.y)/this.scale)
+        };
+    }
+
+    generateVisible() {
+        const rect = this.visibleRect;
+        const start = Coord.fromPixel(rect.left, rect.top);
+        const end = Coord.fromPixel(rect.right, rect.bottom);
+        for (let x = start.xIndex; x <= end.xIndex; x++) {
+            for (let y = start.yIndex; y <= end.yIndex; y++) {
+                this.grid.getField(x, y);
+            }
+        }
     }
 }
 

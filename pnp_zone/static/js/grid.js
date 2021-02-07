@@ -58,11 +58,6 @@ class Grid {
     constructor() {
         this.fields = [];
         this.obj = document.getElementById("grid");
-        for (let y = 0; y < 32; y++) {
-            for (let x = 0; x < 32; x++) {
-                this.getField(x, y);
-            }
-        }
     }
 
     getField(x, y) {
