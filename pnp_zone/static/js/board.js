@@ -159,8 +159,27 @@ class Coord {
         // Point lies in the triangle part
         // and might have to be adjusted
         if (y % ROW_HEIGHT < ROW_HEIGHT - FIELD_HEIGHT/2) {
-            throw Error("Not Implemented");
-            // TODO Requires a hexagon tiling
+            const slope = FIELD.b/FIELD.a;
+            // left half
+            if (x < coord.left + FIELD_WIDTH/2) {
+                const rX = x - coord.left;
+                const rY = FIELD.b - y + coord.top;
+                // point is above slope
+                if (slope*rX < rY) {
+                    coord.yIndex -= 1;
+                    coord.xIndex -= coord.yIndex % 2;
+                }
+            }
+            // right half
+            else {
+                const rX = coord.right - x;
+                const rY = FIELD.b - y + coord.top;
+                // point is above slope
+                if (slope*rX < rY) {
+                    coord.xIndex += coord.yIndex % 2;
+                    coord.yIndex -= 1;
+                }
+            }
         }
 
         return coord;
