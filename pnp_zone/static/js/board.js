@@ -56,7 +56,8 @@ class Board {
 
         /* Make board draggable */
         let mouseStart;
-        let boardStart = {x: 0, y: 0};  // values shared across event handlers
+        let boardStart;  // values shared across event handlers
+        let generateTimeout;
 
         this.grid.obj.addEventListener("mousedown", (event) => {
             this.selected = true;
@@ -65,14 +66,15 @@ class Board {
         });
         document.addEventListener("mouseup", () => {
             this.selected = false;
-            if (boardStart.x !== this.x || boardStart.y !== this.y) {
-                board.generateVisible();
-            }
         });
         document.addEventListener("mousemove", (event) => {
             if (this.selected) {
                 this.x = event.pageX - mouseStart.x + boardStart.x;
                 this.y = event.pageY - mouseStart.y + boardStart.y;
+                if (generateTimeout) {
+                    clearTimeout(generateTimeout);
+                }
+                generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
             }
         });
 
@@ -88,6 +90,11 @@ class Board {
             else {
                 this.scale *= SCALE_SPEED;
             }
+
+            if (generateTimeout) {
+                clearTimeout(generateTimeout);
+            }
+            generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
         };
 
         // Send request to get characters
