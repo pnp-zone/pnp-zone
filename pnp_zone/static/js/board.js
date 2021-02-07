@@ -4,6 +4,7 @@ const FIELD_HEIGHT = Math.floor(FIELD.height);
 const ROW_HEIGHT = Math.floor(FIELD.height - FIELD.b);
 const SCALE_SPEED = 1.1;
 
+let userId = null;
 const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 const characters = {};
 
@@ -30,6 +31,16 @@ socket.registerEvent("colorField", (event) => {
     svg.firstChild.style.fill = event.background;
     svg.lastChild.style.fill = event.border;
 });
+socket.registerEvent("cursor", (event) => {
+    if (userId !== event.id) {
+        const cursor = Cursor.getOrCreate(event.id, event.name);
+        cursor.x = event.x;
+        cursor.y = event.y;
+    }
+});
+socket.registerEvent("welcome", (event) => {
+    userId = event.yourId;
+});
 
 // Add delete functionality
 const deleteCharacter = document.getElementById("deleteCharacter");
@@ -47,6 +58,46 @@ function createCharacter() {
         color:form["color"].value,
     });
 }
+
+class Cursor {
+    static DIV = document.getElementById("cursors");
+    static cursors = {};
+
+    constructor(id, name) {
+        this.obj = tags.div({
+            class: "cursor board-element",
+            children: [
+                tags.span({}),
+                tags.p({
+                    innerText: name,
+                })
+            ],
+        });
+        Cursor.DIV.appendChild(this.obj);
+        Cursor.cursors[id] = this;
+    }
+
+    static getOrCreate(id, name) {
+        let obj = Cursor.cursors[id];
+        if (!obj) {
+            obj = new Cursor(id, name)
+        }
+        return obj;
+    }
+
+    set x(value) {
+        this.obj.style.left = "" + value + "px";
+    }
+
+    set y(value) {
+        this.obj.style.top = "" + value + "px";
+    }
+}
+document.addEventListener("mousemove", (event) => {
+    const a = board.visibleRect;
+    const rect = board.obj.parentElement.getBoundingClientRect();
+    socket.send({type: "cursor", x: event.clientX - rect.x + a.left, y: event.clientY - rect.y + a.top});
+});
 
 class Board {
     constructor() {

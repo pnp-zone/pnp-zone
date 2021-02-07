@@ -62,7 +62,7 @@ class Event(metaclass=_EventRegistry):
     """
     type: str
 
-    def __init__(self, data):
+    def __init__(self, data, **kwargs):
         for key, value in data.items():
             if key not in self.__annotations__:
                 raise EventError(f"Unknown attribute '{key}' for type '{self.type}'")
@@ -106,12 +106,44 @@ class Event(metaclass=_EventRegistry):
         return NotImplemented
 
 
+class UserEvent(Event):
+    """
+    This abstract event extends `Event` to also store the user who send it.
+    """
+    def __init__(self, data, user=None, **kwargs):
+        super().__init__(data)
+        assert user
+        self.user = user
+
+
+class WelcomeEvent(UserEvent):
+    """
+    This event is send upon socket connection to give the client it's user id.
+    """
+    async def response_all_users(self):
+        return {"type": "welcome", "yourId": self.user.id}
+
+
+class CursorEvent(UserEvent):
+    """
+    """
+    type = "cursor"
+
+    x: int
+    y: int
+
+    async def response_all_users(self):
+        if self.user.is_authenticated:
+            return dict(self._data, name=self.user.get_username(), id=self.user.id)
+
+
 class RoomEvent(Event):
     """
     This abstract event extends `Event` to also store the room it occurred in.
     """
-    def __init__(self, data, room):
+    def __init__(self, data, room=None, **kwargs):
         super().__init__(data)
+        assert room
         self.room = room
 
 

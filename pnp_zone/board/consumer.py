@@ -26,12 +26,14 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def init_events(self):
-        characters = [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}, self.room)
+        characters = [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color},
+                               room=self.room)
                       for c in self.room.character_set.all()]
         fields = [ColorGridEvent({"type": "colorField", "x": f.x, "y": f.y,
-                                  "background": f.background, "border": f.border}, self.room)
+                                  "background": f.background, "border": f.border},
+                                 room=self.room)
                   for f in self.room.field_set.all()]
-        return characters + fields
+        return characters + fields + [WelcomeEvent({"type": "welcome"}, user=self.user)]
 
     @property
     def user(self):
@@ -58,7 +60,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             # Wrap event data with matching event class
             if "type" not in event:
                 raise EventError("Missing type attribute")
-            event = Event[event["type"]](event, room=self.room)
+            event = Event[event["type"]](event, room=self.room, user=self.user)
 
             # Check if sender has required privileges
             if event.type in self.requires_moderator and not self.is_moderator:

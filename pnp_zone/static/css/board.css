@@ -13,6 +13,9 @@
 #characters {
     z-index: 50;
 }
+#cursors {
+    z-index: 100;
+}
 .character {
     transition-property: left, top;
     transition-duration: 1s;
@@ -34,6 +37,18 @@
 }
 .field path {
     fill: black;
+}
+.cursor p {
+    position: absolute;
+    text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+.cursor span {
+    position: absolute;
+    height: 10px;
+    width: 10px;
+    background-color: #bbb;
+    border-radius: 50%;
+    display: inline-block;
 }
 body {
     background-color: white;
