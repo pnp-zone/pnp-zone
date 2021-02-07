@@ -167,7 +167,7 @@ class Coord {
                 // point is above slope
                 if (slope*rX < rY) {
                     coord.yIndex -= 1;
-                    coord.xIndex -= coord.yIndex % 2;
+                    coord.xIndex -= (coord.yIndex % 2 === 0) ? 0 : 1;
                 }
             }
             // right half
@@ -176,7 +176,7 @@ class Coord {
                 const rY = FIELD.b - y + coord.top;
                 // point is above slope
                 if (slope*rX < rY) {
-                    coord.xIndex += coord.yIndex % 2;
+                    coord.xIndex += (coord.yIndex % 2 === 0) ? 0 : 1;
                     coord.yIndex -= 1;
                 }
             }
