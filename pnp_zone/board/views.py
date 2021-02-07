@@ -38,19 +38,3 @@ class BoardView(TemplateView):
             "is_moderator": request.user in room.moderators.all(),
             "x_range": list(range(25)), "y_range": list(range(17)),
         })
-
-
-class RoomInfoView(View):
-
-    def get(self, request, *args, **kwargs):
-        if "room" not in request.GET:
-            raise SuspiciousOperation("Missing parameter: 'room'")
-        else:
-            try:
-                room = Room.objects.get(identifier=request.GET["room"])
-                return JsonResponse({
-                    "characters": [{"id": c.identifier, "x": c.x, "y": c.y, "color": c.color}
-                                   for c in room.character_set.all()]
-                })
-            except Room.DoesNotExist:
-                raise Http404

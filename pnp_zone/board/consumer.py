@@ -2,7 +2,7 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from board.events import Event, EventError
+from board.events import Event, EventError, NewEvent
 from board.models import Room
 
 
@@ -24,6 +24,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
         self.is_moderator = self.user in self.room.moderators.all()
 
+    @database_sync_to_async
+    def init_events(self):
+        return [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}, self.room)
+                for c in self.room.character_set.all()]
+
     @property
     def user(self):
         return self.scope["user"]
@@ -39,6 +44,10 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 "BACKEND is unconfigured or doesn't support groups"
             )
         self.groups.append(self.room.identifier)
+
+        # Send events to initialize board
+        for event in await self.init_events():
+            await self.send_json(await event.response_all_users())
 
     async def receive_json(self, event, **kwargs):
         try:

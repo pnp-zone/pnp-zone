@@ -1,6 +1,5 @@
 class Socket {
     constructor() {
-        this.open();
         this.event_handlers = new Map();
     }
 

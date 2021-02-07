@@ -9,6 +9,7 @@ const characters = {};
 
 // Setup socket
 const socket = new Socket();
+document.addEventListener("DOMContentLoaded", socket.open.bind(socket));
 socket.registerEvent("move", (event) => {
     characters[event.id].moveTo(event.x, event.y);
 });
@@ -96,21 +97,6 @@ class Board {
             }
             generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
         };
-
-        // Send request to get characters
-        const request = new XMLHttpRequest();
-        request.open("GET", "/board/load_room?room="+encodeURIComponent(room), true);
-        request.responseType = "json";
-        request.onreadystatechange = () => {
-            if (request.readyState === 4) {
-                if (request.status === 200) {
-                    request.response.characters.forEach((character) => {
-                        characters[character.id] = new Character(character);
-                    });
-                }
-            }
-        };
-        request.send();
     }
 
     get scale() {
