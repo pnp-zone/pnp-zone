@@ -25,6 +25,11 @@ socket.registerEvent("error", (event) => {
 socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
+socket.registerEvent("colorField", (event) => {
+    const svg = board.grid.getField(event.x, event.y).firstChild;
+    svg.firstChild.style.fill = event.background;
+    svg.lastChild.style.fill = event.border;
+});
 
 // Add delete functionality
 const deleteCharacter = document.getElementById("deleteCharacter");

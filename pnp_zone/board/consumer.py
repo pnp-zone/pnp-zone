@@ -2,7 +2,7 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from board.events import Event, EventError, NewEvent
+from board.events import *
 from board.models import Room
 
 
@@ -26,8 +26,12 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def init_events(self):
-        return [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}, self.room)
-                for c in self.room.character_set.all()]
+        characters = [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}, self.room)
+                      for c in self.room.character_set.all()]
+        fields = [ColorGridEvent({"type": "colorField", "x": f.x, "y": f.y,
+                                  "background": f.background, "border": f.border}, self.room)
+                  for f in self.room.field_set.all()]
+        return characters + fields
 
     @property
     def user(self):

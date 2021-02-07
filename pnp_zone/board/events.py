@@ -15,7 +15,7 @@ An event class defines attributes the event requires and associate a type with i
 
 from channels.db import database_sync_to_async
 
-from board.models import Character
+from board.models import Character, Field
 
 
 class EventError(RuntimeError):
@@ -178,3 +178,21 @@ class DeleteEvent(CharacterEvent):
         except Character.DoesNotExist:
             raise EventError(f"No character with id: {self.id}") from None
 
+
+class ColorGridEvent(RoomEvent):
+    """
+    """
+    type = "colorField"
+    x: int
+    y: int
+    background: str
+    border: str
+
+    @database_sync_to_async
+    def update_db(self):
+        field, _ = Field.objects.get_or_create(room=self.room, x=self.x, y=self.y)
+        if self.background:
+            field.background = self.background
+        if self.border:
+            field.border = self.border
+        field.save()
