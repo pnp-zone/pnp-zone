@@ -1,4 +1,5 @@
 import socket from "./socket.js";
+import tags from "./tagFactory.js";
 import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
 
