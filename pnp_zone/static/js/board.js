@@ -47,7 +47,7 @@ if (deleteCharacter) {
 }
 
 // Add submit action to new character form
-const newCharacter = document.getElementById("newCharacter");
+const newCharacter = document.forms["newCharacter"];
 if (newCharacter) {
     newCharacter.onsubmit = () => {
         const form = document.forms["newCharacter"];
@@ -95,6 +95,7 @@ class Cursor {
         this.obj.style.top = "" + value + "px";
     }
 }
+
 document.addEventListener("mousemove", (event) => {
     socket.send({type: "cursor", x: event.boardX, y: event.boardY});
 });
@@ -133,6 +134,10 @@ class Board {
                 }
                 generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
             }
+        });
+
+        window.addEventListener("resize", () => {
+            this.generateVisible();
         });
 
         /* Make board scalable */
@@ -202,3 +207,25 @@ class Board {
 
 export const board = new Board();
 Mouse.init(board);
+
+const colorTile = document.forms["colorTile"];
+if (colorTile) {
+    let active = colorTile["active"].checked;
+    colorTile["active"].onchange = () => {
+        active = colorTile["active"].checked;
+    };
+    board.grid.addEventListener("click", (event) => {
+        if (active) {
+            let background = colorTile["colorBg"].value;
+            if (background === "") {
+                background = "none";
+            }
+            let border = colorTile["colorBr"].value;
+            if (border === "") {
+                border = "none";
+            }
+            const coord = Coord.fromPixel(event.boardX, event.boardY);
+            socket.send({type: "colorField", x: coord.xIndex, y: coord.yIndex, background, border});
+        }
+    });
+}

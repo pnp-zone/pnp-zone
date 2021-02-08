@@ -3,9 +3,18 @@ import { Coord } from "./grid.js";
 let board = null;
 export function init(b) {
     board = b;
-    document.addEventListener("mousemove", extendEvent, true);
-    document.addEventListener("mouseup", extendEvent, true);
+
+    // Mouse events
+    document.addEventListener("click", extendEvent, true);
+    document.addEventListener("contextmenu", extendEvent, true);
+    document.addEventListener("ondbclick", extendEvent, true);
     document.addEventListener("mousedown", extendEvent, true);
+    document.addEventListener("mouseenter", extendEvent, true);
+    document.addEventListener("mouseleave", extendEvent, true);
+    document.addEventListener("mousemove", extendEvent, true);
+    document.addEventListener("mouseout", extendEvent, true);
+    document.addEventListener("mouseover", extendEvent, true);
+    document.addEventListener("mouseup", extendEvent, true);
 }
 
 export function extendEvent(event) {

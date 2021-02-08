@@ -29,9 +29,9 @@ export class Tile {
     }
 
     // get backgroundColor() { return this.obj.firstChild.style.fill; }
-    set backgroundColor(value) { this.obj.firstChild.style.fill = ""+value; }
+    set backgroundColor(value) { this.obj.firstChild.firstChild.style.fill = ""+value; }
     // get borderColor() { return this.obj.lastChild.style.fill; }
-    set borderColor(value) { this.obj.lastChild.style.fill = ""+value; }
+    set borderColor(value) { this.obj.firstChild.lastChild.style.fill = ""+value; }
 
     static getOrCreate(x, y) {
         let column = this.lookup[x];
