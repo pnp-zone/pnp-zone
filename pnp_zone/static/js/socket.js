@@ -6,7 +6,7 @@ class Socket {
     open() {
         this.socket = new WebSocket(this.getEndpoint());
 
-        this.socket.onopen = (event) => {
+        this.socket.onopen = () => {
         };
 
         this.socket.onmessage = (event) => {
@@ -22,7 +22,7 @@ class Socket {
             console.error(event);
         };
 
-        this.socket.onclose = (event) => {
+        this.socket.onclose = () => {
             setTimeout(this.open.bind(this), 1000);
         };
     }
@@ -40,3 +40,6 @@ class Socket {
         return url.protocol.replace("http", "ws") + "//" + url.host + url.pathname;
     }
 }
+
+const socket = new Socket();
+export default socket;

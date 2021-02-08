@@ -1,3 +1,9 @@
+import Hexagon from "./hexagon.js";
+import { parseHTML } from "./hexagon.js";
+import tags from "./tagFactory.js";
+import { Coord } from "./grid.js";
+import socket from "./socket.js";
+
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
 const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
@@ -79,3 +85,5 @@ class Character {
         });
     }
 }
+
+export default Character;

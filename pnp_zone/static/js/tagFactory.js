@@ -61,3 +61,5 @@ const tags = new Proxy(new TagFactory(), {
         return target.forTag(prop);
     }
 });
+
+export default tags;

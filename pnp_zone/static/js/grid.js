@@ -1,58 +1,14 @@
-class Hexagon {
-    constructor(width) {
-        this.a = width/2;
-        this.b = this.a / Math.sqrt(3);
+import Hexagon from "./hexagon.js";
+import { parseHTML } from "./hexagon.js";
+import tags from "./tagFactory.js";
+import Character from "./character.js";
 
-        this.side = Math.sqrt(Math.pow(this.a, 2) + Math.pow(this.b, 2));
-        this.width = width;
-        this.height = this.side + (2 * this.b);
+const FIELD = new Hexagon(100);
+const FIELD_WIDTH = Math.floor(FIELD.width);
+const FIELD_HEIGHT = Math.floor(FIELD.height);
+const ROW_HEIGHT = Math.floor(FIELD.height - FIELD.b);
 
-        this.points = [
-            [-this.a, this.side/2],
-            [0, this.height/2],
-            [this.a, this.side/2],
-            [this.a, -this.side/2],
-            [0, -this.height/2],
-            [-this.a, -this.side/2]
-        ];
-    }
-
-    get asPath() {
-        return "M" + this.points.map((p) => p.join(",")).join(" L") + " Z";
-    }
-
-    get asPolygon() {
-        return this.points.map((p) => p.join(",")).join(" ");
-    }
-
-    static svgString(width, borderWidth) {
-        const bigH = new Hexagon(width);
-        const smallH = new Hexagon(width - 2*borderWidth);
-
-        const border = `<path fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`;
-        const polygon = `<polygon points='${bigH.asPolygon}'></polygon>`;
-
-        return "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' class='field' " +
-            "viewBox='-"+bigH.width/2+" -"+bigH.height/2+" "+bigH.width+" "+bigH.height+"'>" +
-            polygon +
-            border +
-            "</svg>";
-    }
-}
-
-const parseHTML = (() => {
-    const parser = document.createElement("div");
-    return (html) => {
-        parser.innerHTML = html;
-        return parser.firstChild;
-    };
-})();
-
-function hexagonSVG(width, borderWidth) {
-    return parseHTML(Hexagon.svgString(width, borderWidth));
-}
-
-class Grid {
+export class Grid {
     static hexString = Hexagon.svgString(512, 8);
 
     constructor() {
@@ -86,5 +42,69 @@ class Grid {
         }
 
         return field;
+    }
+}
+
+export class Coord {
+    constructor() {
+        this.xPixel = 0;
+        this.yPixel = 0;
+        this.xIndex = 0;
+        this.yIndex = 0;
+    }
+
+    get left() {
+        return FIELD_WIDTH*this.xIndex + ((this.yIndex%2 === 0) ? 0 : FIELD_WIDTH/2);
+    }
+    get top() {
+        return ROW_HEIGHT*this.yIndex;
+    }
+    get right() {
+        return this.left + FIELD_WIDTH;
+    }
+
+    static fromIndex(x, y) {
+        const coord = new Coord();
+        coord.xIndex = x;
+        coord.yIndex = y;
+        coord.xPixel = FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2) + FIELD_WIDTH/2;
+        coord.yPixel = ROW_HEIGHT*y + FIELD_HEIGHT/2;
+        return coord;
+    }
+
+    static fromPixel(x, y) {
+        const coord = new Coord();
+        coord.yIndex = Math.floor(y / ROW_HEIGHT);
+        coord.xIndex = Math.floor((x - ((coord.yIndex%2 === 0) ? 0 : FIELD_WIDTH/2)) / FIELD_WIDTH);
+        coord.xPixel = x;
+        coord.yPixel = y;
+
+        // Point lies in the triangle part
+        // and might have to be adjusted
+        if (y % ROW_HEIGHT < ROW_HEIGHT - FIELD_HEIGHT/2) {
+            const slope = FIELD.b/FIELD.a;
+            // left half
+            if (x < coord.left + FIELD_WIDTH/2) {
+                const rX = x - coord.left;
+                const rY = FIELD.b - y + coord.top;
+                // point is above slope
+                if (slope*rX < rY) {
+                    coord.yIndex -= 1;
+                    coord.xIndex -= (coord.yIndex % 2 === 0) ? 0 : 1;
+                }
+            }
+            // right half
+            else {
+                const rX = coord.right - x;
+                const rY = FIELD.b - y + coord.top;
+                // point is above slope
+                if (slope*rX < rY) {
+                    coord.xIndex += (coord.yIndex % 2 === 0) ? 0 : 1;
+                    coord.yIndex -= 1;
+                }
+            }
+        }
+
+        return coord;
     }
 }
