@@ -2,43 +2,45 @@ import Hexagon from "./hexagon.js";
 import tags from "./tagFactory.js";
 import Character from "./character.js";
 
-const FIELD = new Hexagon(100);
-const FIELD_WIDTH = Math.floor(FIELD.width);
-const FIELD_HEIGHT = Math.floor(FIELD.height);
-const ROW_HEIGHT = Math.floor(FIELD.height - FIELD.b);
+const TILE_HEXAGON = new Hexagon(100);
+const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
+const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
+const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
+const DIV = document.getElementById("grid");
 
-export class Grid {
-    constructor() {
-        this.fields = [];
-        this.obj = document.getElementById("grid");
+export class Tile {
+    static lookup = [];
+
+    constructor(x, y) {
+        const coord = Coord.fromIndex(x, y);
+        this.obj = tags.div({
+            class: "board-element",
+            style: {
+                left: coord.left+"px",
+                top: coord.top+"px",
+                width: TILE_WIDTH+"px",
+                height: TILE_HEIGHT+"px",
+            },
+            ondragstart: () => { return false; },
+            children: [Hexagon.generateSVG(512, 8)],
+        });
+        DIV.appendChild(this.obj);
+        Character.registerMoveTarget(this.obj, x, y);
     }
 
-    getField(x, y) {
-        let column = this.fields[x];
+    static getOrCreate(x, y) {
+        let column = this.lookup[x];
         if (!column) {
             column = [];
-            this.fields[x] = column;
+            this.lookup[x] = column;
         }
 
-        let field = column[y];
-        if (!field) {
-            field = tags.div({
-                class: "board-element",
-                style: {
-                    left: (FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2))+"px",
-                    top: (ROW_HEIGHT*y)+"px",
-                    width: FIELD_WIDTH+"px",
-                    height: FIELD_HEIGHT+"px",
-                },
-                ondragstart: () => { return false; },
-                children: [Hexagon.generateSVG(512, 8)],
-            });
-            this.obj.appendChild(field);
-            Character.registerMoveTarget(field, x, y);
-            column[y] = field;
+        let tile = column[y];
+        if (!tile) {
+            tile = new Tile(x, y);
+            column[y] = tile;
         }
-
-        return field;
+        return tile;
     }
 }
 
@@ -51,39 +53,39 @@ export class Coord {
     }
 
     get left() {
-        return FIELD_WIDTH*this.xIndex + ((this.yIndex%2 === 0) ? 0 : FIELD_WIDTH/2);
+        return TILE_WIDTH*this.xIndex + ((this.yIndex%2 === 0) ? 0 : TILE_WIDTH/2);
     }
     get top() {
         return ROW_HEIGHT*this.yIndex;
     }
     get right() {
-        return this.left + FIELD_WIDTH;
+        return this.left + TILE_WIDTH;
     }
 
     static fromIndex(x, y) {
         const coord = new Coord();
         coord.xIndex = x;
         coord.yIndex = y;
-        coord.xPixel = FIELD_WIDTH*x + ((y%2 === 0) ? 0 : FIELD_WIDTH/2) + FIELD_WIDTH/2;
-        coord.yPixel = ROW_HEIGHT*y + FIELD_HEIGHT/2;
+        coord.xPixel = TILE_WIDTH*x + ((y%2 === 0) ? 0 : TILE_WIDTH/2) + TILE_WIDTH/2;
+        coord.yPixel = ROW_HEIGHT*y + TILE_HEIGHT/2;
         return coord;
     }
 
     static fromPixel(x, y) {
         const coord = new Coord();
         coord.yIndex = Math.floor(y / ROW_HEIGHT);
-        coord.xIndex = Math.floor((x - ((coord.yIndex%2 === 0) ? 0 : FIELD_WIDTH/2)) / FIELD_WIDTH);
+        coord.xIndex = Math.floor((x - ((coord.yIndex%2 === 0) ? 0 : TILE_WIDTH/2)) / TILE_WIDTH);
         coord.xPixel = x;
         coord.yPixel = y;
 
         // Point lies in the triangle part
         // and might have to be adjusted
-        if (y % ROW_HEIGHT < ROW_HEIGHT - FIELD_HEIGHT/2) {
-            const slope = FIELD.b/FIELD.a;
+        if (y % ROW_HEIGHT < ROW_HEIGHT - TILE_HEIGHT/2) {
+            const slope = TILE_HEXAGON.b/TILE_HEXAGON.a;
             // left half
-            if (x < coord.left + FIELD_WIDTH/2) {
+            if (x < coord.left + TILE_WIDTH/2) {
                 const rX = x - coord.left;
-                const rY = FIELD.b - y + coord.top;
+                const rY = TILE_HEXAGON.b - y + coord.top;
                 // point is above slope
                 if (slope*rX < rY) {
                     coord.yIndex -= 1;
@@ -93,7 +95,7 @@ export class Coord {
             // right half
             else {
                 const rX = coord.right - x;
-                const rY = FIELD.b - y + coord.top;
+                const rY = TILE_HEXAGON.b - y + coord.top;
                 // point is above slope
                 if (slope*rX < rY) {
                     coord.xIndex += (coord.yIndex % 2 === 0) ? 0 : 1;

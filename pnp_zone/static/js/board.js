@@ -1,5 +1,5 @@
 import socket from "./socket.js";
-import { Grid, Coord } from "./grid.js";
+import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
 
 const SCALE_SPEED = 1.1;
@@ -23,7 +23,7 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 socket.registerEvent("colorField", (event) => {
-    const svg = board.grid.getField(event.x, event.y).firstChild;
+    const svg = Tile.getOrCreate(event.x, event.y).obj.firstChild;
     svg.firstChild.style.fill = event.background;
     svg.lastChild.style.fill = event.border;
 });
@@ -102,10 +102,10 @@ document.addEventListener("mousemove", (event) => {
 class Board {
     constructor() {
         this.obj = document.getElementById("board");
-        this.grid = new Grid();
         document.addEventListener("DOMContentLoaded", () => {
             this.generateVisible();
         });
+        this.grid = document.getElementById("grid");
         this.selected = false;
 
         this.x = 0;
@@ -116,7 +116,7 @@ class Board {
         let boardStart;  // values shared across event handlers
         let generateTimeout;
 
-        this.grid.obj.addEventListener("mousedown", (event) => {
+        this.grid.addEventListener("mousedown", (event) => {
             this.selected = true;
             mouseStart = {x: event.pageX, y: event.pageY};
             boardStart = {x: this.x, y: this.y};
@@ -195,7 +195,7 @@ class Board {
         const end = Coord.fromPixel(rect.right, rect.bottom);
         for (let x = start.xIndex; x <= end.xIndex; x++) {
             for (let y = start.yIndex; y <= end.yIndex; y++) {
-                this.grid.getField(x, y);
+                Tile.getOrCreate(x, y);
             }
         }
     }

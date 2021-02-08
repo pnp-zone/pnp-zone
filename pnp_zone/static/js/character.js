@@ -6,10 +6,9 @@ import socket from "./socket.js";
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
 const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
+const DIV = document.getElementById("characters");
 
-class Character {
-    static DIV = document.getElementById("characters");
-
+export default class Character {
     constructor({id, x, y, color}) {
         this.id = id;
 
@@ -34,7 +33,7 @@ class Character {
                 event.dataTransfer.setData("plain/text", this.id);
             }
         });
-        Character.DIV.appendChild(this.obj);
+        DIV.appendChild(this.obj);
 
         this.moveTo(x, y);
     }
@@ -83,5 +82,3 @@ class Character {
         });
     }
 }
-
-export default Character;
