@@ -2,6 +2,7 @@ import socket from "./socket.js";
 import tags from "./tagFactory.js";
 import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
+import * as Mouse from "./mouse.js"
 
 const SCALE_SPEED = 1.1;
 
@@ -95,9 +96,8 @@ class Cursor {
     }
 }
 document.addEventListener("mousemove", (event) => {
-    const a = board.visibleRect;
-    const rect = board.obj.parentElement.getBoundingClientRect();
-    socket.send({type: "cursor", x: event.clientX - rect.x + a.left, y: event.clientY - rect.y + a.top});
+    const { boardX, boardY } = Mouse.extendEvent(event);
+    socket.send({type: "cursor", x: boardX, y: boardY});
 });
 
 class Board {
@@ -181,13 +181,12 @@ class Board {
      * The boundary rect of what is visible
      * (in pixel; use `Coord.fromPixel` if you need indices)
      */
+    get left() { return Math.floor((-this.x)/this.scale); }
+    get top() { return Math.floor((-this.y)/this.scale); }
+    get right() { return Math.ceil((this.obj.parentElement.offsetWidth-this.x)/this.scale); }
+    get bottom() { return Math.ceil((this.obj.parentElement.offsetHeight-this.y)/this.scale); }
     get visibleRect() {
-        return {
-            left: Math.floor((-this.x)/this.scale),
-            top: Math.floor((-this.y)/this.scale),
-            right: Math.ceil((this.obj.parentElement.offsetWidth-this.x)/this.scale),
-            bottom: Math.ceil((this.obj.parentElement.offsetHeight-this.y)/this.scale)
-        };
+        return { left: this.left, top: this.top, right: this.right, bottom: this.bottom, };
     }
 
     generateVisible() {
@@ -203,3 +202,4 @@ class Board {
 }
 
 export const board = new Board();
+Mouse.init(board);
