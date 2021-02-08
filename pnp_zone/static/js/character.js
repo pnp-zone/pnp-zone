@@ -1,5 +1,4 @@
 import Hexagon from "./hexagon.js";
-import { parseHTML } from "./hexagon.js";
 import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
@@ -9,13 +8,12 @@ const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
 const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
 
 class Character {
-    static hexString = Hexagon.svgString(512, 12);
     static DIV = document.getElementById("characters");
 
     constructor({id, x, y, color}) {
         this.id = id;
 
-        const svg = parseHTML(Character.hexString);
+        const svg = Hexagon.generateSVG(512, 12);
         svg.firstChild.style.fill = color;
         this.obj = tags.div({
             id: this.id,

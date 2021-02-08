@@ -25,7 +25,21 @@ export default class Hexagon {
         return this.points.map((p) => p.join(",")).join(" ");
     }
 
-    static svgString(width, borderWidth) {
+    static _stringCache = {};
+    static _parser = document.createElement("div");
+
+    static generateSVG(width, borderWidth) {
+        let html = this._stringCache[""+width+" "+borderWidth];
+        if (!html) {
+            html = this._svgString(width, borderWidth);
+            this._stringCache[""+width+" "+borderWidth] = html;
+        }
+
+        this._parser.innerHTML = html;
+        return this._parser.firstChild;
+    }
+
+    static _svgString(width, borderWidth) {
         const bigH = new Hexagon(width);
         const smallH = new Hexagon(width - 2*borderWidth);
 
@@ -38,16 +52,4 @@ export default class Hexagon {
             border +
             "</svg>";
     }
-}
-
-export const parseHTML = (() => {
-    const parser = document.createElement("div");
-    return (html) => {
-        parser.innerHTML = html;
-        return parser.firstChild;
-    };
-})();
-
-export function hexagonSVG(width, borderWidth) {
-    return parseHTML(Hexagon.svgString(width, borderWidth));
 }

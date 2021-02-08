@@ -1,5 +1,4 @@
 import Hexagon from "./hexagon.js";
-import { parseHTML } from "./hexagon.js";
 import tags from "./tagFactory.js";
 import Character from "./character.js";
 
@@ -9,8 +8,6 @@ const FIELD_HEIGHT = Math.floor(FIELD.height);
 const ROW_HEIGHT = Math.floor(FIELD.height - FIELD.b);
 
 export class Grid {
-    static hexString = Hexagon.svgString(512, 8);
-
     constructor() {
         this.fields = [];
         this.obj = document.getElementById("grid");
@@ -34,7 +31,7 @@ export class Grid {
                     height: FIELD_HEIGHT+"px",
                 },
                 ondragstart: () => { return false; },
-                children: [parseHTML(Grid.hexString)],
+                children: [Hexagon.generateSVG(512, 8)],
             });
             this.obj.appendChild(field);
             Character.registerMoveTarget(field, x, y);
