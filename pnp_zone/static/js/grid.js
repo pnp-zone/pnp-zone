@@ -12,12 +12,12 @@ export class Tile {
     static lookup = [];
 
     constructor(x, y) {
-        const coord = Coord.fromIndex(x, y);
+        this.position = Coord.fromIndex(x, y);
         this.obj = tags.div({
             class: "board-element",
             style: {
-                left: coord.left+"px",
-                top: coord.top+"px",
+                left: this.position.left+"px",
+                top: this.position.top+"px",
                 width: TILE_WIDTH+"px",
                 height: TILE_HEIGHT+"px",
             },
@@ -27,6 +27,11 @@ export class Tile {
         DIV.appendChild(this.obj);
         Character.registerMoveTarget(this.obj, x, y);
     }
+
+    // get backgroundColor() { return this.obj.firstChild.style.fill; }
+    set backgroundColor(value) { this.obj.firstChild.style.fill = ""+value; }
+    // get borderColor() { return this.obj.lastChild.style.fill; }
+    set borderColor(value) { this.obj.lastChild.style.fill = ""+value; }
 
     static getOrCreate(x, y) {
         let column = this.lookup[x];

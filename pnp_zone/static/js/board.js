@@ -23,9 +23,9 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 socket.registerEvent("colorField", (event) => {
-    const svg = Tile.getOrCreate(event.x, event.y).obj.firstChild;
-    svg.firstChild.style.fill = event.background;
-    svg.lastChild.style.fill = event.border;
+    const tile = Tile.getOrCreate(event.x, event.y);
+    tile.backgroundColor = event.background;
+    tile.borderColor = event.border;
 });
 socket.registerEvent("cursor", (event) => {
     if (userId !== event.id) {
