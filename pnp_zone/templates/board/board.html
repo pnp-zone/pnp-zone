@@ -4,38 +4,66 @@
 {% load static %}
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 
-{% if is_moderator %}
-    <div id="moderator">
-        <h1>Moderator Tools</h1>
-        <hr>
-        <form id="newCharacter">
-            <h2>Create new character</h2>
-            <p><label>Identifier: <input name="id" type="text"></label></p>
-            <p><label>X: <input name="x" type="number"></label></p>
-            <p><label>Y: <input name="y" type="number"></label></p>
-            <p><label>Color: <input name="color" type="text"></label></p>
-            <p><input value="New" type="submit"></p>
-        </form>
-        <hr>
-        <div id="deleteCharacter">
-            <h2>Delete a character</h2>
-            <p>Drop here to delete</p>
+<div class="flex-vertical" style="height: 100vh;">
+    <div id="board-view">
+        <div id="board" class="board-element noselect">
+            <img id="background" class="board-element" src="{{ room.background }}" alt="Background">
+            <div id="grid" class="board-element"></div>
+            <div id="characters" class="board-element"></div>
+            <div id="cursors" class="board-element"></div>
         </div>
     </div>
-{% endif %}
 
-<div id="board-view">
-    <div id="board" class="board-element noselect">
-        <img id="background" class="board-element" src="{{ room.background }}" alt="Background">
-        <div id="grid" class="board-element"></div>
-        <div id="characters" class="board-element"></div>
-        <div id="cursors" class="board-element"></div>
-    </div>
+    {% if is_moderator %}
+        <div id="moderator" class="flex-horizontal">
+            <form class="moderator-child" id="newCharacter">
+                <h2>New character</h2>
+                <table>
+                    <tr>
+                        <td><label for="newId">Identifier: </label></td>
+                        <td><input id="newId" name="id" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="newX">X: </label></td>
+                        <td><input id="newX" name="x" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="newY">Y: </label></td>
+                        <td><input id="newY" name="y" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="newColor">Color: </label></td>
+                        <td><input id="newColor" name="color" type="text"></td>
+                    </tr>
+                    <tr><td></td><td><input value="New" type="submit"></td></tr>
+                </table>
+            </form>
+            <div class="moderator-child" id="deleteCharacter">
+                <h2>Delete character</h2>
+                <p>Drop here to delete</p>
+            </div>
+            <form class="moderator-child" id="colorTile" onsubmit="return false;">
+                <h2>Color tile</h2>
+                <table>
+                    <tr>
+                        <td><label for="colorBg">Background: </label></td>
+                        <td><input id="colorBg" name="background" type="text"></td>
+                    </tr>
+                    <tr>
+                        <td><label for="colorBr">Border: </label></td>
+                        <td><input id="colorBr" name="border" type="text" value="black"></td>
+                    </tr>
+                    <tr><td></td><td><label>Active <input name="active" type="checkbox"></label></td></tr>
+                </table>
+            </form>
+        </div>
+    {% endif %}
 </div>
 
 <script type="module" src="{% static "js/board.js" %}"></script>
 <script>
     // Expose some modules for debugging
-    let Board; import("{% static "js/board.js" %}").then((module) => { Board = module });
+    let board; import("{% static "js/board.js" %}").then((module) => { board = module.board; });
+    let socket; import("{% static "js/socket.js" %}").then((module) => { socket = module.default; });
 </script>
 {% endblock %}

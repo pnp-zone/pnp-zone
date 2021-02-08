@@ -54,16 +54,17 @@ body {
     background-color: white;
 }
 #moderator {
-    position: sticky;
-    background: #192734;
+    background: #16232d;
+}
+.moderator-child {
     padding: 1vw;
-    float: right;
-    width: 15vw;
-    z-index: 100;
+}
+#moderator input {
+    width: 8vw;
 }
 #board-view {
-    height: 100vh;
     width: 100%;
     overflow: hidden;
-    position: absolute;
+    flex: 1 1 auto;
+    position: relative;
 }
