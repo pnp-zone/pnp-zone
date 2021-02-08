@@ -29,11 +29,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         characters = [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color},
                                room=self.room)
                       for c in self.room.character_set.all()]
-        fields = [ColorGridEvent({"type": "colorField", "x": f.x, "y": f.y,
-                                  "background": f.background, "border": f.border},
-                                 room=self.room)
-                  for f in self.room.field_set.all()]
-        return characters + fields + [WelcomeEvent({"type": "welcome"}, user=self.user)]
+        tiles = [ColorTileEvent({"type": ColorTileEvent.type, "x": f.x, "y": f.y,
+                                 "background": f.background, "border": f.border},
+                                room=self.room)
+                  for f in self.room.tile_set.all()]
+        return characters + tiles + [WelcomeEvent({"type": "welcome"}, user=self.user)]
 
     @property
     def user(self):

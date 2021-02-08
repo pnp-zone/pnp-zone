@@ -24,7 +24,7 @@ socket.registerEvent("error", (event) => {
 socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
-socket.registerEvent("colorField", (event) => {
+socket.registerEvent("colorTile", (event) => {
     const tile = Tile.getOrCreate(event.x, event.y);
     tile.backgroundColor = event.background;
     tile.borderColor = event.border;
@@ -225,7 +225,7 @@ if (colorTile) {
                 border = "none";
             }
             const coord = Coord.fromPixel(event.boardX, event.boardY);
-            socket.send({type: "colorField", x: coord.xIndex, y: coord.yIndex, background, border});
+            socket.send({type: "colorTile", x: coord.xIndex, y: coord.yIndex, background, border});
         }
     });
 }

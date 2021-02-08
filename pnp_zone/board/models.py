@@ -34,9 +34,12 @@ class Character(models.Model):
         return self.identifier
 
 
-class Field(models.Model):
+class Tile(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     x = models.IntegerField()
     y = models.IntegerField()
     background = models.CharField(max_length=255, default="none", blank=True)
     border = models.CharField(max_length=255, default="black", blank=True)
+
+    def __str__(self):
+        return f"{self.x} {self.y}"
