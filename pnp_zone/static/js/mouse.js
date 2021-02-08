@@ -3,9 +3,9 @@ import { Coord } from "./grid.js";
 let board = null;
 export function init(b) {
     board = b;
-    document.addEventListener("mousemove", move);
-    document.addEventListener("mouseup", up);
-    document.addEventListener("mousedown", down);
+    document.addEventListener("mousemove", extendEvent, true);
+    document.addEventListener("mouseup", extendEvent, true);
+    document.addEventListener("mousedown", extendEvent, true);
 }
 
 export function extendEvent(event) {
@@ -22,20 +22,4 @@ export function extendEvent(event) {
 
     event.boardX = boardX;
     event.boardY = boardY;
-    return {
-        boardX,
-        boardY,
-    };
-}
-
-function move(event) {
-
-}
-
-function up() {
-
-}
-
-function down() {
-
 }

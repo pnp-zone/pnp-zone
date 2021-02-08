@@ -96,8 +96,7 @@ class Cursor {
     }
 }
 document.addEventListener("mousemove", (event) => {
-    const { boardX, boardY } = Mouse.extendEvent(event);
-    socket.send({type: "cursor", x: boardX, y: boardY});
+    socket.send({type: "cursor", x: event.boardX, y: event.boardY});
 });
 
 class Board {
