@@ -147,13 +147,6 @@ class RoomEvent(Event):
         self.room = room
 
 
-class ReloadEvent(RoomEvent):
-    """
-    This event forces all users to reload their page.
-    """
-    type = "reload"
-
-
 class CharacterEvent(RoomEvent):
     """
     This abstract event extends `RoomEvent` and requires a id specifying a character.

@@ -16,9 +16,6 @@ socket.registerEvent("move", (event) => {
 socket.registerEvent("new", (event) => {
     characters[event.id] = new Character({id: event.id, x: event.x, y: event.y, color: event.color});
 });
-socket.registerEvent("reload", () => {
-    window.location.reload(true);
-});
 socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
