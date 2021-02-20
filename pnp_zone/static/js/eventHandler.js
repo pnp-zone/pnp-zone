@@ -40,10 +40,12 @@ export class EventGroup extends Array {
         for (let i = 0; i < this.length; i++) {
             this[i].enable();
         }
+        return this;
     }
     disable() {
         for (let i = 0; i < this.length; i++) {
             this[i].disable();
         }
+        return this;
     }
 }

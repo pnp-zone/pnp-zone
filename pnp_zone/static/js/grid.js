@@ -1,6 +1,5 @@
 import Hexagon from "./hexagon.js";
 import tags from "./tagFactory.js";
-import Character from "./character.js";
 
 const TILE_HEXAGON = new Hexagon(100);
 const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
@@ -25,7 +24,6 @@ export class Tile {
             children: [Hexagon.generateSVG(512, 8)],
         });
         DIV.appendChild(this.obj);
-        Character.registerMoveTarget(this.obj, x, y);
     }
 
     // get backgroundColor() { return this.obj.firstChild.style.fill; }
