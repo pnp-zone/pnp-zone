@@ -3,7 +3,7 @@ import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
-import { getDragged, setDragged } from "./mouse.js";
+import { getDragged, startDrag, endDrag } from "./mouse.js";
 
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
@@ -38,7 +38,7 @@ export default class Character {
             new EventListener(this.obj, "mousedown", (event) => {
                 Character.selected = this;
                 this.obj.style.transition = "none";
-                setDragged(this);
+                startDrag(this);
                 event.stopPropagation();
             }),
             new EventListener(this.obj, "mouseup", (event) => {
@@ -47,7 +47,7 @@ export default class Character {
                     const coord = Coord.fromPixel(event.boardX, event.boardY);
                     socket.send({type: "move", id: this.id, x: coord.xIndex, y: coord.yIndex});
 
-                    setDragged(null);
+                    endDrag(this);
                     event.stopPropagation();
                 }
             }),

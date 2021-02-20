@@ -4,7 +4,7 @@ let board = null;
 export function init(b) {
     board = b;
 
-    // Mouse events
+    // Extend mouse events
     document.addEventListener("click", extendEvent, true);
     document.addEventListener("contextmenu", extendEvent, true);
     document.addEventListener("ondbclick", extendEvent, true);
@@ -31,6 +31,20 @@ export function extendEvent(event) {
 
     event.boardX = boardX;
     event.boardY = boardY;
+
+    let coord = null;
+    Object.defineProperty(event, "gridX", {get: () => {
+        if (!coord) {
+            coord = Coord.fromPixel(boardX, boardY);
+        }
+        return coord.xIndex;
+    }});
+    Object.defineProperty(event, "gridY", {get: () => {
+            if (!coord) {
+                coord = Coord.fromPixel(boardX, boardY);
+            }
+            return coord.yIndex;
+    }});
 }
 
 let dragged = null;
@@ -45,15 +59,19 @@ document.addEventListener("mouseup", (event) => {
         dragged = null;
     }
 });
-export function setDragged(obj) {
-    if (obj) {
-        if (dragged) {
-            console.error("You can't start dragging, because there is already something being dragged");
-        } else {
-            dragged = obj;
-        }
+export function startDrag(obj) {
+    if (dragged) {
+        console.error("You can't start dragging, because there is already something being dragged");
     } else {
+        dragged = obj;
+    }
+
+}
+export function endDrag(obj) {
+    if (dragged === obj) {
         dragged = null;
+    } else {
+        console.error("The object isn't being dragged.");
     }
 }
 export function getDragged() {

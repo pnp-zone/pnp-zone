@@ -3,13 +3,12 @@ import tags from "./tagFactory.js";
 import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import { EventListener, EventGroup } from "./eventHandler.js";
-import {setDragged} from "./mouse.js";
+import { EventListener } from "./eventHandler.js";
+import { startDrag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
 let userId = null;
-// const room = window.location.pathname.substring(window.location.pathname.lastIndexOf('/') + 1);
 const characters = {};
 
 // Setup socket
@@ -65,6 +64,8 @@ if (newCharacter) {
 
 class Cursor {
     static DIV = document.getElementById("cursors");
+    static TIMEOUT = 100;
+    static activeTimeout = null;
     static cursors = {};
 
     constructor(id, name) {
@@ -99,7 +100,12 @@ class Cursor {
 }
 
 document.addEventListener("mousemove", (event) => {
-    socket.send({type: "cursor", x: event.boardX, y: event.boardY});
+    if (!Cursor.activeTimeout) {
+        Cursor.activeTimeout = setTimeout(() => {
+            socket.send({type: "cursor", x: event.boardX, y: event.boardY});
+            Cursor.activeTimeout = null;
+        }, Cursor.TIMEOUT);
+    }
 });
 
 class Board {
@@ -124,7 +130,7 @@ class Board {
 
         // dragStart
         this.grid.addEventListener("mousedown", (event) => {
-            setDragged(this);
+            startDrag(this);
             this._mouseStart = {x: event.pageX, y: event.pageY};
             this._boardStart = {x: this.x, y: this.y};
         });
@@ -207,21 +213,45 @@ class Board {
 export const board = new Board();
 Mouse.init(board);
 
+class PaintBrush {
+    constructor(form) {
+        this.form = form;
+        this.clickHandler = new EventListener(board.grid, "click", (event) => {
+            this.color(event.gridX, event.gridY);
+        });
+        this.form.addEventListener("mousedown", () => {
+            startDrag(this);
+        });
+        this.visited = {};
+    }
+
+    color(x, y) {
+        socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
+    }
+
+    get background() {
+        return this.form["colorBg"].value;
+    }
+    get border() {
+        return this.form["colorBr"].value;
+    }
+
+    dragMove(event) {
+        const key = ""+event.gridX+" "+event.gridY;
+        if (!this.visited.hasOwnProperty(key)) {
+            this.color(event.gridX, event.gridY);
+            this.visited[key] = null;
+        }
+    }
+    dragEnd() {
+        this.visited = {};
+    }
+}
+
 const colorTile = document.forms["colorTile"];
 if (colorTile) {
-    const eventHandler = new EventListener(board.grid, "click", (event) => {
-        let background = colorTile["colorBg"].value;
-        if (background === "") {
-            background = "none";
-        }
-        let border = colorTile["colorBr"].value;
-        if (border === "") {
-            border = "none";
-        }
-        const coord = Coord.fromPixel(event.boardX, event.boardY);
-        socket.send({type: "colorTile", x: coord.xIndex, y: coord.yIndex, background, border});
-    });
+    const brush = new PaintBrush(colorTile);
     colorTile["active"].onchange = () => {
-        eventHandler.active = colorTile["active"].checked;
+        brush.clickHandler.active = colorTile["active"].checked;
     };
 }
