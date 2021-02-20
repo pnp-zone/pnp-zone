@@ -2,7 +2,8 @@ import socket from "./socket.js";
 import tags from "./tagFactory.js";
 import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
-import * as Mouse from "./mouse.js"
+import * as Mouse from "./mouse.js";
+import { EventListener, EventGroup } from "./eventHandler.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -105,44 +106,45 @@ class Board {
         this.obj = document.getElementById("board");
         document.addEventListener("DOMContentLoaded", () => {
             this.generateVisible();
+            window.addEventListener("resize", () => {
+                this.generateVisible();
+            });
         });
+
         this.grid = document.getElementById("grid");
         this.selected = false;
 
         this.x = 0;
         this.y = 0;
+        this.scale = 1
 
-        /* Make board draggable */
         let mouseStart;
-        let boardStart;  // values shared across event handlers
+        let boardStart;  // values shared across event listeners
         let generateTimeout;
 
-        this.grid.addEventListener("mousedown", (event) => {
-            this.selected = true;
-            mouseStart = {x: event.pageX, y: event.pageY};
-            boardStart = {x: this.x, y: this.y};
-        });
-        document.addEventListener("mouseup", () => {
-            this.selected = false;
-        });
-        document.addEventListener("mousemove", (event) => {
-            if (this.selected) {
-                this.x = event.pageX - mouseStart.x + boardStart.x;
-                this.y = event.pageY - mouseStart.y + boardStart.y;
-                if (generateTimeout) {
-                    clearTimeout(generateTimeout);
+        this.movement = new EventGroup(
+            new EventListener(this.grid, "mousedown", (event) => {
+                this.selected = true;
+                mouseStart = {x: event.pageX, y: event.pageY};
+                boardStart = {x: this.x, y: this.y};
+            }),
+            new EventListener(document, "mouseup", () => {
+                this.selected = false;
+            }),
+            new EventListener(document, "mousemove", (event) => {
+                if (this.selected) {
+                    this.x = event.pageX - mouseStart.x + boardStart.x;
+                    this.y = event.pageY - mouseStart.y + boardStart.y;
+                    if (generateTimeout) {
+                        clearTimeout(generateTimeout);
+                    }
+                    generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
                 }
-                generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
-            }
-        });
+            })
+        );
+        this.movement.enable();
 
-        window.addEventListener("resize", () => {
-            this.generateVisible();
-        });
-
-        /* Make board scalable */
-        this.scale = 1
-        this.obj.onwheel = (event) => {
+        this.scaling = new EventListener(this.obj, "wheel", (event) => {
             // down
             if (event.deltaY > 0) {
                 this.scale /= SCALE_SPEED;
@@ -157,7 +159,8 @@ class Board {
                 clearTimeout(generateTimeout);
             }
             generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
-        };
+        });
+        this.scaling.enable();
     }
 
     get scale() {
@@ -210,22 +213,19 @@ Mouse.init(board);
 
 const colorTile = document.forms["colorTile"];
 if (colorTile) {
-    let active = colorTile["active"].checked;
-    colorTile["active"].onchange = () => {
-        active = colorTile["active"].checked;
-    };
-    board.grid.addEventListener("click", (event) => {
-        if (active) {
-            let background = colorTile["colorBg"].value;
-            if (background === "") {
-                background = "none";
-            }
-            let border = colorTile["colorBr"].value;
-            if (border === "") {
-                border = "none";
-            }
-            const coord = Coord.fromPixel(event.boardX, event.boardY);
-            socket.send({type: "colorTile", x: coord.xIndex, y: coord.yIndex, background, border});
+    const eventHandler = new EventListener(board.grid, "click", (event) => {
+        let background = colorTile["colorBg"].value;
+        if (background === "") {
+            background = "none";
         }
+        let border = colorTile["colorBr"].value;
+        if (border === "") {
+            border = "none";
+        }
+        const coord = Coord.fromPixel(event.boardX, event.boardY);
+        socket.send({type: "colorTile", x: coord.xIndex, y: coord.yIndex, background, border});
     });
+    colorTile["active"].onchange = () => {
+        eventHandler.active = colorTile["active"].checked;
+    };
 }
