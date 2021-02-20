@@ -32,3 +32,30 @@ export function extendEvent(event) {
     event.boardX = boardX;
     event.boardY = boardY;
 }
+
+let dragged = null;
+document.addEventListener("mousemove", (event) => {
+    if (dragged) {
+        dragged.dragMove(event);
+    }
+});
+document.addEventListener("mouseup", (event) => {
+    if (dragged) {
+        dragged.dragEnd(event);
+        dragged = null;
+    }
+});
+export function setDragged(obj) {
+    if (obj) {
+        if (dragged) {
+            console.error("You can't start dragging, because there is already something being dragged");
+        } else {
+            dragged = obj;
+        }
+    } else {
+        dragged = null;
+    }
+}
+export function getDragged() {
+    return dragged;
+}

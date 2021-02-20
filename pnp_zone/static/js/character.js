@@ -3,6 +3,7 @@ import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
+import { getDragged, setDragged } from "./mouse.js";
 
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
@@ -10,22 +11,6 @@ const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
 const DIV = document.getElementById("characters");
 
 export default class Character {
-
-    static selected = null;
-    static movementGlobal = new EventGroup(
-        new EventListener(document, "mousemove", (event) => {
-            if (Character.selected) {
-                Character.selected._moveToPixel(event.boardX, event.boardY);
-            }
-        }),
-        new EventListener(document, "mouseup", () => {
-            if (Character.selected) {
-                Character.selected.obj.style.transition = "";
-                Character.selected.moveTo(Character.selected.x, Character.selected.y);
-            }
-            Character.selected = null;
-        })
-    ).enable();
 
     constructor({id, x, y, color}) {
         this.id = id;
@@ -49,25 +34,35 @@ export default class Character {
         });
         DIV.appendChild(this.obj);
 
-        this.movementLocal = new EventGroup(
+        this.drag = new EventGroup(
             new EventListener(this.obj, "mousedown", (event) => {
                 Character.selected = this;
                 this.obj.style.transition = "none";
+                setDragged(this);
                 event.stopPropagation();
             }),
             new EventListener(this.obj, "mouseup", (event) => {
-                if (Character.selected === this) {
+                if (getDragged() === this) {
                     this.obj.style.transition = "";
                     const coord = Coord.fromPixel(event.boardX, event.boardY);
                     socket.send({type: "move", id: this.id, x: coord.xIndex, y: coord.yIndex});
 
-                    Character.selected = null;
+                    setDragged(null);
                     event.stopPropagation();
                 }
             }),
         ).enable();
 
         this.moveTo(x, y);
+    }
+
+    dragMove(event) {
+        this._moveToPixel(event.boardX, event.boardY);
+    }
+
+    dragEnd() {
+        this.obj.style.transition = "";
+        this.moveTo(Character.selected.x, Character.selected.y);
     }
 
     _moveToPixel(x, y) {
@@ -85,8 +80,8 @@ export default class Character {
 
     static registerDeleteTarget(obj) {
         new EventListener(obj, "mouseup", () => {
-            if (Character.selected) {
-                socket.send({type: "delete", id: Character.selected.id});
+            if (getDragged() instanceof Character) {
+                socket.send({type: "delete", id: getDragged().id});
             }
         }).enable();
     }

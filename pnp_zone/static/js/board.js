@@ -4,6 +4,7 @@ import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
+import {setDragged} from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -102,6 +103,10 @@ document.addEventListener("mousemove", (event) => {
 });
 
 class Board {
+    _mouseStart;
+    _boardStart;  // values shared across event listeners
+    _generateTimeout;
+
     constructor() {
         this.obj = document.getElementById("board");
         document.addEventListener("DOMContentLoaded", () => {
@@ -112,39 +117,20 @@ class Board {
         });
 
         this.grid = document.getElementById("grid");
-        this.selected = false;
 
         this.x = 0;
         this.y = 0;
         this.scale = 1
 
-        let mouseStart;
-        let boardStart;  // values shared across event listeners
-        let generateTimeout;
+        // dragStart
+        this.grid.addEventListener("mousedown", (event) => {
+            setDragged(this);
+            this._mouseStart = {x: event.pageX, y: event.pageY};
+            this._boardStart = {x: this.x, y: this.y};
+        });
 
-        this.movement = new EventGroup(
-            new EventListener(this.grid, "mousedown", (event) => {
-                this.selected = true;
-                mouseStart = {x: event.pageX, y: event.pageY};
-                boardStart = {x: this.x, y: this.y};
-            }),
-            new EventListener(document, "mouseup", () => {
-                this.selected = false;
-            }),
-            new EventListener(document, "mousemove", (event) => {
-                if (this.selected) {
-                    this.x = event.pageX - mouseStart.x + boardStart.x;
-                    this.y = event.pageY - mouseStart.y + boardStart.y;
-                    if (generateTimeout) {
-                        clearTimeout(generateTimeout);
-                    }
-                    generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
-                }
-            })
-        );
-        this.movement.enable();
-
-        this.scaling = new EventListener(this.obj, "wheel", (event) => {
+        // scaling
+        this.obj.addEventListener("wheel", (event) => {
             // down
             if (event.deltaY > 0) {
                 this.scale /= SCALE_SPEED;
@@ -155,12 +141,11 @@ class Board {
                 this.scale *= SCALE_SPEED;
             }
 
-            if (generateTimeout) {
-                clearTimeout(generateTimeout);
+            if (this._generateTimeout) {
+                clearTimeout(this._generateTimeout);
             }
-            generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
+            this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
         });
-        this.scaling.enable();
     }
 
     get scale() {
@@ -206,6 +191,17 @@ class Board {
             }
         }
     }
+
+    dragMove(event) {
+        this.x = event.pageX - this._mouseStart.x + this._boardStart.x;
+        this.y = event.pageY - this._mouseStart.y + this._boardStart.y;
+        if (this._generateTimeout) {
+            clearTimeout(this._generateTimeout);
+        }
+        this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
+    }
+
+    dragEnd(event) {}
 }
 
 export const board = new Board();
