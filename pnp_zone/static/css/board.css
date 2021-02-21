@@ -32,12 +32,6 @@
     margin: 0;
     text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
-.field polygon {
-    fill: none;
-}
-.field path {
-    fill: black;
-}
 .cursor p {
     position: absolute;
     text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
@@ -50,8 +44,8 @@
     border-radius: 50%;
     display: inline-block;
 }
-body {
-    background-color: white;
+.field polygon {
+    fill: none;
 }
 #moderator {
     background: #16232d;
