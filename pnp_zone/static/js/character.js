@@ -4,6 +4,7 @@ import { Coord } from "./grid.js";
 import socket from "./socket.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
 import { getDragged, startDrag, endDrag } from "./mouse.js";
+import { board } from "./board.js";
 
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
@@ -39,6 +40,7 @@ export default class Character {
                 Character.selected = this;
                 this.obj.style.transition = "none";
                 startDrag(this);
+                board.sliding.enable();
                 event.stopPropagation();
             }),
             new EventListener(this.obj, "mouseup", (event) => {
@@ -48,6 +50,7 @@ export default class Character {
                     socket.send({type: "move", id: this.id, x: coord.xIndex, y: coord.yIndex});
 
                     endDrag(this);
+                    board.sliding.disable();
                     event.stopPropagation();
                 }
             }),
@@ -63,6 +66,7 @@ export default class Character {
     dragEnd() {
         this.obj.style.transition = "";
         this.moveTo(Character.selected.x, Character.selected.y);
+        board.sliding.disable();
     }
 
     _moveToPixel(x, y) {

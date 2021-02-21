@@ -3,7 +3,7 @@ import tags from "./tagFactory.js";
 import { Tile, Coord } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import { EventListener } from "./eventHandler.js";
+import {EventGroup, EventListener} from "./eventHandler.js";
 import { startDrag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
@@ -152,6 +152,60 @@ class Board {
             }
             this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
         });
+
+        const MARGIN = 50;
+        const SPEED = 20;
+        const TIMEOUT = 100;
+        let vx = 0
+        let vy = 0
+        let interval;
+        this.sliding = new EventGroup(
+            new EventListener(window, "mousemove", (event) => {
+                const { left, right, top, bottom } = this.obj.parentElement.getBoundingClientRect();
+                const x = event.clientX;
+                const y = event.clientY;
+
+                if (left < x && x < right && top < y && y < bottom) {
+                    if (x < left + MARGIN) {
+                        vx = +SPEED;
+                    } else if (right - MARGIN < x) {
+                        vx = -SPEED;
+                    } else {
+                        vx = 0;
+                    }
+
+                    if (y < top + MARGIN) {
+                        vy = +SPEED;
+                    } else if (bottom - MARGIN < y) {
+                        vy = -SPEED;
+                    } else {
+                        vy = 0;
+                    }
+                } else {
+                    vx = 0;
+                    vy = 0;
+                }
+            }),
+            {
+                enable: () => {
+                    interval = setInterval(() => {
+                        if (vx !== 0 || vy !== 0) {
+                            this.x += vx;
+                            this.y += vy;
+                            if (this._generateTimeout) {
+                                clearTimeout(this._generateTimeout);
+                            }
+                            this._generateTimeout = setTimeout(this.generateVisible.bind(this), TIMEOUT);
+                        }
+                    }, 100);
+                    this.obj.style.transition = "left "+TIMEOUT+"ms linear, top "+TIMEOUT+"ms linear"
+                },
+                disable: () => {
+                    clearInterval(interval);
+                    this.obj.style.transition = "";
+                }
+            }
+        );
     }
 
     get scale() {
@@ -221,6 +275,7 @@ class PaintBrush {
         });
         this.form.addEventListener("mousedown", () => {
             startDrag(this);
+            board.sliding.enable();
         });
         this.visited = {};
     }
@@ -245,6 +300,7 @@ class PaintBrush {
     }
     dragEnd() {
         this.visited = {};
+        board.sliding.disable();
     }
 }
 
