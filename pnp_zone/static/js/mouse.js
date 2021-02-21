@@ -69,6 +69,7 @@ export function startDrag(obj) {
 }
 export function endDrag(obj) {
     if (dragged === obj) {
+        dragged.dragEnd(null);
         dragged = null;
     } else {
         console.error("The object isn't being dragged.");

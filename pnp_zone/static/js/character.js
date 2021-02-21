@@ -45,12 +45,9 @@ export default class Character {
             }),
             new EventListener(this.obj, "mouseup", (event) => {
                 if (getDragged() === this) {
-                    this.obj.style.transition = "";
-                    const coord = Coord.fromPixel(event.boardX, event.boardY);
-                    socket.send({type: "move", id: this.id, x: coord.xIndex, y: coord.yIndex});
+                    socket.send({type: "move", id: this.id, x: event.gridX, y: event.gridY});
 
                     endDrag(this);
-                    board.sliding.disable();
                     event.stopPropagation();
                 }
             }),
