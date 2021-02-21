@@ -33,6 +33,6 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "title": room.name,
             "menu": menu.get(),
             "room": room,
-            "is_moderator": request.user in room.moderators.all(),
+            "is_moderator": request.user in room.moderators.all() or request.user.is_superuser,
             "x_range": list(range(25)), "y_range": list(range(17)),
         })

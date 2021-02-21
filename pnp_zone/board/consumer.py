@@ -8,7 +8,7 @@ from board.models import Room
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
 
-    requires_moderator = ["reload", "new"]
+    requires_moderator = ["new"]
 
     # attributes are not initialized in `__init__`,
     # but in `connect` via `database_lookups` to wait for the scope attribute
@@ -22,7 +22,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user in self.room.moderators.all()
+        self.is_moderator = self.user in self.room.moderators.all() or self.user.is_superuser
 
     @database_sync_to_async
     def init_events(self):
