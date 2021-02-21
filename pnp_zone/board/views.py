@@ -1,15 +1,13 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
-from django.template.loader import render_to_string
-from django.views import View
 from django.views.generic import TemplateView
-from django.http.response import Http404, JsonResponse
-from django.core.exceptions import SuspiciousOperation
+from django.http.response import Http404
 
-from board.models import Room, Character
+from board.models import Room
 from pnp_zone import menu
 
 
-class IndexView(TemplateView):
+class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "board/index.html"
 
     def get(self, request, *args, **kwargs):
@@ -20,7 +18,7 @@ class IndexView(TemplateView):
         })
 
 
-class BoardView(TemplateView):
+class BoardView(LoginRequiredMixin, TemplateView):
     template_name = "board/board.html"
 
     def get(self, request, *args, **kwargs):
