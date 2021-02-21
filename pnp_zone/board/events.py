@@ -215,9 +215,13 @@ class ColorTileEvent(RoomEvent):
 
     @database_sync_to_async
     def update_db(self):
-        tile, _ = Tile.objects.get_or_create(room=self.room, x=self.x, y=self.y)
-        if self.background:
+        if self.background or self.border:
+            tile, _ = Tile.objects.get_or_create(room=self.room, x=self.x, y=self.y)
             tile.background = self.background
-        if self.border:
             tile.border = self.border
-        tile.save()
+            tile.save()
+        else:
+            try:
+                Tile.objects.get(room=self.room, x=self.x, y=self.y).delete()
+            except Tile.DoesNotExist:
+                pass
