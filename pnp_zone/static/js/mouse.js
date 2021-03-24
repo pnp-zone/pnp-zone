@@ -50,15 +50,21 @@ export function extendEvent(event) {
 let dragged = null;
 document.addEventListener("mousemove", (event) => {
     if (dragged) {
-        dragged.dragMove(event);
+        if (event.buttons % 2 === 1) {
+            dragged.dragMove(event);
+        } else {
+            dragged.dragEnd(event);
+            dragged = null;
+        }
     }
 });
 document.addEventListener("mouseup", (event) => {
-    if (dragged) {
+    if (dragged && (event.button === 0)) {
         dragged.dragEnd(event);
         dragged = null;
     }
-});
+
+})
 export function startDrag(obj) {
     if (dragged) {
         console.error("You can't start dragging, because there is already something being dragged");
