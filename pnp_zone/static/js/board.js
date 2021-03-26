@@ -281,6 +281,11 @@ class PaintBrush {
 
             startDrag(this);
         });
+
+        this.form["active"].onchange = () => {
+            this.active = this.form["active"].checked;
+        };
+        this.active = this.form["active"].checked;
     }
 
     color(x, y) {
@@ -329,7 +334,4 @@ class PaintBrush {
 const colorTile = document.forms["colorTile"];
 if (colorTile) {
     const brush = new PaintBrush(colorTile);
-    colorTile["active"].onchange = () => {
-        brush.active = colorTile["active"].checked;
-    };
 }
