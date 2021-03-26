@@ -129,11 +129,12 @@ class Board {
         this.scale = 1
 
         // dragStart
-        this.grid.addEventListener("mousedown", (event) => {
+        this.dragging = new EventListener(this.grid, "mousedown", (event) => {
             startDrag(this);
             this._mouseStart = {x: event.pageX, y: event.pageY};
             this._boardStart = {x: this.x, y: this.y};
         });
+        this.dragging.enable();
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
@@ -270,17 +271,20 @@ Mouse.init(board);
 class PaintBrush {
     constructor(form) {
         this.form = form;
-        this.clickHandler = new EventListener(board.grid, "click", (event) => {
-            this.color(event.gridX, event.gridY);
-        });
-        this.form.addEventListener("mousedown", () => {
-            startDrag(this);
-            board.sliding.enable();
-        });
         this.visited = {};
+
+        this.previously = null;  //previously colored Tile
+
+        this.dragStarter = new EventListener(board.grid, "mousedown", (event) => {
+            this.previously = Coord.fromIndex(event.gridX, event.gridY);
+            this.color(event.gridX, event.gridY);
+
+            startDrag(this);
+        });
     }
 
     color(x, y) {
+        //socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
         socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
     }
 
@@ -296,11 +300,29 @@ class PaintBrush {
         if (!this.visited.hasOwnProperty(key)) {
             this.color(event.gridX, event.gridY);
             this.visited[key] = null;
+            /*const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
+            for (let i = 0; i < points.length; i++) {
+                this.color(points[i].xIndex, points[i].yIndex);
+            }*/
         }
+        this.previously = Coord.fromIndex(event.gridX, event.gridY);
     }
     dragEnd() {
         this.visited = {};
-        board.sliding.disable();
+    }
+
+    set active(value) {
+        if (value) {
+            board.obj.parentElement.classList.add("paintbrush");
+            board.sliding.enable();
+            board.dragging.disable();
+            this.dragStarter.enable();
+        } else {
+            board.obj.parentElement.classList.remove("paintbrush");
+            board.sliding.disable();
+            board.dragging.enable();
+            this.dragStarter.disable();
+        }
     }
 }
 
@@ -308,6 +330,6 @@ const colorTile = document.forms["colorTile"];
 if (colorTile) {
     const brush = new PaintBrush(colorTile);
     colorTile["active"].onchange = () => {
-        brush.clickHandler.active = colorTile["active"].checked;
+        brush.active = colorTile["active"].checked;
     };
 }

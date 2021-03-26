@@ -10,6 +10,9 @@
     .field path {
         fill: {{ room.defaultBorder }};
     }
+    .paintbrush {
+        cursor: url("{% static 'paintbrush.cur' %}"), auto;
+    }
 </style>
 
 <div class="flex-vertical" style="height: 100vh;">
@@ -72,6 +75,7 @@
 <script>
     // Expose some modules for debugging
     let board; import("{% static "js/board.js" %}").then((module) => { board = module.board; });
+    let grid; import("{% static "js/grid.js" %}").then((module) => { grid = module; });
     let socket; import("{% static "js/socket.js" %}").then((module) => { socket = module.default; });
 </script>
 {% endblock %}
