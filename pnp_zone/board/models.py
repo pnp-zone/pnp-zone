@@ -6,7 +6,6 @@ class Room(models.Model):
     name = models.CharField(max_length=255)
     identifier = models.CharField(max_length=255, unique=True)
     moderators = models.ManyToManyField(User, blank=True)
-    backgroundImage = models.CharField(max_length=255, default="", blank=True)
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
 
