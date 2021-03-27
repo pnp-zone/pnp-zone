@@ -44,3 +44,17 @@ class Tile(models.Model):
 
     def __str__(self):
         return f"{self.x} {self.y}"
+
+
+class UserSession(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    board_x = models.IntegerField()
+    board_y = models.IntegerField()
+    board_scale = models.FloatField()
+
+    class Meta:
+        unique_together = ("room", "user")
+
+    def __str__(self):
+        return f"{self.user} in {self.room}"

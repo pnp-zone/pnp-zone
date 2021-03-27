@@ -12,7 +12,9 @@ let userId = null;
 const characters = {};
 
 // Setup socket
-document.addEventListener("DOMContentLoaded", socket.open.bind(socket));
+document.addEventListener("DOMContentLoaded", () => {
+    socket.open();
+});
 socket.registerEvent("move", (event) => {
     characters[event.id].moveTo(event.x, event.y);
 });
@@ -39,6 +41,12 @@ socket.registerEvent("cursor", (event) => {
 });
 socket.registerEvent("welcome", (event) => {
     userId = event.yourId;
+});
+socket.registerEvent("session", (event) => {
+    board.x = event.x;
+    board.y = event.y;
+    board.scale = event.scale;
+    board.generateVisible();
 });
 
 // Add delete functionality
@@ -119,6 +127,14 @@ class Board {
             this.generateVisible();
             window.addEventListener("resize", () => {
                 this.generateVisible();
+            });
+        });
+        window.addEventListener("beforeunload", (event) => {
+            socket.send({
+                type: "session",
+                x: this.x,
+                y: this.y,
+                scale: this.scale
             });
         });
 

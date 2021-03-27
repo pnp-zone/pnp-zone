@@ -15,7 +15,7 @@ An event class defines attributes the event requires and associate a type with i
 
 from channels.db import database_sync_to_async
 
-from board.models import Character, Tile
+from board.models import Character, Tile, UserSession
 
 
 class EventError(RuntimeError):
@@ -115,6 +115,25 @@ class WelcomeEvent(Event):
     """
     async def response_all_users(self):
         return {"type": "welcome", "yourId": self.user.id}
+
+
+class UpdateSessionEvent(Event):
+    """
+    This event is used to store a users session persistent.
+    """
+    type = "session"
+
+    x: int
+    y: int
+    scale: float
+
+    @database_sync_to_async
+    def update_db(self):
+        session, _ = UserSession.objects.get_or_create(room=self.room, user=self.user)
+        session.board_x = self.x
+        session.board_y = self.y
+        session.board_scale = self.scale
+        session.save()
 
 
 class CursorEvent(Event):

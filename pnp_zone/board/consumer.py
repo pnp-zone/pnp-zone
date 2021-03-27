@@ -32,8 +32,18 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         tiles = [ColorTileEvent({"type": ColorTileEvent.type, "x": f.x, "y": f.y,
                                  "background": f.background, "border": f.border},
                                 room=self.room)
-                  for f in self.room.tile_set.all()]
-        return characters + tiles + [WelcomeEvent({"type": "welcome"}, user=self.user)]
+                 for f in self.room.tile_set.all()]
+        try:
+            session = UserSession.objects.get(room=self.room, user=self.user)
+        except UserSession.DoesNotExist:
+            session = UserSession.objects.create(room=self.room, user=self.user, board_x=0, board_y=0, board_scale=1)
+        session = UpdateSessionEvent(
+            {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale},
+            room=self.room, user=self.user
+        )
+        welcome = WelcomeEvent({"type": "welcome"},
+                               user=self.user)
+        return [session] + characters + tiles + [welcome]
 
     @property
     def user(self):
