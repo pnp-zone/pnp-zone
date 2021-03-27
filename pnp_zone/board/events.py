@@ -62,10 +62,7 @@ class Event(metaclass=_EventRegistry):
     """
     type: str
 
-    def __init__(self, data, user=None, room=None, **kwargs):
-        self.user = user
-        self.room = room
-
+    def __init__(self, data, consumer=None, **kwargs):
         for key, value in data.items():
             if key not in self.__annotations__:
                 raise EventError(f"Unknown attribute '{key}' for type '{self.type}'")
@@ -75,6 +72,7 @@ class Event(metaclass=_EventRegistry):
                 raise EventError(f"Missing attribute '{key}' for type '{self.type}'")
 
         self._data = data
+        self._consumer = consumer
 
     def __getattr__(self, key):
         """
@@ -98,6 +96,20 @@ class Event(metaclass=_EventRegistry):
         Return `None` to send nothing.
         """
         return self._data
+
+    @property
+    def user(self):
+        """
+        Shortcut to the user object
+        """
+        return self._consumer.user
+
+    @property
+    def room(self):
+        """
+        Shortcut to the user room
+        """
+        return self._consumer.room
 
     @database_sync_to_async
     def update_db(self):

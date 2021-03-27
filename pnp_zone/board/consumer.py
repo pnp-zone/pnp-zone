@@ -26,24 +26,39 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def init_events(self):
-        characters = [NewEvent({"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color},
-                               room=self.room)
-                      for c in self.room.character_set.all()]
-        tiles = [ColorTileEvent({"type": ColorTileEvent.type, "x": f.x, "y": f.y,
-                                 "background": f.background, "border": f.border},
-                                room=self.room)
-                 for f in self.room.tile_set.all()]
+        events = []
+
         try:
             session = UserSession.objects.get(room=self.room, user=self.user)
         except UserSession.DoesNotExist:
             session = UserSession.objects.create(room=self.room, user=self.user, board_x=0, board_y=0, board_scale=1)
-        session = UpdateSessionEvent(
-            {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale},
-            room=self.room, user=self.user
+        events.append(
+            UpdateSessionEvent(
+                {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale},
+                consumer=self
+            )
         )
-        welcome = WelcomeEvent({"type": "welcome"},
-                               user=self.user)
-        return [session] + characters + tiles + [welcome]
+
+        for c in self.room.character_set.all():
+            events.append(
+                NewEvent(
+                    {"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color},
+                    consumer=self
+                )
+            )
+
+        for t in self.room.tile_set.all():
+            events.append(
+                ColorTileEvent(
+                    {"type": ColorTileEvent.type, "x": t.x, "y": t.y, "background": t.background, "border": t.border},
+                    consumer=self
+                )
+            )
+
+        events.append(
+            WelcomeEvent({"type": "welcome"}, consumer=self)
+        )
+        return events
 
     @property
     def user(self):
@@ -70,7 +85,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             # Wrap event data with matching event class
             if "type" not in event:
                 raise EventError("Missing type attribute")
-            event = Event[event["type"]](event, room=self.room, user=self.user)
+            event = Event[event["type"]](event, consumer=self)
 
             # Check if sender has required privileges
             if event.type in self.requires_moderator and not self.is_moderator:
