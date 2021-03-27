@@ -336,12 +336,12 @@ class PaintBrush {
 
     set active(value) {
         if (value) {
-            board.obj.parentElement.classList.add("paintbrush");
+            board.obj.parentElement.style.cursor = "crosshair";
             board.sliding.enable();
             board.dragging.disable();
             this.dragStarter.enable();
         } else {
-            board.obj.parentElement.classList.remove("paintbrush");
+            board.obj.parentElement.style.cursor = "";
             board.sliding.disable();
             board.dragging.enable();
             this.dragStarter.disable();
