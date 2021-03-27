@@ -62,7 +62,10 @@ class Event(metaclass=_EventRegistry):
     """
     type: str
 
-    def __init__(self, data, **kwargs):
+    def __init__(self, data, user=None, room=None, **kwargs):
+        self.user = user
+        self.room = room
+
         for key, value in data.items():
             if key not in self.__annotations__:
                 raise EventError(f"Unknown attribute '{key}' for type '{self.type}'")
@@ -106,17 +109,7 @@ class Event(metaclass=_EventRegistry):
         return NotImplemented
 
 
-class UserEvent(Event):
-    """
-    This abstract event extends `Event` to also store the user who send it.
-    """
-    def __init__(self, data, user=None, **kwargs):
-        super().__init__(data)
-        assert user
-        self.user = user
-
-
-class WelcomeEvent(UserEvent):
+class WelcomeEvent(Event):
     """
     This event is send upon socket connection to give the client it's user id.
     """
@@ -124,7 +117,7 @@ class WelcomeEvent(UserEvent):
         return {"type": "welcome", "yourId": self.user.id}
 
 
-class CursorEvent(UserEvent):
+class CursorEvent(Event):
     """
     """
     type = "cursor"
@@ -137,19 +130,9 @@ class CursorEvent(UserEvent):
             return dict(self._data, name=self.user.get_username(), id=self.user.id)
 
 
-class RoomEvent(Event):
+class CharacterEvent(Event):
     """
-    This abstract event extends `Event` to also store the room it occurred in.
-    """
-    def __init__(self, data, room=None, **kwargs):
-        super().__init__(data)
-        assert room
-        self.room = room
-
-
-class CharacterEvent(RoomEvent):
-    """
-    This abstract event extends `RoomEvent` and requires a id specifying a character.
+    This abstract event extends `Event` and requires a id specifying a character.
     """
     id: str
 
@@ -204,7 +187,7 @@ class DeleteEvent(CharacterEvent):
             raise EventError(f"No character with id: {self.id}") from None
 
 
-class ColorTileEvent(RoomEvent):
+class ColorTileEvent(Event):
     """
     """
     type = "colorTile"
