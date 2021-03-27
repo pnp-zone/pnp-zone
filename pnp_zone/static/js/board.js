@@ -237,6 +237,9 @@ class Board {
     }
     set scale(value) {
         //this.obj.style.transform = "scale("+value+")";
+        if (value < 0.1) {
+            value = 0.1;
+        }
         this.obj.style.scale = "" + value;
     }
     set x(value) {
