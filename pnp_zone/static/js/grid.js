@@ -109,4 +109,105 @@ export class Coord {
 
         return coord;
     }
+
+    /*
+     * "step" - methods:
+     * A step returns a point's neighbor in the desired direction.
+     * For example stepNorthWest returns the upper right hexagon.
+     */
+    stepNW() {
+        return Coord.fromIndex(this.xIndex - (this.yIndex % 2 === 0 ? 1 : 0), this.yIndex - 1);
+    }
+    stepW() {
+        return Coord.fromIndex(this.xIndex - 1, this.yIndex);
+    }
+    stepSW() {
+        return Coord.fromIndex(this.xIndex - (this.yIndex % 2 === 0 ? 1 : 0), this.yIndex + 1);
+    }
+    stepNE() {
+        return Coord.fromIndex(this.xIndex + (this.yIndex % 2 === 0 ? 0 : 1), this.yIndex - 1);
+    }
+    stepE() {
+        return Coord.fromIndex(this.xIndex + 1, this.yIndex);
+    }
+    stepSE() {
+        return Coord.fromIndex(this.xIndex + (this.yIndex % 2 === 0 ? 0 : 1), this.yIndex+1);
+    }
+    step(direction) {
+        return this["step"+direction]();
+    }
+    neighbors() {
+        return [this.stepNW(), this.stepW(), this.stepSW(), this.stepNE(), this.stepE(), this.stepSE()];
+    }
+}
+
+export class Line {
+    constructor(start, end) {
+        const goesWest = start.xIndex > end.xIndex;
+        const goesNorth = start.yIndex > end.yIndex;
+        const dx = Math.abs(start.xIndex - end.xIndex);
+        const dy = Math.abs(start.yIndex - end.yIndex);
+
+        // "x over y": How many steps in x could you make through steps in y?
+        let xoy = Math.floor(dy / 2);
+        if (dy % 2 !== 0) {
+            if (goesWest) {
+                if (end.yIndex % 2 !== 0) {
+                    xoy += 1
+                }
+            } else {
+                if (start.yIndex % 2 !== 0) {
+                    xoy += 1
+                }
+            }
+        }
+
+        const counts = {};  // How many steps in a given direction are required?
+        const taken = {};  // How many steps in a given direction where already taken?
+        let direction;     // Place holder
+        if (xoy > dx) {
+            direction = (goesNorth ? "N" : "S") + (goesWest ? "E" : "W")
+            counts[direction] = xoy - dx;
+            taken[direction] = 0;
+
+            direction = (goesNorth ? "N" : "S") + (goesWest ? "W" : "E")
+            counts[direction] = dy - (xoy - dx);
+            taken[direction] = 0;
+        } else {
+            direction = (goesNorth ? "N" : "S") + (goesWest ? "W" : "E")
+            counts[direction] = dy;
+            taken[direction] = 0;
+        }
+        if (dx > xoy) {
+            direction = goesWest ? "W" : "E";
+            counts[direction] = dx - xoy;
+            taken[direction] = 0;
+        }
+
+        // How many steps are required in total?
+        const total = dy + (dx > xoy ? dx - xoy : 0);
+
+        this.steps = [];
+        this.points = [start];
+        for (let i = 0; i < total; i++) {
+            let smallest = 2; // Some number greater 1
+            let next = null;
+
+            for (let direction in counts) {
+                let completed = taken[direction] / counts[direction];
+                if (completed < smallest) {
+                    smallest = completed;
+                    next = direction;
+                }
+            }
+
+            if (smallest >= 1) {
+                break;
+            } else {
+                this.steps.push(next);
+                this.points.push(this.points[this.points.length-1].step(next));
+                taken[next] += 1;
+            }
+        }
+    }
 }
