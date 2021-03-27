@@ -1,9 +1,9 @@
 import socket from "./socket.js";
 import tags from "./tagFactory.js";
-import { Tile, Coord } from "./grid.js";
+import { Tile, Coord, Line } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import {EventGroup, EventListener} from "./eventHandler.js";
+import { EventGroup, EventListener } from "./eventHandler.js";
 import { startDrag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
@@ -289,8 +289,12 @@ class PaintBrush {
     }
 
     color(x, y) {
-        //socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
-        socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
+        const key = ""+x+" "+y;
+        if (!this.visited.hasOwnProperty(key)) {
+            this.visited[key] = null;
+            //socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
+            socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
+        }
     }
 
     get background() {
@@ -301,14 +305,9 @@ class PaintBrush {
     }
 
     dragMove(event) {
-        const key = ""+event.gridX+" "+event.gridY;
-        if (!this.visited.hasOwnProperty(key)) {
-            this.color(event.gridX, event.gridY);
-            this.visited[key] = null;
-            /*const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
-            for (let i = 0; i < points.length; i++) {
-                this.color(points[i].xIndex, points[i].yIndex);
-            }*/
+        const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
+        for (let i = 0; i < points.length; i++) {
+            this.color(points[i].xIndex, points[i].yIndex);
         }
         this.previously = Coord.fromIndex(event.gridX, event.gridY);
     }
