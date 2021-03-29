@@ -4,7 +4,7 @@ import { Tile, Coord, Line } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { EventGroup, EventListener } from "./eventHandler.js";
-import { startDrag } from "./mouse.js";
+import {startDrag, MIDDLE_BUTTON, LEFT_BUTTON} from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -145,12 +145,27 @@ class Board {
         this.scale = 1
 
         // dragStart
-        this.dragging = new EventListener(this.grid, "mousedown", (event) => {
-            startDrag(this);
-            this._mouseStart = {x: event.pageX, y: event.pageY};
-            this._boardStart = {x: this.x, y: this.y};
+        this.draggingOnLeft = new EventListener(this.grid, "mousedown", (event) => {
+            if (event.button === LEFT_BUTTON) {
+                if (startDrag(this, LEFT_BUTTON)) {
+                    document.body.style.cursor = "move";
+                    this._mouseStart = {x: event.pageX, y: event.pageY};
+                    this._boardStart = {x: this.x, y: this.y};
+                }
+            }
         });
-        this.dragging.enable();
+        this.draggingOnLeft.enable();
+
+        this.draggingOnMiddle = new EventListener(this.grid, "mousedown", (event) => {
+            if (event.button === MIDDLE_BUTTON) {
+                if (startDrag(this, MIDDLE_BUTTON)) {
+                    document.body.style.cursor = "move";
+                    this._mouseStart = {x: event.pageX, y: event.pageY};
+                    this._boardStart = {x: this.x, y: this.y};
+                }
+            }
+        });
+        this.draggingOnMiddle.enable();
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
@@ -281,7 +296,9 @@ class Board {
         this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
     }
 
-    dragEnd(event) {}
+    dragEnd(event) {
+        document.body.style.cursor = "default";
+    }
 }
 
 export const board = new Board();
@@ -295,10 +312,12 @@ class PaintBrush {
         this.previously = null;  //previously colored Tile
 
         this.dragStarter = new EventListener(board.grid, "mousedown", (event) => {
-            this.previously = Coord.fromIndex(event.gridX, event.gridY);
-            this.color(event.gridX, event.gridY);
-
-            startDrag(this);
+            if (event.button === LEFT_BUTTON) {
+                if (startDrag(this, LEFT_BUTTON)) {
+                    this.previously = Coord.fromIndex(event.gridX, event.gridY);
+                    this.color(event.gridX, event.gridY);
+                }
+            }
         });
 
         this.form["active"].onchange = () => {
@@ -337,13 +356,11 @@ class PaintBrush {
     set active(value) {
         if (value) {
             board.obj.parentElement.style.cursor = "crosshair";
-            board.sliding.enable();
-            board.dragging.disable();
+            board.draggingOnLeft.disable();
             this.dragStarter.enable();
         } else {
             board.obj.parentElement.style.cursor = "";
-            board.sliding.disable();
-            board.dragging.enable();
+            board.draggingOnLeft.enable();
             this.dragStarter.disable();
         }
     }
