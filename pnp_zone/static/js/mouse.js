@@ -1,5 +1,19 @@
 import { Coord } from "./grid.js";
 
+export const LEFT_BUTTON = 0;
+export const MIDDLE_BUTTON = 1;
+export const RIGHT_BUTTON = 2;
+
+export function buttons(event) {
+    return {
+        0: event.buttons & 1,  // left
+        1: event.buttons & 4,  // middle
+        2: event.buttons & 2,  // right
+        // back: event.buttons & 8,
+        // forward: event.buttons & 16,
+    };
+}
+
 let board = null;
 export function init(b) {
     board = b;
@@ -47,40 +61,59 @@ export function extendEvent(event) {
     }});
 }
 
-let dragged = null;
+let is_drag_active = false;
+let dragged_for_button = {};
 document.addEventListener("mousemove", (event) => {
-    if (dragged) {
-        if (event.buttons % 2 === 1) {
-            dragged.dragMove(event);
-        } else {
-            dragged.dragEnd(event);
-            dragged = null;
+    if (is_drag_active) {
+        const pressed_buttons = buttons(event);
+        for (let button in dragged_for_button) {
+            if (!pressed_buttons[button]) {
+                _endDrag(button, event)
+            } else {
+                dragged_for_button[button].dragMove(event);
+            }
         }
     }
 });
 document.addEventListener("mouseup", (event) => {
-    if (dragged && (event.button === 0)) {
-        dragged.dragEnd(event);
-        dragged = null;
+    if (is_drag_active) {
+        for (let button in dragged_for_button) {
+            if (event.button === parseInt(button)) {
+                _endDrag(button, event)
+            }
+        }
     }
+});
 
-})
-export function startDrag(obj) {
-    if (dragged) {
-        console.error("You can't start dragging, because there is already something being dragged");
-    } else {
-        dragged = obj;
+function _endDrag(button, event=null) {
+    dragged_for_button[button].dragEnd(event);
+    delete dragged_for_button[button];
+
+    is_drag_active = false;
+    for (let button in dragged_for_button) {
+        is_drag_active = true;
+        break;
     }
-
 }
-export function endDrag(obj) {
-    if (dragged === obj) {
-        dragged.dragEnd(null);
-        dragged = null;
+
+export function startDrag(obj, button=LEFT_BUTTON) {
+    if (dragged_for_button[button]) {
+        console.error("You can't start dragging, because there is already something being dragged");
+        return false;
+    } else {
+        dragged_for_button[button] = obj;
+        is_drag_active = true;
+        return true
+    }
+}
+export function endDrag(obj, button=LEFT_BUTTON) {
+    if (dragged_for_button[button] === obj) {
+        dragged_for_button[button].dragEnd(null);
+        dragged_for_button[button] = null;
     } else {
         console.error("The object isn't being dragged.");
     }
 }
-export function getDragged() {
-    return dragged;
+export function getDragged(button=LEFT_BUTTON) {
+    return dragged_for_button[button];
 }
