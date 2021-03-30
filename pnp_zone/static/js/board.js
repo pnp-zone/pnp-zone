@@ -259,7 +259,7 @@ class PaintBrush {
         const key = ""+x+" "+y;
         if (!this.visited.hasOwnProperty(key)) {
             this.visited[key] = null;
-            //socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
+            socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
             socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
         }
     }
