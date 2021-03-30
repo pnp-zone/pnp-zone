@@ -40,7 +40,6 @@ export default class Character {
                 Character.selected = this;
                 this.obj.style.transition = "none";
                 startDrag(this);
-                board.sliding.enable();
                 event.stopPropagation();
             }),
             new EventListener(this.obj, "mouseup", (event) => {
@@ -63,7 +62,6 @@ export default class Character {
     dragEnd() {
         this.obj.style.transition = "";
         this.moveTo(Character.selected.x, Character.selected.y);
-        board.sliding.disable();
     }
 
     _moveToPixel(x, y) {
