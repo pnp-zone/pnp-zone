@@ -64,11 +64,6 @@ export function extendEvent(event) {
 
 let dragged_for_button = {};
 const dragHandler = new EventGroup(
-        /*new EventListener(document, "mousedown", (event) => {
-            if (dragged_for_button[event.button]) {
-                dragged_for_button[event.button].dragStart(event);
-            }
-        }),*/
         new EventListener(document, "mousemove", (event) => {
             const pressed_buttons = buttons(event);
             for (let button in dragged_for_button) {
@@ -86,32 +81,54 @@ const dragHandler = new EventGroup(
 );
 dragHandler.enable();
 
-const dragStarter = {};
+// Map from target (something an EventListener is added to) to tha actual EventListener
+const targetHandler = new Map();
+const targetMouseObjects = new Map();
 
-export function registerDrag(obj, button=LEFT_BUTTON, target=null, name=null) {
-    if (!name) {
-        name = "" + obj;
-    }
-    if (!target) {
-        target = obj;
-    }
-
-    dragStarter[name] = new EventListener(target, "mousedown", (event) => {
-        if (event.button === button) {
-            if (startDrag(obj, button)) {
-                obj.dragStart(event);
-                event.stopPropagation();
-            }
+export class Drag {
+    constructor(object, target = null, button = LEFT_BUTTON) {
+        if (!target) {
+            target = object;
         }
-    }).enable();
-}
+        this.object = object;
+        this.target = target;
+        this.button = button;
 
-export function disableDrag(name) {
-    dragStarter[name].disable();
-}
+        if (!targetHandler.has(target)) {
+            targetHandler.set(target, new EventListener(target, "mousedown", (event) => {
+                const mouseObjects = targetMouseObjects.get(target);
+                if (mouseObjects.has(event.button)) {
+                    const objects = mouseObjects.get(event.button);
+                    if (objects.length > 0) {
+                        if (startDrag(objects[0], event.button)) {
+                            objects[0].dragStart(event);
+                            event.stopPropagation();
+                        }
+                    }
+                }
+            }).enable());
+        }
 
-export function enableDrag(name) {
-    dragStarter[name].enable();
+        if (!targetMouseObjects.has(target)) {
+            targetMouseObjects.set(target, new Map());
+        }
+        const mouseObjects = targetMouseObjects.get(target);
+        if (!mouseObjects.has(button)) {
+            mouseObjects.set(button, []);
+        }
+    }
+
+    disable() {
+        const objects = targetMouseObjects.get(this.target).get(this.button);
+        const index = objects.indexOf(this.object);
+        if (index !== -1) {
+            objects.splice(index, 1);
+        }
+    }
+
+    enable() {
+        targetMouseObjects.get(this.target).get(this.button).unshift(this.object);
+    }
 }
 
 export function startDrag(obj, button=LEFT_BUTTON) {

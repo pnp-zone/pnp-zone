@@ -3,8 +3,7 @@ import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
-import { getDragged, startDrag, endDrag, LEFT_BUTTON, registerDrag } from "./mouse.js";
-import { board } from "./board.js";
+import { endDrag, getDragged, LEFT_BUTTON, Drag } from "./mouse.js";
 
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
@@ -35,7 +34,7 @@ export default class Character {
         });
         DIV.appendChild(this.obj);
 
-        registerDrag(this, LEFT_BUTTON, this.obj);
+        new Drag(this, this.obj).enable();
         this.drag = new EventGroup(
             new EventListener(this.obj, "mouseup", (event) => {
                 if (event.button === LEFT_BUTTON && getDragged() === this) {

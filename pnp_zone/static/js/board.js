@@ -3,7 +3,7 @@ import tags from "./tagFactory.js";
 import { Tile, Coord, Line } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import { MIDDLE_BUTTON, LEFT_BUTTON, registerDrag, enableDrag, disableDrag } from "./mouse.js";
+import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -144,8 +144,8 @@ class Board {
         this.scale = 1
 
         // dragStart
-        registerDrag(this, LEFT_BUTTON, this.grid);
-        registerDrag(this, MIDDLE_BUTTON, this.grid, "don't touch me");
+        new Drag(this, this.grid, LEFT_BUTTON).enable();
+        new Drag(this, this.grid, MIDDLE_BUTTON).enable();
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
@@ -247,8 +247,7 @@ class PaintBrush {
 
         this.previously = null;  //previously colored Tile
 
-        registerDrag(this, LEFT_BUTTON, board.grid);
-        disableDrag(this);
+        this.drag = new Drag(this, board.grid);
 
         this.form["active"].onchange = () => {
             this.active = this.form["active"].checked;
@@ -291,12 +290,10 @@ class PaintBrush {
     set active(value) {
         if (value) {
             board.obj.parentElement.style.cursor = "crosshair";
-            disableDrag(board);
-            enableDrag(this);
+            this.drag.enable();
         } else {
             board.obj.parentElement.style.cursor = "";
-            enableDrag(board);
-            disableDrag(this);
+            this.drag.disable();
         }
     }
 
