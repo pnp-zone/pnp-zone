@@ -1,4 +1,5 @@
 import { Coord } from "./grid.js";
+import { EventGroup, EventListener } from "./eventHandler.js";
 
 export const LEFT_BUTTON = 0;
 export const MIDDLE_BUTTON = 1;
@@ -61,39 +62,56 @@ export function extendEvent(event) {
     }});
 }
 
-let is_drag_active = false;
 let dragged_for_button = {};
-document.addEventListener("mousemove", (event) => {
-    if (is_drag_active) {
-        const pressed_buttons = buttons(event);
-        for (let button in dragged_for_button) {
-            if (!pressed_buttons[button]) {
-                _endDrag(button, event)
-            } else {
-                dragged_for_button[button].dragMove(event);
+const dragHandler = new EventGroup(
+        /*new EventListener(document, "mousedown", (event) => {
+            if (dragged_for_button[event.button]) {
+                dragged_for_button[event.button].dragStart(event);
+            }
+        }),*/
+        new EventListener(document, "mousemove", (event) => {
+            const pressed_buttons = buttons(event);
+            for (let button in dragged_for_button) {
+                if (pressed_buttons[button] && dragged_for_button[button]) {
+                    dragged_for_button[button].dragMove(event);
+                }
+            }
+        }),
+        new EventListener(document, "mouseup", (event) => {
+            if (dragged_for_button[event.button]) {
+                dragged_for_button[event.button].dragEnd(event);
+                dragged_for_button[event.button] = null;
+            }
+        }),
+);
+dragHandler.enable();
+
+const dragStarter = {};
+
+export function registerDrag(obj, button=LEFT_BUTTON, target=null, name=null) {
+    if (!name) {
+        name = "" + obj;
+    }
+    if (!target) {
+        target = obj;
+    }
+
+    dragStarter[name] = new EventListener(target, "mousedown", (event) => {
+        if (event.button === button) {
+            if (startDrag(obj, button)) {
+                obj.dragStart(event);
+                event.stopPropagation();
             }
         }
-    }
-});
-document.addEventListener("mouseup", (event) => {
-    if (is_drag_active) {
-        for (let button in dragged_for_button) {
-            if (event.button === parseInt(button)) {
-                _endDrag(button, event)
-            }
-        }
-    }
-});
+    }).enable();
+}
 
-function _endDrag(button, event=null) {
-    dragged_for_button[button].dragEnd(event);
-    delete dragged_for_button[button];
+export function disableDrag(name) {
+    dragStarter[name].disable();
+}
 
-    is_drag_active = false;
-    for (let button in dragged_for_button) {
-        is_drag_active = true;
-        break;
-    }
+export function enableDrag(name) {
+    dragStarter[name].enable();
 }
 
 export function startDrag(obj, button=LEFT_BUTTON) {
@@ -102,7 +120,7 @@ export function startDrag(obj, button=LEFT_BUTTON) {
         return false;
     } else {
         dragged_for_button[button] = obj;
-        is_drag_active = true;
+        dragHandler.enable();
         return true
     }
 }

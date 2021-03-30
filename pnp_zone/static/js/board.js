@@ -3,8 +3,7 @@ import tags from "./tagFactory.js";
 import { Tile, Coord, Line } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import { EventGroup, EventListener } from "./eventHandler.js";
-import {startDrag, MIDDLE_BUTTON, LEFT_BUTTON} from "./mouse.js";
+import { MIDDLE_BUTTON, LEFT_BUTTON, registerDrag, enableDrag, disableDrag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -145,27 +144,8 @@ class Board {
         this.scale = 1
 
         // dragStart
-        this.draggingOnLeft = new EventListener(this.grid, "mousedown", (event) => {
-            if (event.button === LEFT_BUTTON) {
-                if (startDrag(this, LEFT_BUTTON)) {
-                    document.body.style.cursor = "move";
-                    this._mouseStart = {x: event.pageX, y: event.pageY};
-                    this._boardStart = {x: this.x, y: this.y};
-                }
-            }
-        });
-        this.draggingOnLeft.enable();
-
-        this.draggingOnMiddle = new EventListener(this.grid, "mousedown", (event) => {
-            if (event.button === MIDDLE_BUTTON) {
-                if (startDrag(this, MIDDLE_BUTTON)) {
-                    document.body.style.cursor = "move";
-                    this._mouseStart = {x: event.pageX, y: event.pageY};
-                    this._boardStart = {x: this.x, y: this.y};
-                }
-            }
-        });
-        this.draggingOnMiddle.enable();
+        registerDrag(this, LEFT_BUTTON, this.grid);
+        registerDrag(this, MIDDLE_BUTTON, this.grid, "don't touch me");
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
@@ -233,6 +213,12 @@ class Board {
         }
     }
 
+    dragStart(event) {
+        document.body.style.cursor = "move";
+        this._mouseStart = {x: event.pageX, y: event.pageY};
+        this._boardStart = {x: this.x, y: this.y};
+    }
+
     dragMove(event) {
         this.x = event.pageX - this._mouseStart.x + this._boardStart.x;
         this.y = event.pageY - this._mouseStart.y + this._boardStart.y;
@@ -244,6 +230,10 @@ class Board {
 
     dragEnd(event) {
         document.body.style.cursor = "default";
+    }
+
+    toString() {
+        return "[object Board]";
     }
 }
 
@@ -257,14 +247,8 @@ class PaintBrush {
 
         this.previously = null;  //previously colored Tile
 
-        this.dragStarter = new EventListener(board.grid, "mousedown", (event) => {
-            if (event.button === LEFT_BUTTON) {
-                if (startDrag(this, LEFT_BUTTON)) {
-                    this.previously = Coord.fromIndex(event.gridX, event.gridY);
-                    this.color(event.gridX, event.gridY);
-                }
-            }
-        });
+        registerDrag(this, LEFT_BUTTON, board.grid);
+        disableDrag(this);
 
         this.form["active"].onchange = () => {
             this.active = this.form["active"].checked;
@@ -288,6 +272,11 @@ class PaintBrush {
         return this.form["colorBr"].value;
     }
 
+    dragStart(event) {
+        this.previously = Coord.fromIndex(event.gridX, event.gridY);
+        this.color(event.gridX, event.gridY);
+    }
+
     dragMove(event) {
         const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
         for (let i = 0; i < points.length; i++) {
@@ -302,13 +291,17 @@ class PaintBrush {
     set active(value) {
         if (value) {
             board.obj.parentElement.style.cursor = "crosshair";
-            board.draggingOnLeft.disable();
-            this.dragStarter.enable();
+            disableDrag(board);
+            enableDrag(this);
         } else {
             board.obj.parentElement.style.cursor = "";
-            board.draggingOnLeft.enable();
-            this.dragStarter.disable();
+            enableDrag(board);
+            disableDrag(this);
         }
+    }
+
+    toString() {
+        return "[object PaintBrush]";
     }
 }
 

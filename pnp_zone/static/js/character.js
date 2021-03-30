@@ -3,7 +3,7 @@ import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
 import { EventListener, EventGroup } from "./eventHandler.js";
-import { getDragged, startDrag, endDrag } from "./mouse.js";
+import { getDragged, startDrag, endDrag, LEFT_BUTTON, registerDrag } from "./mouse.js";
 import { board } from "./board.js";
 
 const CHARACTER = new Hexagon(80);
@@ -35,15 +35,10 @@ export default class Character {
         });
         DIV.appendChild(this.obj);
 
+        registerDrag(this, LEFT_BUTTON, this.obj);
         this.drag = new EventGroup(
-            new EventListener(this.obj, "mousedown", (event) => {
-                Character.selected = this;
-                this.obj.style.transition = "none";
-                startDrag(this);
-                event.stopPropagation();
-            }),
             new EventListener(this.obj, "mouseup", (event) => {
-                if (getDragged() === this) {
+                if (event.button === LEFT_BUTTON && getDragged() === this) {
                     socket.send({type: "move", id: this.id, x: event.gridX, y: event.gridY});
 
                     endDrag(this);
@@ -55,13 +50,21 @@ export default class Character {
         this.moveTo(x, y);
     }
 
+    dragStart(event) {
+        this.obj.style.transition = "none";
+    }
+
     dragMove(event) {
         this._moveToPixel(event.boardX, event.boardY);
     }
 
     dragEnd() {
         this.obj.style.transition = "";
-        this.moveTo(Character.selected.x, Character.selected.y);
+        this.moveTo(this.x, this.y);
+    }
+
+    toString() {
+        return "" + this.id;
     }
 
     _moveToPixel(x, y) {
