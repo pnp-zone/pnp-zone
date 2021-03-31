@@ -39,9 +39,10 @@ input[type=number] {
 }
 
 .content {
-    position: fixed;
-    left: 18%;
-    width: 82%;
+    margin-left: 18%;
+    width: 100%;
+
+    transition: margin-left 1s;
 }
 
 .sidebar {
@@ -52,6 +53,9 @@ input[type=number] {
   height: 100vh;
   font-size: 0.65em;
   z-index: 100;
+
+  left: 0;
+  transition: left 1s;
 }
 
 .nav {
