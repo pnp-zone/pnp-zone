@@ -38,11 +38,6 @@ input[type=number] {
 
 }
 
-.sidebar {
-    background: #192734;
-    color: #ffffff;
-}
-
 .content {
     position: fixed;
     left: 18%;
@@ -50,10 +45,11 @@ input[type=number] {
 }
 
 .sidebar {
+  background: #192734;
+  color: #ffffff;
   position: fixed;
   width: 18%;
   height: 100vh;
-  background: #192734;
   font-size: 0.65em;
   z-index: 100;
 }
