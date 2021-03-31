@@ -8,7 +8,7 @@ import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
 const SCALE_SPEED = 1.1;
 
 let userId = null;
-const characters = {};
+export const characters = {};
 
 // Setup socket
 document.addEventListener("DOMContentLoaded", () => {
@@ -202,6 +202,14 @@ class Board {
         return { left: this.left, top: this.top, right: this.right, bottom: this.bottom, };
     }
 
+    jumpTo(character) {
+        const x = character.xPixel;
+        const y = character.yPixel;
+        this.x = (this.obj.parentElement.offsetWidth / 2) - (x * this.scale);
+        this.y = (this.obj.parentElement.offsetHeight / 2) - (y * this.scale);
+        this.generateVisible();
+    }
+
     generateVisible() {
         const rect = this.visibleRect;
         const start = Coord.fromPixel(rect.left, rect.top);
@@ -230,10 +238,6 @@ class Board {
 
     dragEnd(event) {
         document.body.style.cursor = "default";
-    }
-
-    toString() {
-        return "[object Board]";
     }
 }
 
