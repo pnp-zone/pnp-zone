@@ -54,7 +54,8 @@ export default class Character {
     }
 
     dragMove(event) {
-        this._moveToPixel(event.boardX, event.boardY);
+        this.xPixel = event.boardX;
+        this.yPixel = event.boardY;
     }
 
     dragEnd() {
@@ -66,17 +67,25 @@ export default class Character {
         return "" + this.id;
     }
 
-    _moveToPixel(x, y) {
-        const self = {width: this.obj.offsetWidth, height: this.obj.offsetHeight};
-        this.obj.style.left = x - self.width/2 + "px";
-        this.obj.style.top = y - self.height/2 + "px";
+    get xPixel() {
+        return parseInt(this.obj.style.left.replace("px", "")) + this.obj.offsetWidth / 2;
+    }
+    set xPixel(value) {
+        this.obj.style.left = value - this.obj.offsetWidth / 2 + "px";
+    }
+    get yPixel() {
+        return parseInt(this.obj.style.top.replace("px", "")) + this.obj.offsetHeight / 2;
+    }
+    set yPixel(value) {
+        this.obj.style.top = value - this.obj.offsetHeight / 2 + "px";
     }
 
     moveTo(x, y) {
-        this.x = x;
-        this.y = y;
+        this.xIndex = x;
+        this.yIndex = y;
         const coord = Coord.fromIndex(x, y);
-        this._moveToPixel(coord.xPixel, coord.yPixel);
+        this.xPixel = coord.xPixel;
+        this.yPixel = coord.yPixel;
     }
 
     static registerDeleteTarget(obj) {
