@@ -3,6 +3,10 @@ body {
     color: #ffffff;
     margin: 0;
     font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
+
+    /* The flex is required for the content to fit itself to the remaining space */
+    display: flex;
+    flex-direction: row;
 }
 
 button {
@@ -39,10 +43,10 @@ input[type=number] {
 }
 
 .content {
-    margin-left: 18%;
-    width: 100%;
+    flex-grow: 1;
 
-    transition: margin-left 1s;
+    margin-left: 0;
+    transition: margin-left 0.5s;
 }
 
 .sidebar {
@@ -54,8 +58,21 @@ input[type=number] {
   font-size: 0.65em;
   z-index: 100;
 
-  left: 0;
-  transition: left 1s;
+  left: -18%;
+  transition: left 0.5s;
+}
+
+.toggle {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 150;
+}
+.toggle:checked ~ .sidebar {
+    left: 0;
+}
+.toggle:checked ~ .content {
+    margin-left: 18%;
 }
 
 .nav {
