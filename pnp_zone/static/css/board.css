@@ -49,12 +49,22 @@
 }
 #moderator {
     background: #16232d;
+    display: none;
 }
 .moderator-child {
     padding: 1vw;
 }
 #moderator input {
     width: 8vw;
+}
+.toggleModerator {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    z-index: 150;
+}
+.toggleModerator:checked ~ #moderator {
+    display: inherit;
 }
 #board-view {
     width: 100%;
