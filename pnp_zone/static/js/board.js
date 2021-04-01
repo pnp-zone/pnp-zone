@@ -124,9 +124,10 @@ class Board {
         this.obj = document.getElementById("board");
         document.addEventListener("DOMContentLoaded", () => {
             this.generateVisible();
-            window.addEventListener("resize", () => {
+            new ResizeObserver(() => {
+                console.log("Resize");
                 this.generateVisible();
-            });
+            }).observe(this.obj.parentElement);
         });
         window.addEventListener("beforeunload", (event) => {
             socket.send({
