@@ -23,7 +23,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             identifier = request.POST.get("identifier")
             try:
                 room = Room.objects.get(identifier=identifier)
-                if request.user in room.moderators:
+                if request.user in room.moderators.all():
                     room.delete()
             except Room.DoesNotExist:
                 pass
