@@ -147,6 +147,12 @@ class UpdateSessionEvent(Event):
         session.board_scale = self.scale
         session.save()
 
+    async def response_sender(self):
+        return self._data
+
+    async def response_all_users(self):
+        return None
+
 
 class CursorEvent(Event):
     """

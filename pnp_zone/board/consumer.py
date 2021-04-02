@@ -78,7 +78,8 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
         # Send events to initialize board
         for event in await self.init_events():
-            await self.send_json(await event.response_all_users())
+            response = await event.response_sender() or await event.response_all_users()
+            await self.send_json(response)
 
     async def receive_json(self, event, **kwargs):
         try:
