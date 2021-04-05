@@ -37,18 +37,17 @@ export class Grid {
     }
 
     getOrCreate(x, y) {
-        let column = this.lookup[x];
-        if (!column) {
-            column = [];
-            this.lookup[x] = column;
-        }
-
-        let tile = column[y];
+        const p = [x, y];
+        let tile = this.lookup[p]
         if (!tile) {
-            tile = new Tile(this.container, x, y);
-            column[y] = tile;
+            tile = this.newTile(x, y);
+            this.lookup[p] = tile;
         }
         return tile;
+    }
+
+    newTile(x, y) {
+        return new Tile(this.container, x, y);
     }
 }
 
