@@ -140,9 +140,9 @@ class Board {
         this.tiles = new Grid(document.getElementById("coloredGrid"));
         this.grid = new BackgroundGrid(document.getElementById("backgroundGrid"));
 
+        this.scale = 1
         this.x = 0;
         this.y = 0;
-        this.scale = 1
 
         // dragStart
         new Drag(this, this.obj, LEFT_BUTTON).enable();
@@ -168,8 +168,7 @@ class Board {
     }
 
     get scale() {
-        //return parseFloat(this.obj.style.transform.match(/scale\(([\d.]+)\)/)[1]);
-        return parseFloat(this.obj.style.scale);
+        return parseFloat(this.obj.style.transform.match(/scale\(([\d.]+)\)/)[1]);
     }
     get x() {
         return parseInt(this.obj.style.left.replace("px", ""));
@@ -181,13 +180,16 @@ class Board {
         if (value < 0.05) {
             value = 0.05;
         }
-        this.obj.style.scale = "" + value;
+        this.obj.style.transform = `scale(${value})`;
     }
     set x(value) {
         this.obj.style.left = "" + value + "px";
+        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
     }
     set y(value) {
         this.obj.style.top = "" + value + "px";
+        this.grid.y = this.top - (this.top % ROW_HEIGHT);
+        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
     }
 
     /*
@@ -211,7 +213,6 @@ class Board {
     }
 
     generateVisible() {
-        // Ensure background grid is large enough
         const start = Coord.fromPixel(this.left, this.top);
         const end = Coord.fromPixel(this.right, this.bottom);
         const w = Math.abs(start.xIndex - end.xIndex);
@@ -221,10 +222,8 @@ class Board {
                 this.grid.getOrCreate(x, y);
             }
         }
-
-        // Adjust background grid
-        this.grid.y = this.top - (this.top % ROW_HEIGHT);
-        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
+        this.x += 0;
+        this.y += 0;
     }
 
     dragStart(event) {
@@ -240,10 +239,6 @@ class Board {
             clearTimeout(this._generateTimeout);
         }
         this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
-
-        // Adjust background grid
-        this.grid.y = this.top - (this.top % ROW_HEIGHT);
-        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
     }
 
     dragEnd(event) {

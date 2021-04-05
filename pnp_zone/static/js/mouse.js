@@ -30,6 +30,7 @@ export function init(b) {
     document.addEventListener("mouseout", extendEvent, true);
     document.addEventListener("mouseover", extendEvent, true);
     document.addEventListener("mouseup", extendEvent, true);
+    document.addEventListener("wheel", extendEvent, true);
 }
 
 export function extendEvent(event) {
