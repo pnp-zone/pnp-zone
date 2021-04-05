@@ -8,9 +8,7 @@ const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 const DIV = document.getElementById("grid");
 
 export class Tile {
-    static lookup = [];
-
-    constructor(x, y) {
+    constructor(container, x, y) {
         this.position = Coord.fromIndex(x, y);
         this.obj = tags.div({
             class: "board-element",
@@ -23,15 +21,22 @@ export class Tile {
             ondragstart: () => { return false; },
             children: [Hexagon.generateSVG(512, 8)],
         });
-        DIV.appendChild(this.obj);
+        container.appendChild(this.obj);
     }
 
     // get backgroundColor() { return this.obj.firstChild.style.fill; }
     set backgroundColor(value) { this.obj.firstChild.firstChild.style.fill = ""+value; }
     // get borderColor() { return this.obj.lastChild.style.fill; }
     set borderColor(value) { this.obj.firstChild.lastChild.style.fill = ""+value; }
+}
 
-    static getOrCreate(x, y) {
+export class Grid {
+    constructor(container) {
+        this.container = container;
+        this.lookup = {};
+    }
+
+    getOrCreate(x, y) {
         let column = this.lookup[x];
         if (!column) {
             column = [];
@@ -40,7 +45,7 @@ export class Tile {
 
         let tile = column[y];
         if (!tile) {
-            tile = new Tile(x, y);
+            tile = new Tile(this.container, x, y);
             column[y] = tile;
         }
         return tile;

@@ -1,6 +1,6 @@
 import socket from "./socket.js";
 import tags from "./tagFactory.js";
-import { Tile, Coord, Line } from "./grid.js";
+import { Grid, Coord, Line } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
@@ -27,7 +27,7 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 socket.registerEvent("colorTile", (event) => {
-    const tile = Tile.getOrCreate(event.x, event.y);
+    const tile = board.grid.getOrCreate(event.x, event.y);
     tile.backgroundColor = event.background;
     tile.borderColor = event.border;
 });
@@ -138,15 +138,15 @@ class Board {
             });
         });
 
-        this.grid = document.getElementById("grid");
+        this.grid = new Grid(document.getElementById("grid"));
 
         this.x = 0;
         this.y = 0;
         this.scale = 1
 
         // dragStart
-        new Drag(this, this.grid, LEFT_BUTTON).enable();
-        new Drag(this, this.grid, MIDDLE_BUTTON).enable();
+        new Drag(this, this.obj, LEFT_BUTTON).enable();
+        new Drag(this, this.obj, MIDDLE_BUTTON).enable();
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
@@ -217,7 +217,7 @@ class Board {
         const end = Coord.fromPixel(rect.right, rect.bottom);
         for (let x = start.xIndex; x <= end.xIndex; x++) {
             for (let y = start.yIndex; y <= end.yIndex; y++) {
-                Tile.getOrCreate(x, y);
+                this.grid.getOrCreate(x, y);
             }
         }
     }
