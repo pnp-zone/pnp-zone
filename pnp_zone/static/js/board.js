@@ -7,7 +7,6 @@ import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
 
 const SCALE_SPEED = 1.1;
 
-let userId = null;
 export const characters = {};
 
 // Setup socket
@@ -32,14 +31,9 @@ socket.registerEvent("colorTile", (event) => {
     tile.borderColor = event.border;
 });
 socket.registerEvent("cursor", (event) => {
-    if (userId !== event.id) {
-        const cursor = Cursor.getOrCreate(event.id, event.name);
-        cursor.x = event.x;
-        cursor.y = event.y;
-    }
-});
-socket.registerEvent("welcome", (event) => {
-    userId = event.yourId;
+    const cursor = Cursor.getOrCreate(event.id, event.name);
+    cursor.x = event.x;
+    cursor.y = event.y;
 });
 socket.registerEvent("session", (event) => {
     board.x = event.x;

@@ -80,20 +80,22 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"type": "error", "message": f"'{event['type']}' can only be used by moderators"})
                 return
 
-            response_sender, response_all = await handler(self.room, self.user, event)
+            response_sender, response_others = await handler(self.room, self.user, event)
 
             # Respond to sender
             if response_sender:
                 await self.send_json(response_sender)
 
             # Respond to / notify all users
-            if response_all:
+            if response_others:
                 await self.channel_layer.group_send(
-                    self.room.identifier, {"type": "board.event", "event": response_all}
+                    self.room.identifier,
+                    {"type": "board.event", "event": response_others, "consumer": self.channel_name}
                 )
 
         except EventError as err:
             await self.send_json({"type": "error", "message": str(err)})
 
     async def board_event(self, message):
-        await self.send_json(message["event"])
+        if message["consumer"] != self.channel_name:
+            await self.send_json(message["event"])

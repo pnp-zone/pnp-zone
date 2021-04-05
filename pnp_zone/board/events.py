@@ -39,7 +39,7 @@ def process_update_session(room, user, data):
 
 @register("cursor")
 async def process_cursor(room, user, data):
-    return None, dict(data, name=user.get_username(), id=user.id)
+    return None, dict(data, name=user.get_username())
 
 
 @register("move")
@@ -52,7 +52,7 @@ def process_move_character(room, user, data):
         character.x = data["x"]
         character.y = data["y"]
         character.save()
-        return None, data
+        return data, data
 
 
 @register("new")
@@ -64,7 +64,7 @@ def process_new_character(room, user, data):
     else:
         character = Character(identifier=data["id"], x=data["x"], y=data["y"], color=data["color"], room=room)
         character.save()
-        return None, data
+        return data, data
 
 
 @register("delete")
@@ -73,7 +73,7 @@ def process_new_character(room, user, data):
 def process_delete_character(room, user, data):
     try:
         Character.objects.get(identifier=data["id"], room=data["room"]).delete()
-        return None, data
+        return data, data
     except Character.DoesNotExist:
         raise EventError(f"No character with id: {data['id']}") from None
 
@@ -92,4 +92,4 @@ def process_color_tile(room, user, data):
             Tile.objects.get(room=room, x=data["x"], y=data["y"]).delete()
         except Tile.DoesNotExist:
             pass
-    return None, data
+    return data, data
