@@ -33,31 +33,19 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         except UserSession.DoesNotExist:
             session = UserSession.objects.create(room=self.room, user=self.user, board_x=0, board_y=0, board_scale=1)
         events.append(
-            UpdateSessionEvent(
-                {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale},
-                consumer=self
-            )
+            {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale}
         )
 
         for c in self.room.character_set.all():
             events.append(
-                NewEvent(
-                    {"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color},
-                    consumer=self
-                )
+                {"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}
             )
 
         for t in self.room.tile_set.all():
             events.append(
-                ColorTileEvent(
-                    {"type": ColorTileEvent.type, "x": t.x, "y": t.y, "background": t.background, "border": t.border},
-                    consumer=self
-                )
+                {"type": "colorTile", "x": t.x, "y": t.y, "background": t.background, "border": t.border}
             )
 
-        events.append(
-            WelcomeEvent({"type": "welcome"}, consumer=self)
-        )
         return events
 
     @property
@@ -78,33 +66,31 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
         # Send events to initialize board
         for event in await self.init_events():
-            response = await event.response_sender() or await event.response_all_users()
-            await self.send_json(response)
+            await self.send_json(event)
 
     async def receive_json(self, event, **kwargs):
         try:
             # Wrap event data with matching event class
             if "type" not in event:
                 raise EventError("Missing type attribute")
-            event = Event[event["type"]](event, consumer=self)
+            handler = event_handlers[event["type"]]
 
             # Check if sender has required privileges
-            if event.type in self.requires_moderator and not self.is_moderator:
-                await self.send_json({"type": "error", "message": f"'{event.type}' can only be used by moderators"})
+            if hasattr(handler, "moderators_only ") and not self.is_moderator:
+                await self.send_json({"type": "error", "message": f"'{event['type']}' can only be used by moderators"})
                 return
 
-            # Perform db operations
-            await event.update_db()
+            response_sender, response_all = await handler(self.room, self.user, event)
 
             # Respond to sender
-            response = await event.response_sender()
-            if response:
-                await self.send_json(response)
+            if response_sender:
+                await self.send_json(response_sender)
 
             # Respond to / notify all users
-            response = await event.response_all_users()
-            if response:
-                await self.channel_layer.group_send(self.room.identifier, {"type": "board.event", "event": response})
+            if response_all:
+                await self.channel_layer.group_send(
+                    self.room.identifier, {"type": "board.event", "event": response_all}
+                )
 
         except EventError as err:
             await self.send_json({"type": "error", "message": str(err)})
