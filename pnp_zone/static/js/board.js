@@ -144,6 +144,9 @@ class Board {
 
         // scaling
         this.obj.addEventListener("wheel", (event) => {
+            const oldRect = this.obj.parentElement.getBoundingClientRect();
+            const oldScale = this.scale;
+
             // down
             if (event.deltaY > 0) {
                 this.scale /= SCALE_SPEED;
@@ -153,6 +156,12 @@ class Board {
             else {
                 this.scale *= SCALE_SPEED;
             }
+
+            const factor = this.scale / oldScale;
+            const newRect = this.obj.parentElement.getBoundingClientRect();
+
+            this.x += (event.clientX - newRect.x - this.x) - factor*(event.clientX - oldRect.x - this.x);
+            this.y += (event.clientY - newRect.y - this.y) - factor*(event.clientY - oldRect.y - this.y);
 
             if (this._generateTimeout) {
                 clearTimeout(this._generateTimeout);
