@@ -52,7 +52,7 @@ export class Grid {
 
 export class BackgroundGrid extends Grid {
     constructor(container,
-                patchSize = 6,
+                patchSize = 16,
                 width=100,
                 borderWidth=2) {
         super(container);
