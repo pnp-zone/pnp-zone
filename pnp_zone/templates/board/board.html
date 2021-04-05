@@ -7,16 +7,13 @@
     body {
         background-color: {{ room.defaultBackground }};
     }
-    .field path {
-        fill: {{ room.defaultBorder }};
-    }
 </style>
 
 <div class="flex-vertical" style="height: 100vh;">
     <div id="board-view">
         <div id="board" class="board-element noselect">
-            <img id="background" class="board-element" src="{{ room.background }}" alt="Background">
-            <div id="grid" class="board-element">
+            <div id="backgroundGrid" class="board-element" style="color: {{ room.defaultBorder }}"></div>
+            <div id="coloredGrid" class="board-element">
                 <div id="characters" class="board-element"></div>
             </div>
             <div id="cursors" class="board-element"></div>

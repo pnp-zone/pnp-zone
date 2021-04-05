@@ -1,11 +1,10 @@
 import Hexagon from "./hexagon.js";
 import tags from "./tagFactory.js";
 
-const TILE_HEXAGON = new Hexagon(100);
-const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
-const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
-const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
-const DIV = document.getElementById("grid");
+export const TILE_HEXAGON = new Hexagon(100);
+export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
+export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
+export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 
 export class Tile {
     constructor(container, x, y) {
@@ -49,6 +48,74 @@ export class Grid {
     newTile(x, y) {
         return new Tile(this.container, x, y);
     }
+}
+
+export class BackgroundGrid extends Grid {
+    constructor(container,
+                patchSize = 6,
+                width=100,
+                borderWidth=2) {
+        super(container);
+
+        this.patchSize = patchSize;
+
+        // Generate an svg for the patches
+        const border = this.container.style.color;
+        const borders = [];
+        for (let ix = 0; ix < this.patchSize; ix++) {
+            for (let iy = 0; iy < this.patchSize; iy++) {
+                // Generate new hexagons
+                const coord = Coord.fromIndex(ix, iy);
+                const bigH = new Hexagon(width);
+                const smallH = new Hexagon(width - 2*borderWidth);
+
+                // Translate hexagons
+                for (let i = 0; i < 6; i++) {
+                    bigH.points[i][0] += coord.xPixel;
+                    bigH.points[i][1] += coord.yPixel;
+                    smallH.points[i][0] += coord.xPixel;
+                    smallH.points[i][1] += coord.yPixel;
+                }
+
+                // Combine hexagons
+                borders.push(`<path fill='${border}' fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`);
+            }
+        }
+        const viewBox = "0 0 "+TILE_WIDTH * this.patchSize+" "+ROW_HEIGHT * this.patchSize;
+        const header = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='"+viewBox+"'>\n";
+        const svg = header + borders.join("\n") + "\n</svg>";
+
+        // Set svg as background image
+        const css = document.createElement("style");
+        css.innerHTML = `.patch${this.patchSize} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}");}`;
+        document.body.appendChild(css);
+    }
+
+    newTile(x, y) {
+        const position = Coord.fromIndex(x, y);
+        const tile = tags.div({
+            class: "board-element patch" + this.patchSize,
+            style: {
+                left: position.left+"px",
+                top: position.top+"px",
+                width: TILE_WIDTH * this.patchSize + "px",
+                height: ROW_HEIGHT * this.patchSize + "px",
+            },
+        });
+        this.container.appendChild(tile);
+        return tile;
+    }
+
+    getOrCreate(x, y) {
+        x -= x % this.patchSize;
+        y -= y % this.patchSize;
+        return super.getOrCreate(x, y);
+    }
+
+    get x() { return parseInt(this.container.style.left.replace("px", "")); }
+    get y() { return parseInt(this.container.style.top.replace("px", "")); }
+    set x(value) { this.container.style.left = "" + value + "px"; }
+    set y(value) { this.container.style.top = "" + value + "px"; }
 }
 
 export class Coord {

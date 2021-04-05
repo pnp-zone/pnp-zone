@@ -1,6 +1,6 @@
 import socket from "./socket.js";
 import tags from "./tagFactory.js";
-import { Grid, Coord, Line } from "./grid.js";
+import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
@@ -27,7 +27,7 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 socket.registerEvent("colorTile", (event) => {
-    const tile = board.grid.getOrCreate(event.x, event.y);
+    const tile = board.tiles.getOrCreate(event.x, event.y);
     tile.backgroundColor = event.background;
     tile.borderColor = event.border;
 });
@@ -125,7 +125,6 @@ class Board {
         document.addEventListener("DOMContentLoaded", () => {
             this.generateVisible();
             new ResizeObserver(() => {
-                console.log("Resize");
                 this.generateVisible();
             }).observe(this.obj.parentElement);
         });
@@ -138,7 +137,8 @@ class Board {
             });
         });
 
-        this.grid = new Grid(document.getElementById("grid"));
+        this.tiles = new Grid(document.getElementById("coloredGrid"));
+        this.grid = new BackgroundGrid(document.getElementById("backgroundGrid"));
 
         this.x = 0;
         this.y = 0;
@@ -178,9 +178,8 @@ class Board {
         return parseInt(this.obj.style.top.replace("px", ""));
     }
     set scale(value) {
-        //this.obj.style.transform = "scale("+value+")";
-        if (value < 0.1) {
-            value = 0.1;
+        if (value < 0.05) {
+            value = 0.05;
         }
         this.obj.style.scale = "" + value;
     }
@@ -212,14 +211,20 @@ class Board {
     }
 
     generateVisible() {
-        const rect = this.visibleRect;
-        const start = Coord.fromPixel(rect.left, rect.top);
-        const end = Coord.fromPixel(rect.right, rect.bottom);
-        for (let x = start.xIndex; x <= end.xIndex; x++) {
-            for (let y = start.yIndex; y <= end.yIndex; y++) {
+        // Ensure background grid is large enough
+        const start = Coord.fromPixel(this.left, this.top);
+        const end = Coord.fromPixel(this.right, this.bottom);
+        const w = Math.abs(start.xIndex - end.xIndex);
+        const h = Math.abs(start.yIndex - end.yIndex);
+        for (let x = -this.grid.patchSize; x <= w; x += this.grid.patchSize) {
+            for (let y = -this.grid.patchSize; y <= h; y += this.grid.patchSize) {
                 this.grid.getOrCreate(x, y);
             }
         }
+
+        // Adjust background grid
+        this.grid.y = this.top - (this.top % ROW_HEIGHT);
+        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
     }
 
     dragStart(event) {
@@ -235,6 +240,10 @@ class Board {
             clearTimeout(this._generateTimeout);
         }
         this._generateTimeout = setTimeout(this.generateVisible.bind(this), 100);
+
+        // Adjust background grid
+        this.grid.y = this.top - (this.top % ROW_HEIGHT);
+        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
     }
 
     dragEnd(event) {
@@ -252,7 +261,7 @@ class PaintBrush {
 
         this.previously = null;  //previously colored Tile
 
-        this.drag = new Drag(this, board.grid);
+        this.drag = new Drag(this, board.obj);
 
         this.form["active"].onchange = () => {
             this.active = this.form["active"].checked;
