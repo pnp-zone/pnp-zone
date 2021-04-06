@@ -62,8 +62,8 @@ export class BackgroundGrid extends Grid {
         // Generate an svg for the patches
         const border = this.container.style.color;
         const borders = [];
-        for (let ix = 0; ix < this.patchSize; ix++) {
-            for (let iy = 0; iy < this.patchSize; iy++) {
+        for (let ix = -1; ix < this.patchSize+1; ix++) {
+            for (let iy = -1; iy < this.patchSize+1; iy++) {
                 // Generate new hexagons
                 const coord = Coord.fromIndex(ix, iy);
                 const bigH = new Hexagon(width);
