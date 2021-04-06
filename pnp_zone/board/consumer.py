@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -41,9 +43,12 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 {"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}
             )
 
+        tiles = defaultdict(list)
         for t in self.room.tile_set.all():
+            tiles[(t.background, t.border)].append([t.x, t.y])
+        for color, points in tiles.items():
             events.append(
-                {"type": "colorTile", "x": t.x, "y": t.y, "background": t.background, "border": t.border}
+                {"type": "colorTile", "tiles": points, "background": color[0], "border": color[1]}
             )
 
         return events

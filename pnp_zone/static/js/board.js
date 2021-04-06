@@ -26,9 +26,11 @@ socket.registerEvent("delete", (event) => {
     characters[event.id].obj.remove();
 });
 socket.registerEvent("colorTile", (event) => {
-    const tile = board.tiles.getOrCreate(event.x, event.y);
-    tile.backgroundColor = event.background;
-    tile.borderColor = event.border;
+    for (let i = 0; i < event.tiles.length; i++) {
+        const tile = board.tiles.getOrCreate(...event.tiles[i]);
+        tile.backgroundColor = event.background;
+        tile.borderColor = event.border;
+    }
 });
 socket.registerEvent("cursor", (event) => {
     const cursor = Cursor.getOrCreate(event.id, event.name);
@@ -255,7 +257,10 @@ Mouse.init(board);
 class PaintBrush {
     constructor(form) {
         this.form = form;
+
         this.visited = {};
+        this.toSend = [];
+        this.sendTimeout = null;
 
         this.previously = null;  //previously colored Tile
 
@@ -267,12 +272,25 @@ class PaintBrush {
         this.active = this.form["active"].checked;
     }
 
+    send() {
+        socket.send({type: "colorTile", tiles: this.toSend, background: this.background, border: this.border});
+        this.toSend = [];
+        this.sendTimeout = null;
+    }
+
     color(x, y) {
         const key = ""+x+" "+y;
         if (!this.visited.hasOwnProperty(key)) {
             this.visited[key] = null;
-            socket.event_handlers.get("colorTile")({type: "colorTile", x, y, background: this.background, border: this.border});
-            socket.send({type: "colorTile", x, y, background: this.background, border: this.border});
+
+            this.toSend.push([x, y]);
+            if (!this.sendTimeout)  {
+                this.sendTimeout = setTimeout(this.send.bind(this), 1000);
+            }
+
+            const tile = board.tiles.getOrCreate(x, y);
+            tile.backgroundColor = this.background;
+            tile.borderColor = this.border;
         }
     }
 

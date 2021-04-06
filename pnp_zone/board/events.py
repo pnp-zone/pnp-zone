@@ -82,14 +82,25 @@ def process_delete_character(room, user, data):
 @moderators_only
 @database_sync_to_async
 def process_color_tile(room, user, data):
-    if data["background"] or data["border"]:
-        tile, _ = Tile.objects.get_or_create(room=room, x=data["x"], y=data["y"])
-        tile.background = data["background"]
-        tile.border = data["border"]
-        tile.save()
-    else:
+    # Sort the incoming tiles by already colored or not and prepare the orm objects
+    tiles_ids = []
+    new_tiles = []
+    for point in data["tiles"]:
         try:
-            Tile.objects.get(room=room, x=data["x"], y=data["y"]).delete()
+            tiles_ids.append(Tile.objects.get(room=room, x=point[0], y=point[1]).id)
         except Tile.DoesNotExist:
-            pass
-    return data, data
+            new_tiles.append(Tile(
+                room=room, x=point[0], y=point[1], background=data["background"], border=data["border"]
+            ))
+    tiles = Tile.objects.filter(id__in=tiles_ids)
+
+    # Set the new color
+    if data["background"] or data["border"]:
+        tiles.update(border=data["border"], background=data["background"])
+        Tile.objects.bulk_create(new_tiles)
+
+    # Delete instead of setting no color
+    else:
+        tiles.delete()
+
+    return None, data
