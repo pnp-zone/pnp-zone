@@ -72,7 +72,7 @@ def process_new_character(room, user, data):
 @database_sync_to_async
 def process_delete_character(room, user, data):
     try:
-        Character.objects.get(identifier=data["id"], room=data["room"]).delete()
+        Character.objects.get(identifier=data["id"], room=room).delete()
         return data, data
     except Character.DoesNotExist:
         raise EventError(f"No character with id: {data['id']}") from None
