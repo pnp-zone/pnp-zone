@@ -4,8 +4,8 @@ from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
-from board.events import *
-from board.models import Room
+from board.events import event_handlers, EventError
+from board.models import Room, UserSession
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
