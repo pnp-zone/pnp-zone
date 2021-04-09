@@ -178,3 +178,7 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
 }
+
+JITSI_INTEGRATION = False
+JITSI_DOMAIN = "change_me"  # Without https://
+JITSI_PREFIX = "pnp-zone/"  # Will be added to the room uuid to create the jitsi room

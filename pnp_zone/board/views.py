@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import TemplateView
@@ -58,4 +59,6 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "room": room,
             "is_moderator": request.user in room.moderators.all() or request.user.is_superuser,
             "x_range": list(range(25)), "y_range": list(range(17)),
+            "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
+            "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
         })
