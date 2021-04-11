@@ -4,6 +4,7 @@ import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./gri
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
+import { handleCursors } from "./cursors.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -32,11 +33,7 @@ socket.registerEvent("colorTile", (event) => {
         tile.borderColor = event.border;
     }
 });
-socket.registerEvent("cursor", (event) => {
-    const cursor = Cursor.getOrCreate(event.id, event.name);
-    cursor.x = event.x;
-    cursor.y = event.y;
-});
+socket.registerEvent("cursor", handleCursors);
 socket.registerEvent("session", (event) => {
     board.x = event.x;
     board.y = event.y;
@@ -65,51 +62,6 @@ if (newCharacter) {
     }
 }
 
-class Cursor {
-    static DIV = document.getElementById("cursors");
-    static TIMEOUT = 100;
-    static activeTimeout = null;
-    static cursors = {};
-
-    constructor(id, name) {
-        this.obj = tags.div({
-            class: "cursor board-element",
-            children: [
-                tags.span({}),
-                tags.p({
-                    innerText: name,
-                })
-            ],
-        });
-        Cursor.DIV.appendChild(this.obj);
-        Cursor.cursors[id] = this;
-    }
-
-    static getOrCreate(id, name) {
-        let obj = Cursor.cursors[id];
-        if (!obj) {
-            obj = new Cursor(id, name)
-        }
-        return obj;
-    }
-
-    set x(value) {
-        this.obj.style.left = "" + value + "px";
-    }
-
-    set y(value) {
-        this.obj.style.top = "" + value + "px";
-    }
-}
-
-document.addEventListener("mousemove", (event) => {
-    if (!Cursor.activeTimeout) {
-        Cursor.activeTimeout = setTimeout(() => {
-            socket.send({type: "cursor", x: event.boardX, y: event.boardY});
-            Cursor.activeTimeout = null;
-        }, Cursor.TIMEOUT);
-    }
-});
 
 class Board {
     _mouseStart;
