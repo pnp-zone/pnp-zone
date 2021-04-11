@@ -60,11 +60,7 @@ export default class Character {
 
     dragEnd() {
         this.obj.style.transition = "";
-        this.moveTo(this.x, this.y);
-    }
-
-    toString() {
-        return "" + this.id;
+        this.moveTo(this.xIndex, this.yIndex);
     }
 
     get xPixel() {
