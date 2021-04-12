@@ -16,7 +16,9 @@
 
     <div id="board-view">
         <div id="board" class="board-element noselect">
+            <div id="backgrounds" class="board-element"></div>
             <div id="backgroundGrid" class="board-element" style="color: {{ room.defaultBorder }}"></div>
+            <div id="backgroundHitboxes" class="board-element"></div>
             <div id="coloredGrid" class="board-element">
                 <div id="characters" class="board-element"></div>
             </div>
@@ -72,6 +74,7 @@
 </div>
 
 <script type="module" src="{% static "js/board.js" %}"></script>
+<script type="module" src="{% static "js/backgrounds.js" %}"></script>
 <script>
     // Expose some modules for debugging
     let board; import("{% static "js/board.js" %}").then((module) => { board = module.board; });

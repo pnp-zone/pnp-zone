@@ -1,5 +1,4 @@
 import socket from "./socket.js";
-import tags from "./tagFactory.js";
 import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
@@ -61,7 +60,6 @@ if (newCharacter) {
         return false;
     }
 }
-
 
 class Board {
     _mouseStart;
