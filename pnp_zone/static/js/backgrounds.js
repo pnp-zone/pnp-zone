@@ -1,6 +1,8 @@
 import tags from "./tagFactory.js";
 import { Drag, LEFT_BUTTON } from "./mouse.js";
 
+let is_moderator = true;
+
 function getNumericStyle(node, property, unit="px") {
     return parseFloat(node.style[property].replace(unit, ""));
 }
@@ -17,6 +19,7 @@ const HITBOXES = document.getElementById("backgroundHitboxes");
 const backgrounds = {};
 
 export function handleBackgrounds(event) {
+    console.log(event);
     const { id, url, x, y, width, height } = event;
 
     let background = backgrounds[id];
@@ -32,12 +35,11 @@ export function handleBackgrounds(event) {
     background.height = height;
 }
 
-class Background {
+class Hitbox {
+    constructor(parent) {
+        this.parent = parent;
 
-    constructor(id, url) {
-        this.id = id;
-
-        this.leftHitbox = tags.div({
+        this.left = tags.div({
             class: "board-element",
             style: {
                 cursor: "ew-resize",
@@ -46,11 +48,11 @@ class Background {
             }
         });
         new Drag(this.wrapDragMove((function(dx, dy) {
-            this.x += dx;
-            this.width -= dx;
-        }).bind(this)), this.leftHitbox, LEFT_BUTTON).enable();
+            parent.x += dx;
+            parent.width -= dx;
+        }).bind(this)), this.left, LEFT_BUTTON).enable();
 
-        this.rightHitbox = tags.div({
+        this.right = tags.div({
             class: "board-element",
             style: {
                 cursor: "ew-resize",
@@ -61,10 +63,10 @@ class Background {
             }
         });
         new Drag(this.wrapDragMove((function(dx, dy) {
-            this.width += dx;
-        }).bind(this)), this.rightHitbox, LEFT_BUTTON).enable();
+            parent.width += dx;
+        }).bind(this)), this.right, LEFT_BUTTON).enable();
 
-        this.topHitbox = tags.div({
+        this.top = tags.div({
             class: "board-element",
             style: {
                 cursor: "ns-resize",
@@ -73,11 +75,11 @@ class Background {
             }
         });
         new Drag(this.wrapDragMove((function(dx, dy) {
-            this.y += dy;
-            this.height -= dy;
-        }).bind(this)), this.topHitbox, LEFT_BUTTON).enable();
+            parent.y += dy;
+            parent.height -= dy;
+        }).bind(this)), this.top, LEFT_BUTTON).enable();
 
-        this.bottomHitbox = tags.div({
+        this.bottom = tags.div({
             class: "board-element",
             style: {
                 cursor: "ns-resize",
@@ -88,10 +90,10 @@ class Background {
             }
         });
         new Drag(this.wrapDragMove((function(dx, dy) {
-            this.height += dy;
-        }).bind(this)), this.bottomHitbox, LEFT_BUTTON).enable();
+            parent.height += dy;
+        }).bind(this)), this.bottom, LEFT_BUTTON).enable();
 
-        this.hitbox = tags.div({
+        this.main = tags.div({
             class: "board-element",
             style: {
                 cursor: "grab",
@@ -100,73 +102,29 @@ class Background {
                 padding: "" + DELTA/2 + "px",
             },
             children: [
-                this.leftHitbox,
-                this.rightHitbox,
-                this.topHitbox,
-                this.bottomHitbox,
+                this.left,
+                this.right,
+                this.top,
+                this.bottom,
             ],
         });
         const move = this.wrapDragMove(function(dx, dy) {
-            this.x += dx;
-            this.y += dy;
+            parent.x += dx;
+            parent.y += dy;
         }.bind(this));
         const dragStart = move.dragStart;
         move.dragStart = function(event) {
             dragStart(event);
-            this.hitbox.style.cursor = "grabbing";
+            this.main.style.cursor = "grabbing";
         }.bind(this);
         const dragEnd = move.dragEnd;
         move.dragEnd = function() {
             dragEnd();
-            this.hitbox.style.cursor = "grab";
+            this.main.style.cursor = "grab";
         }.bind(this);
-        new Drag(move, this.hitbox, LEFT_BUTTON).enable();
-        HITBOXES.appendChild(this.hitbox);
+        new Drag(move, this.main, LEFT_BUTTON).enable();
 
-        this.inner = tags.img({src: url});
-        this.outer = tags.div({
-            class: "board-element",
-            style: {
-                left: "0px",
-                top: "0px",
-                padding: "" + DELTA/2 + "px",
-            },
-            children: [
-                this.inner,
-            ]
-        });
-        CONTAINER.appendChild(this.outer);
-
-        // Get size for outer from inner after rendering it
-        setTimeout(() => {
-            this.width = this.inner.offsetWidth;
-            this.height = this.inner.offsetHeight;
-            this.inner.style.width = "100%";
-            this.inner.style.height = "100%";
-        }, 1000);
-    }
-
-    get url() { return this.inner.src; }
-    set url(value) { this.inner.src = value; }
-    get x() { return getNumericStyle(this.outer, "left"); }
-    get y() { return getNumericStyle(this.outer, "top"); }
-    set x(value) {
-        setNumericStyle(this.outer, "left", value);
-        setNumericStyle(this.hitbox, "left", value);
-    }
-    set y(value) {
-        setNumericStyle(this.outer, "top", value);
-        setNumericStyle(this.hitbox, "top", value);
-    }
-    get width() { return getNumericStyle(this.outer, "width"); }
-    get height() { return getNumericStyle(this.outer, "height"); }
-    set width(value) {
-        setNumericStyle(this.outer, "width", value);
-        setNumericStyle(this.hitbox, "width", value);
-    }
-    set height(value) {
-        setNumericStyle(this.outer, "height", value);
-        setNumericStyle(this.hitbox, "height", value);
+        HITBOXES.appendChild(this.main);
     }
 
     wrapDragMove(callback) {
@@ -186,9 +144,86 @@ class Background {
                 prevY = event.boardY;
             },
             dragEnd: function() {
-                socket.send({type: "background", id: this.id, url: this.url,
-                             x: this.x, y: this.y, width: this.width, height: this.height});
+                socket.send({type: "background", id: this.parent.id, url: this.parent.url,
+                    x: this.parent.x, y: this.parent.y, width: this.parent.width, height: this.parent.height});
             }.bind(this)
         };
+    }
+
+    get x() { return getNumericStyle(this.main, "left"); }
+    get y() { return getNumericStyle(this.main, "top"); }
+    set x(value) { setNumericStyle(this.main, "left", value); }
+    set y(value) { setNumericStyle(this.main, "top", value); }
+    get width() { return getNumericStyle(this.main, "width"); }
+    get height() { return getNumericStyle(this.main, "height"); }
+    set width(value) { setNumericStyle(this.main, "width", value); }
+    set height(value) { setNumericStyle(this.main, "height", value); }
+}
+
+class Background {
+
+    constructor(id, url) {
+        this.id = id;
+
+        if (is_moderator) {
+            this.hitbox = new Hitbox(this);
+        }
+
+        this.inner = tags.img({src: url});
+        this.outer = tags.div({
+            class: "board-element",
+            style: {
+                left: "0px",
+                top: "0px",
+                padding: "" + DELTA/2 + "px",
+            },
+            children: [
+                this.inner,
+            ]
+        });
+        CONTAINER.appendChild(this.outer);
+
+        // Get size for outer from inner after rendering it
+        setTimeout(() => {
+            if (this.width == NaN) {
+                this.width = this.inner.offsetWidth;
+            }
+            if (this.height == NaN) {
+                this.height = this.inner.offsetHeight;
+            }
+            this.inner.style.width = "100%";
+            this.inner.style.height = "100%";
+        }, 1000);
+    }
+
+    get url() { return this.inner.src; }
+    set url(value) { this.inner.src = value; }
+    get x() { return getNumericStyle(this.outer, "left"); }
+    get y() { return getNumericStyle(this.outer, "top"); }
+    set x(value) {
+        setNumericStyle(this.outer, "left", value);
+        if (is_moderator) {
+            this.hitbox.x = value;
+        }
+    }
+    set y(value) {
+        setNumericStyle(this.outer, "top", value);
+        if (is_moderator) {
+            this.hitbox.y = value;
+        }
+    }
+    get width() { return getNumericStyle(this.outer, "width"); }
+    get height() { return getNumericStyle(this.outer, "height"); }
+    set width(value) {
+        setNumericStyle(this.outer, "width", value);
+        if (is_moderator) {
+            this.hitbox.width = value;
+        }
+    }
+    set height(value) {
+        setNumericStyle(this.outer, "height", value);
+        if (is_moderator) {
+            this.hitbox.height = value;
+        }
     }
 }
