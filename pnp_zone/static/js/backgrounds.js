@@ -14,9 +14,29 @@ const DELTA = 20;
 const CONTAINER = document.getElementById("backgrounds");
 const HITBOXES = document.getElementById("backgroundHitboxes");
 
+const backgrounds = {};
+
+export function handleBackgrounds(event) {
+    const { id, url, x, y, width, height } = event;
+
+    let background = backgrounds[id];
+    if (!background) {
+        background = new Background(id, url);
+        backgrounds[id] = background;
+    }
+
+    background.url = url;
+    background.x = x;
+    background.y = y;
+    background.width = width;
+    background.height = height;
+}
+
 class Background {
 
-    constructor(node) {
+    constructor(id, url) {
+        this.id = id;
+
         this.leftHitbox = tags.div({
             class: "board-element",
             style: {
@@ -90,18 +110,20 @@ class Background {
             this.x += dx;
             this.y += dy;
         }.bind(this));
-        const dragStart = move.dragStart.bind(this);
+        const dragStart = move.dragStart;
         move.dragStart = function(event) {
             dragStart(event);
             this.hitbox.style.cursor = "grabbing";
         }.bind(this);
+        const dragEnd = move.dragEnd;
         move.dragEnd = function() {
+            dragEnd();
             this.hitbox.style.cursor = "grab";
         }.bind(this);
         new Drag(move, this.hitbox, LEFT_BUTTON).enable();
         HITBOXES.appendChild(this.hitbox);
 
-        this.inner = node;
+        this.inner = tags.img({src: url});
         this.outer = tags.div({
             class: "board-element",
             style: {
@@ -124,6 +146,8 @@ class Background {
         }, 1000);
     }
 
+    get url() { return this.inner.src; }
+    set url(value) { this.inner.src = value; }
     get x() { return getNumericStyle(this.outer, "left"); }
     get y() { return getNumericStyle(this.outer, "top"); }
     set x(value) {
@@ -161,9 +185,10 @@ class Background {
                 prevX = event.boardX;
                 prevY = event.boardY;
             },
-            dragEnd() {}
+            dragEnd: function() {
+                socket.send({type: "background", id: this.id, url: this.url,
+                             x: this.x, y: this.y, width: this.width, height: this.height});
+            }.bind(this)
         };
     }
 }
-
-const test = new Background(tags.img({src: "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Hinterwald_Cattle_Hinterzarten.jpg/1200px-Hinterwald_Cattle_Hinterzarten.jpg"}));

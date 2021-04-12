@@ -4,6 +4,7 @@ import Character from "./character.js";
 import * as Mouse from "./mouse.js";
 import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
 import { handleCursors } from "./cursors.js";
+import {handleBackgrounds} from "./backgrounds.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -33,6 +34,7 @@ socket.registerEvent("colorTile", (event) => {
     }
 });
 socket.registerEvent("cursor", handleCursors);
+socket.registerEvent("background", handleBackgrounds);
 socket.registerEvent("session", (event) => {
     board.x = event.x;
     board.y = event.y;

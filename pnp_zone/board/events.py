@@ -1,7 +1,6 @@
 from channels.db import database_sync_to_async
 
-from board.models import Character, Tile, UserSession
-
+from board.models import Character, Tile, UserSession, BackgroundImage
 
 event_handlers = {}
 
@@ -103,4 +102,23 @@ def process_color_tile(room, user, data):
     else:
         tiles.delete()
 
+    return None, data
+
+
+@register("background")
+@moderators_only
+@database_sync_to_async
+def process_background(room, user, data):
+    try:
+        background = BackgroundImage.objects.get(room=room, identifier=data["id"])
+    except BackgroundImage.DoesNotExist:
+        background = BackgroundImage(room=room, identifier=data["id"])
+
+    background.url = data["url"]
+    background.x = data["x"]
+    background.y = data["y"]
+    background.width = data["width"]
+    background.height = data["height"]
+
+    background.save()
     return None, data
