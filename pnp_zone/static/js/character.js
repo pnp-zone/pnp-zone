@@ -23,6 +23,7 @@ export default class Character {
             style: {
                 width: CHARACTER_WIDTH + "px",
                 height: CHARACTER_HEIGHT + "px",
+                cursor: "grab",
             },
             children: [
                 svg,
@@ -51,6 +52,7 @@ export default class Character {
 
     dragStart(event) {
         this.obj.style.transition = "none";
+        this.obj.style.cursor = "grabbing";
     }
 
     dragMove(event) {
@@ -60,6 +62,7 @@ export default class Character {
 
     dragEnd() {
         this.obj.style.transition = "";
+        this.obj.style.cursor = "grab";
         this.moveTo(this.xIndex, this.yIndex);
     }
 
