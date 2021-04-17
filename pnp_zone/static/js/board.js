@@ -41,12 +41,6 @@ socket.registerEvent("session", (event) => {
     board.generateVisible();
 });
 
-// Add delete functionality
-const deleteCharacter = document.getElementById("deleteCharacter");
-if (deleteCharacter) {
-    Character.registerDeleteTarget(deleteCharacter);
-}
-
 // Add submit action to new character form
 const newCharacter = document.forms["newCharacter"];
 if (newCharacter) {

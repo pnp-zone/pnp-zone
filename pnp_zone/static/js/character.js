@@ -1,6 +1,6 @@
 import tags from "./lib/tagFactory.js";
 import { EventListener, EventGroup } from "./lib/eventHandler.js";
-import { endDrag, getDragged, LEFT_BUTTON, Drag } from "./lib/mouse.js";
+import {endDrag, getDragged, LEFT_BUTTON, Drag, registerContextMenu} from "./lib/mouse.js";
 import Hexagon from "./hexagon.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
@@ -46,6 +46,7 @@ export default class Character {
                 }
             }),
         ).enable();
+        registerContextMenu(this.obj, this.contextMenu.bind(this)).enable();
 
         this.moveTo(x, y);
     }
@@ -64,6 +65,17 @@ export default class Character {
         this.obj.style.transition = "";
         this.obj.style.cursor = "grab";
         this.moveTo(this.xIndex, this.yIndex);
+    }
+
+    contextMenu() {
+        return [
+            tags.button({
+                onclick: (event) => {
+                    socket.send({type: "delete", id: this.id});
+                },
+                innerText: "Delete character"
+            }),
+        ];
     }
 
     get xPixel() {
@@ -85,13 +97,5 @@ export default class Character {
         const coord = Coord.fromIndex(x, y);
         this.xPixel = coord.xPixel;
         this.yPixel = coord.yPixel;
-    }
-
-    static registerDeleteTarget(obj) {
-        new EventListener(obj, "mouseup", () => {
-            if (getDragged() instanceof Character) {
-                socket.send({type: "delete", id: getDragged().id});
-            }
-        }).enable();
     }
 }
