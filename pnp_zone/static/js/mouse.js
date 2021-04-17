@@ -1,6 +1,8 @@
-import { Coord } from "./grid.js";
 import { EventGroup, EventListener } from "./eventHandler.js";
 
+/*
+ * Utility
+ */
 export const LEFT_BUTTON = 0;
 export const MIDDLE_BUTTON = 1;
 export const RIGHT_BUTTON = 2;
@@ -15,54 +17,37 @@ export function buttons(event) {
     };
 }
 
-let board = null;
-export function init(b) {
-    board = b;
-
-    // Extend mouse events
-    document.addEventListener("click", extendEvent, true);
-    document.addEventListener("contextmenu", extendEvent, true);
-    document.addEventListener("ondbclick", extendEvent, true);
-    document.addEventListener("mousedown", extendEvent, true);
-    document.addEventListener("mouseenter", extendEvent, true);
-    document.addEventListener("mouseleave", extendEvent, true);
-    document.addEventListener("mousemove", extendEvent, true);
-    document.addEventListener("mouseout", extendEvent, true);
-    document.addEventListener("mouseover", extendEvent, true);
-    document.addEventListener("mouseup", extendEvent, true);
-    document.addEventListener("wheel", extendEvent, true);
-}
-
-export function extendEvent(event) {
-    const boardViewRect = board.obj.parentElement.getBoundingClientRect();
-
-    // is the cursor over the board?
-    //const overBoard = (boardViewRect.left < event.clientX && event.clientX < boardViewRect.right)
-    //    && boardViewRect.top < event.clientY && event.clientY < boardViewRect.bottom;
-
-    // get the cursor coordinates in the board
-    // (taking position and scale into consideration)
-    const boardX = (event.clientX - boardViewRect.x)/board.scale + board.left;
-    const boardY = (event.clientY - boardViewRect.y)/board.scale + board.top;
-
-    event.boardX = boardX;
-    event.boardY = boardY;
-
-    let coord = null;
-    Object.defineProperty(event, "gridX", {get: () => {
-        if (!coord) {
-            coord = Coord.fromPixel(boardX, boardY);
+/*
+ * Mouse event extensions
+ */
+const mouseEvents = [
+    "click",
+    "contextmenu",
+    "ondbclick",
+    "mousedown",
+    "mouseenter",
+    "mouseleave",
+    "mousemove",
+    "mouseout",
+    "mouseover",
+    "mouseup",
+    "wheel",
+];
+const extensions = [];
+for (let i = 0; i < mouseEvents.length; i++) {
+    document.addEventListener(mouseEvents[i], (event) => {
+        for (let i = 0; i < extensions.length; i++) {
+            extensions[i](event);
         }
-        return coord.xIndex;
-    }});
-    Object.defineProperty(event, "gridY", {get: () => {
-            if (!coord) {
-                coord = Coord.fromPixel(boardX, boardY);
-            }
-            return coord.yIndex;
-    }});
+    }, true);
+}
+export function addMouseExtension(extension) {
+    extension.push(extension);
 }
 
+/*
+ * Dragging API
+ */
 let dragged_for_button = {};
 const dragHandler = new EventGroup(
         new EventListener(document, "mousemove", (event) => {

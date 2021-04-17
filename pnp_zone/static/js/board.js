@@ -2,7 +2,7 @@ import socket from "./socket.js";
 import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
 import * as Mouse from "./mouse.js";
-import { MIDDLE_BUTTON, LEFT_BUTTON, Drag } from "./mouse.js";
+import {MIDDLE_BUTTON, LEFT_BUTTON, Drag, addMouseExtension} from "./mouse.js";
 import { handleCursors } from "./cursors.js";
 import { handleBackgrounds } from "./backgrounds.js";
 
@@ -204,7 +204,36 @@ class Board {
 }
 
 export const board = new Board();
-Mouse.init(board);
+
+addMouseExtension((event) => {
+    const boardViewRect = board.obj.parentElement.getBoundingClientRect();
+
+    // is the cursor over the board?
+    //const overBoard = (boardViewRect.left < event.clientX && event.clientX < boardViewRect.right)
+    //    && boardViewRect.top < event.clientY && event.clientY < boardViewRect.bottom;
+
+    // get the cursor coordinates in the board
+    // (taking position and scale into consideration)
+    const boardX = (event.clientX - boardViewRect.x)/board.scale + board.left;
+    const boardY = (event.clientY - boardViewRect.y)/board.scale + board.top;
+
+    event.boardX = boardX;
+    event.boardY = boardY;
+
+    let coord = null;
+    Object.defineProperty(event, "gridX", {get: () => {
+        if (!coord) {
+            coord = Coord.fromPixel(boardX, boardY);
+        }
+        return coord.xIndex;
+    }});
+    Object.defineProperty(event, "gridY", {get: () => {
+            if (!coord) {
+                coord = Coord.fromPixel(boardX, boardY);
+            }
+            return coord.yIndex;
+    }});
+});
 
 class PaintBrush {
     constructor(form) {
