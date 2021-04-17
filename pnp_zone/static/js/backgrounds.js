@@ -1,7 +1,7 @@
 import tags from "./tagFactory.js";
 import { Drag, LEFT_BUTTON } from "./mouse.js";
 
-let is_moderator = true;
+const is_moderator = document.getElementById("moderator") !== null;
 
 function getNumericStyle(node, property, unit="px") {
     return parseFloat(node.style[property].replace(unit, ""));
