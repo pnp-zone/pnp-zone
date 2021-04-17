@@ -19,6 +19,14 @@ export function buttons(event) {
 
 /*
  * Mouse event extensions
+ * ----------------------
+ *
+ * Using `addMouseExtension` one can register a function to extend mouse events.
+ * When a mouse event is fired it will go through this function before propagating through the DOM.
+ * The function then can modify/ extend the event object in any way.
+ *
+ * The event will be given to the function as its first and only parameter and should be modified directly.
+ * The function's return value will have no effect.
  */
 const mouseEvents = [
     "click",
@@ -47,6 +55,25 @@ export function addMouseExtension(extension) {
 
 /*
  * Dragging API
+ * ------------
+ *
+ * For making something draggable, create a `Drag` object and enable it.
+ * Its constructor takes a callback object, a DOM node and a mouse button:
+ *     The callback object needs to provide three methods:
+ *       `dragStart`, `dragMove`, `dragEnd`
+ *
+ *     The DOM node is the target for starting the drag.
+ *     So the mouse button has to be pressed while the mouse is above this node.
+ *     It defaults to the callback object.
+ *
+ *     The mouse button is specified as an integer.
+ *     See constants at beginning of module.
+ *     It defaults to the left mouse button.
+ * The `Drag` object provides an `enable` and a `disable` method and starts disabled after construction.
+ *
+ * If you need more control over starting and stopping your dragging,
+ * you could use `startDrag` and `endDrag`, however this is discouraged.
+ * It takes your callback object and the mouse button.
  */
 let dragged_for_button = {};
 const dragHandler = new EventGroup(
