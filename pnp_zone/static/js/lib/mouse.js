@@ -1,5 +1,6 @@
 import { EventGroup, EventListener } from "./eventHandler.js";
 
+
 /*
  * Utility
  */
@@ -16,6 +17,7 @@ export function buttons(event) {
         // forward: event.buttons & 16,
     };
 }
+
 
 /*
  * Mouse event extensions
@@ -52,6 +54,62 @@ for (let i = 0; i < mouseEvents.length; i++) {
 export function addMouseExtension(extension) {
     extensions.push(extension);
 }
+
+
+/*
+ * Context Menus
+ * -------------
+ */
+let isMenuActive = false;
+const menu = document.getElementById("context-menu");
+document.addEventListener("DOMContentLoaded", () => {
+    menu.remove();
+    document.body.appendChild(menu);
+});
+
+function showMenu() {
+    if (!isMenuActive) {
+        isMenuActive = true;
+        menu.setAttribute("active", "true");
+    }
+}
+function hideMenu() {
+    if (isMenuActive) {
+        isMenuActive = false;
+        menu.setAttribute("active", "false");
+    }
+}
+
+// Close menu on any mouse click or ESC key press
+document.addEventListener("keyup", (event) => {
+    if (event.key === "Escape") {
+        hideMenu();
+    }
+}, true);
+document.addEventListener("mousedown", hideMenu, true);
+menu.addEventListener("mousedown", showMenu, true);
+
+export function registerContextMenu(target, getItems) {
+    const eventListener = new EventListener(target, "contextmenu", (event) => {
+        event.preventDefault();
+
+        menu.style.left = event.pageX + "px";
+        menu.style.top = event.pageY + "px";
+
+        const items = getItems();
+        while (menu.children.length > 0) {
+            menu.children[0].remove();
+        }
+        for (let i = 0; i < items.length; i++) {
+            menu.appendChild(items[i]);
+        }
+
+        showMenu();
+    });
+
+    return eventListener;
+}
+
 
 /*
  * Dragging API

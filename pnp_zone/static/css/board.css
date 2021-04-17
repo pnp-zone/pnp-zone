@@ -72,3 +72,15 @@
     flex: 1 1 auto;
     position: relative;
 }
+
+#context-menu {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    background: #192734;
+    color: #ffffff;
+}
+#context-menu[active="true"] {
+    display: block;
+}
