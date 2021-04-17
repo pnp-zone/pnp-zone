@@ -42,7 +42,7 @@ for (let i = 0; i < mouseEvents.length; i++) {
     }, true);
 }
 export function addMouseExtension(extension) {
-    extension.push(extension);
+    extensions.push(extension);
 }
 
 /*

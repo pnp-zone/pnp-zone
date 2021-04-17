@@ -1,5 +1,5 @@
+import tags from "./lib/tagFactory.js";
 import Hexagon from "./hexagon.js";
-import tags from "./tagFactory.js";
 
 export const TILE_HEXAGON = new Hexagon(100);
 export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);

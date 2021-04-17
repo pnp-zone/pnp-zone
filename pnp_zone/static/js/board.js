@@ -1,8 +1,7 @@
+import {MIDDLE_BUTTON, LEFT_BUTTON, Drag, addMouseExtension} from "./lib/mouse.js";
 import socket from "./socket.js";
 import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
-import * as Mouse from "./mouse.js";
-import {MIDDLE_BUTTON, LEFT_BUTTON, Drag, addMouseExtension} from "./mouse.js";
 import { handleCursors } from "./cursors.js";
 import { handleBackgrounds } from "./backgrounds.js";
 

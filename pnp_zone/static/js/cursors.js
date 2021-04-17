@@ -1,4 +1,4 @@
-import tags from "./tagFactory.js";
+import tags from "./lib/tagFactory.js";
 import socket from "./socket.js";
 
 // Timeout for sending movement events to server

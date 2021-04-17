@@ -1,5 +1,5 @@
-import tags from "./tagFactory.js";
-import { Drag, LEFT_BUTTON } from "./mouse.js";
+import tags from "./lib/tagFactory.js";
+import { Drag, LEFT_BUTTON } from "./lib/mouse.js";
 
 const is_moderator = document.getElementById("moderator") !== null;
 

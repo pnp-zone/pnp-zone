@@ -1,9 +1,9 @@
+import tags from "./lib/tagFactory.js";
+import { EventListener, EventGroup } from "./lib/eventHandler.js";
+import { endDrag, getDragged, LEFT_BUTTON, Drag } from "./lib/mouse.js";
 import Hexagon from "./hexagon.js";
-import tags from "./tagFactory.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
-import { EventListener, EventGroup } from "./eventHandler.js";
-import { endDrag, getDragged, LEFT_BUTTON, Drag } from "./mouse.js";
 
 const CHARACTER = new Hexagon(80);
 const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
