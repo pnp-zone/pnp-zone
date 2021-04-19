@@ -182,3 +182,7 @@ LOGGING = {
 JITSI_INTEGRATION = False
 JITSI_DOMAIN = "change_me"  # Without https://
 JITSI_PREFIX = "pnp-zone/"  # Will be added to the room uuid to create the jitsi room
+
+BBB_INTEGRATION = False
+BBB_HOST = "https://bbb.example.com"
+BBB_SECRET = "change_me"
