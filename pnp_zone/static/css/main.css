@@ -50,16 +50,17 @@ input[type=number] {
 }
 
 .sidebar {
-  background: #192734;
-  color: #ffffff;
-  position: fixed;
-  width: 18%;
-  height: 100vh;
-  font-size: 0.65em;
-  z-index: 100;
+  /*background: #192734;*/
+    background-color: #192838;
+    color: #ffffff;
+    position: fixed;
+    width: 18%;
+    height: 100vh;
+    font-size: 0.65em;
+    z-index: 100;
 
-  left: -18%;
-  transition: left 0.5s;
+    left: -18%;
+    transition: left 0.5s;
 }
 
 .toggle {
@@ -158,16 +159,43 @@ input[type=number] {
 .loginBox {
     display: flex;
     flex-direction: column;
-    justify-content: center;
     margin-top: 20vh;
     background-color: #192734;
-    padding: 2vw;
+    padding: 3rem;
     box-shadow: 2px 2px 2px 2px #131313;
 }
 
-.loginBox p {
+.loginBox label {
+    margin-bottom: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.loginBox input {
+    margin-bottom: 0.5rem;
+}
+
+.loginBox button {
+    margin-top: 0.5rem;
+}
+
+.loginRow {
     display: flex;
-    flex-direction: column;
+    margin-bottom: 0.5rem;
+}
+
+#password {
+    margin: 0;
+}
+
+.loginShowPassword {
+    border: none;
+    background-color: transparent;
+    padding: 0.25rem;
+    margin: 0 0 0 0.5rem !important;
+}
+
+.loginShowPassword img {
+    filter: invert(100%);
 }
 
 .noselect {
@@ -178,4 +206,26 @@ input[type=number] {
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
+}
+
+.dashboardContent {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    height: 100vh;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.dashboardBox {
+    padding: 4rem 7rem 4rem 7rem;
+    border: 1px solid black;
+    background-color: #192838;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: background-color 300ms;
+}
+
+.dashboardBox:hover {
+    background-color: #205067;
 }
