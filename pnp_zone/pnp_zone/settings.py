@@ -44,10 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'board',
-    'character',
     'dashboard',
-    'wiki',
-    'dm',
     'accounts',
 ]
 
