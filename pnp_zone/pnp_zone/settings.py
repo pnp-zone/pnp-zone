@@ -14,6 +14,7 @@ from pathlib import Path
 import channels
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import django.db.models
 import ldap
 from django_auth_ldap.config import LDAPSearch
 
@@ -97,6 +98,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = django.db.models.AutoField
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
