@@ -22,3 +22,9 @@ class CampaignModel(models.Model):
 
     def __str__(self):
         return self.name
+
+    def is_part_of(self, username):
+        if username in [x.user.username for x in self.game_master.all()] or\
+                username in [x.user.username for x in self.players.all()]:
+            return True
+        return False

@@ -209,12 +209,10 @@ input[type=number] {
 }
 
 .dashboardContent {
+    margin-left: 3vw;
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
     height: 100vh;
-    align-items: center;
-    justify-content: space-evenly;
 }
 
 .dashboardBox {
@@ -228,4 +226,69 @@ input[type=number] {
 
 .dashboardBox:hover {
     background-color: #205067;
+}
+
+.campaignRow {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
+.campaignLink {
+    text-decoration: none;
+    color: white;
+}
+
+.campaignItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 1rem;
+    padding: 1rem 3rem 1rem 3rem;
+    background-color: #233549;
+    transition: background-color 300ms;
+    height: 40%;
+}
+
+.campaignItem:hover {
+    background-color: #205067;
+    cursor: pointer;
+}
+
+.campaignItem img {
+    width: 2rem;
+    filter: invert(100%);
+}
+
+.campaignCreator {
+    display: flex;
+    flex-direction: column;
+    background-color: #192838;
+    width: 20rem;
+    padding: 2rem;
+}
+
+.campaignCreator input {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.createBoardCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.createBoardBox {
+    display: flex;
+    flex-direction: column;
+    background-color: #192734;
+    padding: 2rem;
+}
+
+.createBoardBox input {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }
