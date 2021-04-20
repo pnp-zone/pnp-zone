@@ -20,9 +20,10 @@ class BoardView(LoginRequiredMixin, TemplateView):
         except Room.DoesNotExist:
             raise Http404
 
-        campaign = CampaignModel.objects.get(room__identifier=room.identifier)
-        if request.user not in campaign.players.all() or request.user not in campaign.game_master.all():
-            HttpResponse("You're not allowed in this room")
+        campaign = CampaignModel.objects.filter(room__in=[room.id])[0]
+        if request.user.username not in [x.user.username for x in campaign.players.all()] and\
+                request.user.username not in [x.user.username for x in campaign.game_master.all()]:
+            return HttpResponse("You're not allowed in this room")
 
         return render(request, template_name=self.template_name, context={
             "title": room.name,
