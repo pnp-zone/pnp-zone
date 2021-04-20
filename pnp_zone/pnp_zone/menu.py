@@ -1,9 +1,6 @@
-_menu = [{"link": "/", "text": "Dashboard"},
-         {"link": "/player/", "text": "Player Tools"},
-         {"link": "/dm/", "text": "DM Tools"},
-         {"link": "/wiki/", "text": "Wiki"},
-         {"link": "/board/", "text": "Game boards"},
-         ]
+_menu = [
+    {"link": "/", "text": "Dashboard"},
+]
 
 
 def get(active_link=None):
