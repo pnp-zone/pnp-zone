@@ -19,11 +19,13 @@ from django.urls import path, include
 from pnp_zone.views import Login, Logout
 import dashboard.urls
 import board.urls
+import campaign.urls
 
 urlpatterns = [
     path("", include(dashboard.urls)),
     path("admin/", admin.site.urls),
     path("board/", include(board.urls)),
+    path("campaign/", include(campaign.urls)),
     path("login", Login.as_view()),
     path("logout", Logout.as_view()),
 ]
