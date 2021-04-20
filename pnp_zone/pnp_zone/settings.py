@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'board',
     'dashboard',
     'accounts',
+    'campaign',
 ]
 
 MIDDLEWARE = [
