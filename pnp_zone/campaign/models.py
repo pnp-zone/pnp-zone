@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models import CharField, OneToOneField, ManyToManyField
 
 from accounts.models import AccountModel
+from board.models import Room
 
 
 class CharacterModel(models.Model):
@@ -14,6 +15,7 @@ class CharacterModel(models.Model):
 
 class CampaignModel(models.Model):
     name = CharField(default="", max_length=255)
+    room = ManyToManyField(Room, blank=True)
     players = ManyToManyField(AccountModel, blank=True, related_name="campaign_players")
     game_master = ManyToManyField(AccountModel, related_name="campaign_gm")
     characters = ManyToManyField(CharacterModel, blank=True)
