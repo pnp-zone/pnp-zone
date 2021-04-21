@@ -1,7 +1,24 @@
 import tags from "./lib/tagFactory.js";
 import {Drag, LEFT_BUTTON} from "./lib/mouse.js";
+import socket from "./socket.js";
 
 const is_moderator = document.getElementById("moderator") !== null;
+
+// Add submit action to add background form
+const addBackground = document.forms["addBackground"];
+if (addBackground) {
+    addBackground.onsubmit = () => {
+        socket.send({type: "background",
+            id: "" + Date.now(),
+            url: addBackground["url"].value,
+            x: 0,
+            y: 0,
+            width: -1,
+            height: -1,
+        });
+        return false;
+    }
+}
 
 function getNumericStyle(node, property, unit="px") {
     return parseFloat(node.style[property].replace(unit, ""));
@@ -277,12 +294,18 @@ class Background {
     get width() { return getNumericStyle(this.outer, "width"); }
     get height() { return getNumericStyle(this.outer, "height"); }
     set width(value) {
+        if (value < 0) {
+            value = this.inner.naturalWidth;
+        }
         setNumericStyle(this.outer, "width", value);
         if (is_moderator) {
             this.hitbox.width = value;
         }
     }
     set height(value) {
+        if (value < 0) {
+            value = this.inner.naturalHeight;
+        }
         setNumericStyle(this.outer, "height", value);
         if (is_moderator) {
             this.hitbox.height = value;
