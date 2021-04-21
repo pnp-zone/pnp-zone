@@ -147,7 +147,8 @@ STATICFILES_DIRS = [
 
 # LDAP
 AUTHENTICATION_BACKENDS = [
-    "django_auth_ldap.backend.LDAPBackend",
+    #"django_auth_ldap.backend.LDAPBackend",
+    "pnp_zone.custom_ldap_backend.CustomLDAPBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -169,6 +170,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "givenName",
     "last_name": "sn",
     "email": "mail",
+    "display_name": "displayName",
 }
 
 # Logging
