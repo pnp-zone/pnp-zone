@@ -181,6 +181,12 @@ LOGGING = {
     "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
 }
 
+SMTP_INTEGRATION = False
+SMTP_HOST = "mail.example.com"
+SMTP_PORT = 465
+SMTP_USER = "info@pnp.zone"
+SMTP_PASS = "change_me"
+
 JITSI_INTEGRATION = False
 JITSI_DOMAIN = "change_me"  # Without https://
 JITSI_PREFIX = "pnp-zone/"  # Will be added to the room uuid to create the jitsi room
