@@ -1,3 +1,5 @@
+import uuid
+
 from channels.db import database_sync_to_async
 
 from board.models import Character, Tile, UserSession, BackgroundImage
@@ -105,22 +107,64 @@ def process_color_tile(room, user, data):
     return None, data
 
 
-@register("background")
+def _background2data(bg: BackgroundImage):
+    return {
+        "type": "background.update",
+        "id": bg.identifier,
+        "url": bg.url,
+        "x": bg.x,
+        "y": bg.y,
+        "width": bg.width,
+        "height": bg.height
+    }
+
+
+@register("background.new")
 @moderators_only
 @database_sync_to_async
-def process_background(room, user, data):
+def new_background(room, user, data):
+    background = BackgroundImage.objects.create(
+        room=room,
+        identifier=str(uuid.uuid4()),
+        url=data["url"],
+        x=0,
+        y=0,
+        width=-1,
+        height=-1,
+    )
+
+    data = _background2data(background)
+    return data, data
+
+
+@register("background.move")
+@moderators_only
+@database_sync_to_async
+def move_background(room, user, data):
     try:
         background = BackgroundImage.objects.get(room=room, identifier=data["id"])
-        response = None, data
     except BackgroundImage.DoesNotExist:
-        background = BackgroundImage(room=room, identifier=data["id"])
-        response = data, data
+        return None, None
 
-    background.url = data["url"]
     background.x = data["x"]
     background.y = data["y"]
     background.width = data["width"]
     background.height = data["height"]
-
     background.save()
-    return response
+
+    data = _background2data(background)
+    return None, data
+
+
+@register("background.delete")
+@moderators_only
+@database_sync_to_async
+def delete_background(room, user, data):
+    try:
+        background = BackgroundImage.objects.get(room=room, identifier=data["id"])
+    except BackgroundImage.DoesNotExist:
+        return None, None
+
+    background.delete()
+
+    return data, data

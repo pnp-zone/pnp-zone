@@ -53,7 +53,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
         for b in self.room.backgroundimage_set.all():
             events.append(
-                {"type": "background", "id": b.identifier, "url": b.url,
+                {"type": "background.update", "id": b.identifier, "url": b.url,
                  "x": b.x, "y": b.y, "width": b.width, "height": b.height}
             )
 

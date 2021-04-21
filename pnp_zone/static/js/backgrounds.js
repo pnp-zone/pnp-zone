@@ -1,20 +1,22 @@
 import tags from "./lib/tagFactory.js";
-import {Drag, LEFT_BUTTON} from "./lib/mouse.js";
+import {Drag, LEFT_BUTTON, registerContextMenu} from "./lib/mouse.js";
 import socket from "./socket.js";
 
+const DELTA = 20;
+
+const CONTAINER = document.getElementById("backgrounds");
+const HITBOXES = document.getElementById("backgroundHitboxes");
+
 const is_moderator = document.getElementById("moderator") !== null;
+
+const backgrounds = {};
 
 // Add submit action to add background form
 const addBackground = document.forms["addBackground"];
 if (addBackground) {
     addBackground.onsubmit = () => {
-        socket.send({type: "background",
-            id: "" + Date.now(),
+        socket.send({type: "background.new",
             url: addBackground["url"].value,
-            x: 0,
-            y: 0,
-            width: -1,
-            height: -1,
         });
         return false;
     }
@@ -28,15 +30,7 @@ function setNumericStyle(node, property, value, unit="px") {
     node.style[property] = "" + value + unit;
 }
 
-const DELTA = 20;
-
-const CONTAINER = document.getElementById("backgrounds");
-const HITBOXES = document.getElementById("backgroundHitboxes");
-
-const backgrounds = {};
-
-export function handleBackgrounds(event) {
-    console.log(event);
+export function updateBackground(event) {
     const { id, url, x, y, width, height } = event;
 
     let background = backgrounds[id];
@@ -50,6 +44,16 @@ export function handleBackgrounds(event) {
     background.y = y;
     background.width = width;
     background.height = height;
+}
+export function deleteBackground(event) {
+    const { id } = event;
+
+    let background = backgrounds[id];
+    if (is_moderator) {
+        background.hitbox.main.remove();
+    }
+    background.outer.remove();
+    delete backgrounds[id];
 }
 
 class Hitbox {
@@ -222,7 +226,7 @@ class Hitbox {
             },
             dragEnd: function() {
                 this.main.focus();
-                socket.send({type: "background", id: this.parent.id, url: this.parent.url,
+                socket.send({type: "background.move", id: this.parent.id, url: this.parent.url,
                     x: this.parent.x, y: this.parent.y, width: this.parent.width, height: this.parent.height});
             }.bind(this)
         };
@@ -246,6 +250,17 @@ class Background {
 
         if (is_moderator) {
             this.hitbox = new Hitbox(this);
+            registerContextMenu(this.hitbox.main, () => {
+                return [
+                    tags.button({
+                        onclick: (event) => {
+                            socket.send({type: "background.delete", id: this.id});
+                        },
+                        innerText: "Delete background"
+                    }),
+                ];
+            }).enable();
+
         }
 
         this.inner = tags.img({src: url});

@@ -3,7 +3,7 @@ import socket from "./socket.js";
 import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
 import { handleCursors } from "./cursors.js";
-import { handleBackgrounds } from "./backgrounds.js";
+import { deleteBackground, updateBackground } from "./backgrounds.js";
 
 const SCALE_SPEED = 1.1;
 
@@ -33,7 +33,8 @@ socket.registerEvent("colorTile", (event) => {
     }
 });
 socket.registerEvent("cursor", handleCursors);
-socket.registerEvent("background", handleBackgrounds);
+socket.registerEvent("background.update", updateBackground);
+socket.registerEvent("background.delete", deleteBackground);
 socket.registerEvent("session", (event) => {
     board.x = event.x;
     board.y = event.y;
