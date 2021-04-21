@@ -57,29 +57,28 @@ class Hitbox {
             class: "board-element",
             style: {
                 cursor,
-                width: "100%",
-                height: "100%",
-                top: 0,
-                left: 0,
+                top: "50%",
+                left: "50%",
+                backgroundColor: "#00f",
+                margin: "" + DELTA + "px",
+                padding: "" + DELTA + "px",
             }
         }
 
-        // size
-        if (ns !== "") {
-            obj.style.height = ""+DELTA+"px";
-        }
-        if (we !== "") {
-            obj.style.width = ""+DELTA+"px";
-        }
-
         // position
+        if (ns === "N") {
+            obj.style.top = "-" + DELTA + "px";
+        }
         if (ns === "S") {
             obj.style.top = "auto";
-            obj.style.bottom = 0;
+            obj.style.bottom = "-" + DELTA + "px";
+        }
+        if (we === "W") {
+            obj.style.left = "-" + DELTA + "px";
         }
         if (we === "E") {
             obj.style.left = "auto";
-            obj.style.right = 0;
+            obj.style.right = "-" + DELTA + "px";
         }
 
         // drag callback
@@ -166,7 +165,7 @@ class Hitbox {
                 cursor: "move",
                 left: 0,
                 top: 0,
-                padding: "" + DELTA/2 + "px",
+                padding: "" + DELTA + "px",
             },
             children: [
                 w, e, n, s,
@@ -236,7 +235,7 @@ class Background {
             style: {
                 left: "0px",
                 top: "0px",
-                padding: "" + DELTA/2 + "px",
+                padding: "" + DELTA + "px",
             },
             children: [
                 this.inner,
