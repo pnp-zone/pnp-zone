@@ -6,6 +6,7 @@ from channels.db import database_sync_to_async
 
 from board.events import event_handlers, EventError
 from board.models import Room, UserSession
+from campaign.models import CampaignModel
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
@@ -24,7 +25,8 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user in self.room.moderators.all() or self.user.is_superuser
+        game_master = CampaignModel.objects.filter(room__in=[self.room.id])[0].game_master.all()
+        self.is_moderator = self.user.username in [x.user.username for x in game_master] or self.user.is_superuser
 
     @database_sync_to_async
     def init_events(self):

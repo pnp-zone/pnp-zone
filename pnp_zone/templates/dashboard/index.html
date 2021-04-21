@@ -1,3 +1,22 @@
 {% extends "base.html" %}
 {% block body %}
+    <div class="dashboardContent">
+        <h2>Your campaigns:</h2>
+        <div class="campaignRow">
+        {% for campaign in campaign_list %}
+            <a class="campaignLink" href="/campaign/show/{{ campaign.id }}">
+                <div class="campaignItem">{{ campaign.name }}</div>
+            </a>
+        {% endfor %}
+        </div>
+        <form method="POST" action="/campaign/create">
+            {% csrf_token %}
+            <div class="campaignCreator">
+                <h2>Create campaign</h2>
+                <label for="campaign_name">Name:</label>
+                <input id="campaign_name" name="name" required>
+                <button>Submit</button>
+            </div>
+        </form>
+    </div>
 {% endblock %}

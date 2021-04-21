@@ -14,6 +14,7 @@ from pathlib import Path
 import channels
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+import django.db.models
 import ldap
 from django_auth_ldap.config import LDAPSearch
 
@@ -43,11 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'board',
-    'character',
     'dashboard',
-    'wiki',
-    'dm',
     'accounts',
+    'campaign',
 ]
 
 MIDDLEWARE = [
@@ -97,6 +96,7 @@ DATABASES = {
     }
 }
 
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -147,7 +147,8 @@ STATICFILES_DIRS = [
 
 # LDAP
 AUTHENTICATION_BACKENDS = [
-    "django_auth_ldap.backend.LDAPBackend",
+    #"django_auth_ldap.backend.LDAPBackend",
+    "pnp_zone.custom_ldap_backend.CustomLDAPBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -169,6 +170,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
     "first_name": "givenName",
     "last_name": "sn",
     "email": "mail",
+    "display_name": "displayName",
 }
 
 # Logging
@@ -179,6 +181,16 @@ LOGGING = {
     "loggers": {"django_auth_ldap": {"level": "DEBUG", "handlers": ["console"]}},
 }
 
+SMTP_INTEGRATION = False
+SMTP_HOST = "mail.example.com"
+SMTP_PORT = 465
+SMTP_USER = "info@pnp.zone"
+SMTP_PASS = "change_me"
+
 JITSI_INTEGRATION = False
 JITSI_DOMAIN = "change_me"  # Without https://
 JITSI_PREFIX = "pnp-zone/"  # Will be added to the room uuid to create the jitsi room
+
+BBB_INTEGRATION = False
+BBB_HOST = "https://bbb.example.com"
+BBB_SECRET = "change_me"

@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.admin import ModelAdmin
 
-from accounts.models import *
+from campaign.models import *
 
 
-@admin.register(AccountModel)
-class AccountAdmin(ModelAdmin):
+@admin.register(CampaignModel)
+class CampaignAdmin(ModelAdmin):
     list_display = ("__str__",)

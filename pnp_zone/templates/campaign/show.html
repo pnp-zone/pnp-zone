@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block body %}
+<h2>Players</h2>
+<h2>Gamemasters</h2>
+{% for gm in gamemasters %}
+    {{ gm }}
+{% endfor %}
+<h2>Boards</h2>
+<div class="campaignRow">
+    <form method="POST" action="/campaign/show/{{ cid }}/createBoard">
+        {% csrf_token %}
+        <div class="createBoardBox">
+            <h2>Create Board</h2>
+            <label for="board_name">Name:</label>
+            <input id="board_name" name="name" required>
+            <button>Submit</button>
+        </div>
+    </form>
+{% for board in boards %}
+    <div class="campaignItem" onclick="window.location = '/board/{{ board.identifier }}';">{{ board.name }}</div>
+{% endfor %}
+</div>
+<h2>Integrations</h2>
+Coming soon...
+{% endblock %}
