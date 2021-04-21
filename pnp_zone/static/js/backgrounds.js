@@ -36,93 +36,111 @@ export function handleBackgrounds(event) {
 }
 
 class Hitbox {
+    createChildBox(pos, cursor = "auto") {
+        // parse parameter
+        let ns = pos.match(/[NS]/);
+        if (ns !== null) {
+            ns = ns[0];
+        } else {
+            ns = "";
+        }
+
+        let we = pos.match(/[WE]/);
+        if (we !== null) {
+            we = we[0];
+        } else {
+            we = "";
+        }
+
+        // base definition for div
+        const obj = {
+            class: "board-element",
+            style: {
+                cursor,
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
+            }
+        }
+
+        // size
+        if (ns !== "") {
+            obj.style.height = ""+DELTA+"px";
+        }
+        if (we !== "") {
+            obj.style.width = ""+DELTA+"px";
+        }
+
+        // position
+        if (ns === "S") {
+            obj.style.top = "auto";
+            obj.style.bottom = 0;
+        }
+        if (we === "E") {
+            obj.style.left = "auto";
+            obj.style.right = 0;
+        }
+
+        // drag callback
+        const parent = this.parent;
+        function callback(dx, dy) {
+            switch (ns) {
+                case "N":
+                    parent.y += dy;
+                    parent.height -= dy;
+                    break;
+                case "S":
+                    parent.height += dy;
+                    break;
+            }
+            switch (we) {
+                case "W":
+                    parent.x += dx;
+                    parent.width -= dx;
+                    break;
+                case "E":
+                    parent.width += dx;
+                    break;
+            }
+        }
+
+        const hitbox = tags.div(obj);
+        new Drag(this.wrapDragMove(callback), hitbox, LEFT_BUTTON).enable();
+        return hitbox
+    }
+
     constructor(parent) {
         this.parent = parent;
 
-        this.left = tags.div({
-            class: "board-element",
-            style: {
-                cursor: "ew-resize",
-                width: ""+DELTA+"px",
-                height: "100%",
-            }
-        });
-        new Drag(this.wrapDragMove((function(dx, dy) {
-            parent.x += dx;
-            parent.width -= dx;
-        }).bind(this)), this.left, LEFT_BUTTON).enable();
+        const n = this.createChildBox("N", "ns-resize");
+        const s = this.createChildBox("S", "ns-resize");
+        const w = this.createChildBox("W", "ew-resize");
+        const e = this.createChildBox("E", "ew-resize");
 
-        this.right = tags.div({
-            class: "board-element",
-            style: {
-                cursor: "ew-resize",
-                width: ""+DELTA+"px",
-                height: "100%",
-                left: "auto",
-                right: 0,
-            }
-        });
-        new Drag(this.wrapDragMove((function(dx, dy) {
-            parent.width += dx;
-        }).bind(this)), this.right, LEFT_BUTTON).enable();
+        const nw = this.createChildBox("NW", "nwse-resize");
+        const se = this.createChildBox("SE", "nwse-resize");
+        const ne = this.createChildBox("NE", "nesw-resize");
+        const sw = this.createChildBox("SW", "nesw-resize");
 
-        this.top = tags.div({
-            class: "board-element",
-            style: {
-                cursor: "ns-resize",
-                width: "100%",
-                height: ""+DELTA+"px",
-            }
-        });
-        new Drag(this.wrapDragMove((function(dx, dy) {
-            parent.y += dy;
-            parent.height -= dy;
-        }).bind(this)), this.top, LEFT_BUTTON).enable();
-
-        this.bottom = tags.div({
-            class: "board-element",
-            style: {
-                cursor: "ns-resize",
-                width: "100%",
-                height: ""+DELTA+"px",
-                top: "auto",
-                bottom: 0,
-            }
-        });
-        new Drag(this.wrapDragMove((function(dx, dy) {
-            parent.height += dy;
-        }).bind(this)), this.bottom, LEFT_BUTTON).enable();
-
+        this.children = {n, s, w, e, nw, se, ne, sw};
         this.main = tags.div({
             class: "board-element",
             style: {
-                cursor: "grab",
-                left: "0px",
-                top: "0px",
+                cursor: "move",
+                left: 0,
+                top: 0,
                 padding: "" + DELTA/2 + "px",
             },
             children: [
-                this.left,
-                this.right,
-                this.top,
-                this.bottom,
+                w, e, n, s,
+                nw, se, ne, sw
             ],
         });
-        const move = this.wrapDragMove(function(dx, dy) {
+        new Drag(this.wrapDragMove(function(dx, dy) {
             parent.x += dx;
             parent.y += dy;
-        }.bind(this));
-        const dragStart = move.dragStart;
-        move.dragStart = function(event) {
-            dragStart(event);
-            this.main.style.cursor = "grabbing";
-        }.bind(this);
-        const dragEnd = move.dragEnd;
-        move.dragEnd = function() {
-            dragEnd();
-            this.main.style.cursor = "grab";
-        }.bind(this);
-        new Drag(move, this.main, LEFT_BUTTON).enable();
+        }), this.main, LEFT_BUTTON).enable();
 
         HITBOXES.appendChild(this.main);
     }
