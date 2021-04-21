@@ -160,7 +160,8 @@ class Hitbox {
 
         this.children = {n, s, w, e, nw, se, ne, sw};
         this.main = tags.div({
-            class: "board-element",
+            class: "board-element hitbox",
+            tabIndex: 0,
             style: {
                 cursor: "move",
                 left: 0,
@@ -203,6 +204,7 @@ class Hitbox {
                 prevY = event.boardY;
             },
             dragEnd: function() {
+                this.main.focus();
                 socket.send({type: "background", id: this.parent.id, url: this.parent.url,
                     x: this.parent.x, y: this.parent.y, width: this.parent.width, height: this.parent.height});
             }.bind(this)

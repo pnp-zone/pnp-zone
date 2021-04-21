@@ -84,3 +84,11 @@
 #context-menu[active="true"] {
     display: block;
 }
+
+.hitbox div {
+    display: none;
+}
+
+.hitbox:focus div {
+    display: block;
+}
