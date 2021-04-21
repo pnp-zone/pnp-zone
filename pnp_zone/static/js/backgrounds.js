@@ -1,5 +1,5 @@
 import tags from "./lib/tagFactory.js";
-import { Drag, LEFT_BUTTON } from "./lib/mouse.js";
+import {Drag, LEFT_BUTTON} from "./lib/mouse.js";
 
 const is_moderator = document.getElementById("moderator") !== null;
 
@@ -84,25 +84,61 @@ class Hitbox {
 
         // drag callback
         const parent = this.parent;
-        function callback(dx, dy) {
-            switch (ns) {
+        function resize(direction, amount) {
+            switch (direction) {
                 case "N":
-                    parent.y += dy;
-                    parent.height -= dy;
+                    parent.y += amount;
+                    parent.height -= amount;
                     break;
                 case "S":
-                    parent.height += dy;
+                    parent.height += amount;
                     break;
-            }
-            switch (we) {
                 case "W":
-                    parent.x += dx;
-                    parent.width -= dx;
+                    parent.x += amount;
+                    parent.width -= amount;
                     break;
                 case "E":
-                    parent.width += dx;
+                    parent.width += amount;
                     break;
             }
+            return parent;
+        }
+
+        let callback;
+        if ((ns !== "") && (we !== "")) {
+            callback = (function (dx, dy, event) {
+                // corner the drag started from
+                const cornerX = parent.x + (we === "E" ? parent.width : 0);
+                const cornerY = parent.y + (ns === "S" ? parent.height : 0);
+
+                // slope of the diagonal through that corner
+                let m;
+                if (((ns === "N") && (we === "W")) || ((ns === "S") && (we === "E"))) {
+                    m = this.ratio;
+                } else {
+                    m = -this.ratio;
+                }
+
+                // is the cursor above that diagonal
+                const above = m * (event.boardX - cornerX) > event.boardY - cornerY;
+
+                let height, width;
+                if ((ns === "N" && !above) || (ns === "S" && above)) {
+                    width = we === "W" ? parent.width - dx : parent.width + dx;
+                    height = width * this.ratio;
+                } else {
+                    height = ns === "N" ? parent.height - dy : parent.height + dy;
+                    width = height / this.ratio;
+                }
+
+                resize(ns, ns === "N" ? parent.height - height : height - parent.height);
+                resize(we, we === "W" ? parent.width - width : width - parent.width);
+            }).bind(this);
+        }
+        else if (ns !== "") {
+            callback = function(dx, dy) { resize(ns, dy); };
+        } else {
+            callback = function(dx, dy) { resize(we, dx); };
         }
 
         const hitbox = tags.div(obj);
@@ -148,16 +184,22 @@ class Hitbox {
     wrapDragMove(callback) {
         let prevX;
         let prevY;
+        let startX;
+        let startY;
+        let startParent;
 
         return {
             dragStart(event) {
                 prevX = event.boardX;
                 prevY = event.boardY;
+                startX = event.boardX;
+                startY = event.boardY;
+                startParent = {x: this.x, y: this.y, width: this.width, height: this.height};
             },
             dragMove(event) {
                 const dx = event.boardX - prevX;
                 const dy = event.boardY - prevY;
-                callback(dx, dy);
+                callback(dx, dy, event);
                 prevX = event.boardX;
                 prevY = event.boardY;
             },
@@ -176,6 +218,7 @@ class Hitbox {
     get height() { return getNumericStyle(this.main, "height"); }
     set width(value) { setNumericStyle(this.main, "width", value); }
     set height(value) { setNumericStyle(this.main, "height", value); }
+    get ratio() { return this.height / this.width; }
 }
 
 class Background {
