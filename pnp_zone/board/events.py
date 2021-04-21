@@ -111,8 +111,10 @@ def process_color_tile(room, user, data):
 def process_background(room, user, data):
     try:
         background = BackgroundImage.objects.get(room=room, identifier=data["id"])
+        response = None, data
     except BackgroundImage.DoesNotExist:
         background = BackgroundImage(room=room, identifier=data["id"])
+        response = data, data
 
     background.url = data["url"]
     background.x = data["x"]
@@ -121,4 +123,4 @@ def process_background(room, user, data):
     background.height = data["height"]
 
     background.save()
-    return None, data
+    return response
