@@ -4,6 +4,7 @@ import { endDrag, getDragged, LEFT_BUTTON, Drag, registerContextMenu } from "./l
 import Hexagon from "./hexagon.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
+import createEditableStyle from "./lib/style.js";
 
 const CHARACTER_WIDTH = 80;
 const CHARACTER_HEIGHT = 92;
@@ -19,13 +20,13 @@ export default class Character extends HTMLElement {
             rel: "stylesheet",
             href: "/static/css/board/character.css",
         }));
-        shadowRoot.appendChild(tags.style({
-            textContent: "" +
-                ":host {" +
-                "   left: 10px;" +
-                "   top: 10px;" +
-                "}",
-        }));
+        this.hiddenStyle = createEditableStyle();
+        this.hiddenStyle.setSelector(":host");
+        this.hiddenStyle.addEntry("left", "10px");
+        this.hiddenStyle.addEntry("top", "10px");
+        this.hiddenStyle.addEntry("transition", "");
+        this.hiddenStyle.addEntry("cursor", "");
+        shadowRoot.appendChild(this.hiddenStyle);
         shadowRoot.appendChild(Hexagon.generateSVG(512, 12));
         shadowRoot.appendChild(tags.p({}));
     }
@@ -73,8 +74,8 @@ export default class Character extends HTMLElement {
     }
 
     dragStart(event) {
-        this.style.transition = "none";
-        this.style.cursor = "grabbing";
+        this.hiddenStyle.transition = "none";
+        this.hiddenStyle.cursor = "grabbing";
     }
 
     dragMove(event) {
@@ -83,8 +84,8 @@ export default class Character extends HTMLElement {
     }
 
     dragEnd() {
-        this.style.transition = "";
-        this.style.cursor = "";
+        this.hiddenStyle.transition = "";
+        this.hiddenStyle.cursor = "";
         this.moveTo(this.xIndex, this.yIndex);
     }
 
@@ -97,23 +98,6 @@ export default class Character extends HTMLElement {
                 innerText: "Delete character"
             }),
         ];
-    }
-
-    get x() {
-        return parseInt(this.shadowRoot.querySelector("style").textContent.match(/left: (\d+)px;/)[1]);
-    }
-    set x(value) {
-        let css = this.shadowRoot.querySelector("style").textContent;
-        css = css.replace(/left: (-?\d+)px;/, "left: " + Math.round(value) + "px;");
-        this.shadowRoot.querySelector("style").textContent = css;
-    }
-    get y() {
-        return parseInt(this.shadowRoot.querySelector("style").textContent.match(/top: (\d+)px;/)[1]);
-    }
-    set y(value) {
-        let css = this.shadowRoot.querySelector("style").textContent;
-        css = css.replace(/top: (-?\d+)px;/, "top: " + Math.round(value) + "px;");
-        this.shadowRoot.querySelector("style").textContent = css;
     }
 
     get xIndex() {
@@ -129,16 +113,16 @@ export default class Character extends HTMLElement {
         return this.setAttribute("y", value);
     }
     get xPixel() {
-        return this.x + CHARACTER_WIDTH / 2;
+        return parseInt(this.hiddenStyle.left.match(/(.*)px/)[1]) + CHARACTER_WIDTH / 2;
     }
     set xPixel(value) {
-        this.x = value - CHARACTER_WIDTH / 2;
+        this.hiddenStyle.left = "" + (value - CHARACTER_WIDTH / 2) + "px";
     }
     get yPixel() {
-        return this.y + CHARACTER_HEIGHT / 2;
+        return parseInt(this.hiddenStyle.top.match(/(.*)px/)[1]) + CHARACTER_HEIGHT / 2;
     }
     set yPixel(value) {
-        this.y = value - CHARACTER_HEIGHT / 2;
+        this.hiddenStyle.top = "" + (value - CHARACTER_HEIGHT / 2) + "px";
     }
     moveTo(x, y) {
         this.xIndex = x;
