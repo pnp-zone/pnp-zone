@@ -74,7 +74,7 @@ def process_new_character(room, user, data):
 def process_delete_character(room, user, data):
     try:
         Character.objects.get(identifier=data["id"], room=room).delete()
-        return data, data
+        return None, data
     except Character.DoesNotExist:
         raise EventError(f"No character with id: {data['id']}") from None
 

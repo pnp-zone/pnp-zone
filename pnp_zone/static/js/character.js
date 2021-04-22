@@ -56,6 +56,11 @@ export default class Character extends HTMLElement {
         registerContextMenu(this, this.contextMenu.bind(this)).enable();
     }
 
+    remove() {
+        super.remove();
+        socket.send({type: "delete", id: this.id});
+    }
+
     dragStart(event) {
         this.style.transition = "none";
         this.style.cursor = "grabbing";
@@ -76,7 +81,7 @@ export default class Character extends HTMLElement {
         return [
             tags.button({
                 onclick: (event) => {
-                    socket.send({type: "delete", id: this.id});
+                    this.remove();
                 },
                 innerText: "Delete character"
             }),
