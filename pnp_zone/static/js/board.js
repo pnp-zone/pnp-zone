@@ -17,7 +17,13 @@ socket.registerEvent("move", (event) => {
     characters[event.id].moveTo(event.x, event.y);
 });
 socket.registerEvent("new", (event) => {
-    characters[event.id] = new Character({id: event.id, x: event.x, y: event.y, color: event.color});
+    const character = document.createElement("board-character");
+    character.id = event.id;
+    character.setAttribute("x", event.x);
+    character.setAttribute("y", event.y);
+    character.setAttribute("color", event.color);
+    document.getElementById("characters").appendChild(character);
+    characters[event.id] = character;
 });
 socket.registerEvent("error", (event) => {
     console.error(event.message);

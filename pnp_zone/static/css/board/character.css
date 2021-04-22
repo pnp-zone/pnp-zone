@@ -1,0 +1,26 @@
+:host {
+    transition-property: left, top;
+    transition-duration: 1s;
+    position: absolute;
+    z-index: inherit;
+    cursor: grab;
+    width: 80px;
+    height: 92px;
+}
+* {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: inherit;
+    height: inherit;
+}
+p {
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: inherit;
+    height: inherit;
+    margin: 0;
+    text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}

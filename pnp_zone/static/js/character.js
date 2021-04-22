@@ -5,39 +5,46 @@ import Hexagon from "./hexagon.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
 
-const CHARACTER = new Hexagon(80);
-const CHARACTER_WIDTH = Math.floor(CHARACTER.width);
-const CHARACTER_HEIGHT = Math.floor(CHARACTER.height);
-const DIV = document.getElementById("characters");
+const CHARACTER_WIDTH = 80;
+const CHARACTER_HEIGHT = 92;
 
-export default class Character {
+export default class Character extends HTMLElement {
+    static observedAttributes = ["id", "color", "x", "y"];
 
-    constructor({id, x, y, color}) {
-        this.id = id;
+    constructor() {
+        super();
+        const shadowRoot = this.attachShadow({mode: 'open'});
 
-        const svg = Hexagon.generateSVG(512, 12);
-        svg.firstChild.style.fill = color;
-        this.obj = tags.div({
-            id: this.id,
-            class: "character",// board-element",
-            style: {
-                width: CHARACTER_WIDTH + "px",
-                height: CHARACTER_HEIGHT + "px",
-                cursor: "grab",
-            },
-            children: [
-                svg,
-                tags.p({
-                    class: "board-element",
-                    innerText: this.id
-                }),
-            ],
-        });
-        DIV.appendChild(this.obj);
+        shadowRoot.appendChild(tags.link({
+            rel: "stylesheet",
+            href: "/static/css/board/character.css",
+        }));
+        shadowRoot.appendChild(Hexagon.generateSVG(512, 12));
+        shadowRoot.appendChild(tags.p({}));
+    }
 
-        new Drag(this, this.obj).enable();
+    attributeChangedCallback(attr, oldValue, newValue) {
+        switch (attr) {
+            case "id":
+                this.shadowRoot.querySelector("p").innerText = newValue;
+                break;
+            case "color":
+                this.shadowRoot.querySelector("svg").style.fill = newValue;
+                break;
+            case "x":
+            case "y":
+                const coord = Coord.fromIndex(this.xIndex, this.yIndex);
+                this.xPixel = coord.xPixel;
+                this.yPixel = coord.yPixel;
+                break;
+        }
+
+    }
+
+    connectedCallback() {
+        new Drag(this, this).enable();
         this.drag = new EventGroup(
-            new EventListener(this.obj, "mouseup", (event) => {
+            new EventListener(this, "mouseup", (event) => {
                 if (event.button === LEFT_BUTTON && getDragged() === this) {
                     socket.send({type: "move", id: this.id, x: event.gridX, y: event.gridY});
 
@@ -46,14 +53,12 @@ export default class Character {
                 }
             }),
         ).enable();
-        registerContextMenu(this.obj, this.contextMenu.bind(this)).enable();
-
-        this.moveTo(x, y);
+        registerContextMenu(this, this.contextMenu.bind(this)).enable();
     }
 
     dragStart(event) {
-        this.obj.style.transition = "none";
-        this.obj.style.cursor = "grabbing";
+        this.style.transition = "none";
+        this.style.cursor = "grabbing";
     }
 
     dragMove(event) {
@@ -62,8 +67,8 @@ export default class Character {
     }
 
     dragEnd() {
-        this.obj.style.transition = "";
-        this.obj.style.cursor = "grab";
+        this.style.transition = "";
+        this.style.cursor = "";
         this.moveTo(this.xIndex, this.yIndex);
     }
 
@@ -78,24 +83,34 @@ export default class Character {
         ];
     }
 
+    get xIndex() {
+        return parseInt(this.getAttribute("x"));
+    }
+    set xIndex(value) {
+        return this.setAttribute("x", value);
+    }
+    get yIndex() {
+        return parseInt(this.getAttribute("y"));
+    }
+    set yIndex(value) {
+        return this.setAttribute("y", value);
+    }
     get xPixel() {
-        return parseInt(this.obj.style.left.replace("px", "")) + this.obj.offsetWidth / 2;
+        return parseInt(this.style.left.replace("px", "")) + CHARACTER_WIDTH / 2;
     }
     set xPixel(value) {
-        this.obj.style.left = value - this.obj.offsetWidth / 2 + "px";
+        this.style.left = value - CHARACTER_WIDTH / 2 + "px";
     }
     get yPixel() {
-        return parseInt(this.obj.style.top.replace("px", "")) + this.obj.offsetHeight / 2;
+        return parseInt(this.style.top.replace("px", "")) + CHARACTER_HEIGHT / 2;
     }
     set yPixel(value) {
-        this.obj.style.top = value - this.obj.offsetHeight / 2 + "px";
+        this.style.top = value - CHARACTER_HEIGHT / 2 + "px";
     }
-
     moveTo(x, y) {
         this.xIndex = x;
         this.yIndex = y;
-        const coord = Coord.fromIndex(x, y);
-        this.xPixel = coord.xPixel;
-        this.yPixel = coord.yPixel;
     }
 }
+
+window.customElements.define("board-character", Character);
