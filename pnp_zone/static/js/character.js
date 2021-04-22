@@ -19,6 +19,13 @@ export default class Character extends HTMLElement {
             rel: "stylesheet",
             href: "/static/css/board/character.css",
         }));
+        shadowRoot.appendChild(tags.style({
+            textContent: "" +
+                ":host {" +
+                "   left: 10px;" +
+                "   top: 10px;" +
+                "}",
+        }));
         shadowRoot.appendChild(Hexagon.generateSVG(512, 12));
         shadowRoot.appendChild(tags.p({}));
     }
@@ -34,8 +41,12 @@ export default class Character extends HTMLElement {
             case "x":
             case "y":
                 const coord = Coord.fromIndex(this.xIndex, this.yIndex);
-                this.xPixel = coord.xPixel;
-                this.yPixel = coord.yPixel;
+                if (!isNaN(coord.xPixel)) {
+                    this.xPixel = coord.xPixel;
+                }
+                if (!isNaN(coord.yPixel)) {
+                    this.yPixel = coord.yPixel;
+                }
                 break;
         }
 
@@ -88,6 +99,23 @@ export default class Character extends HTMLElement {
         ];
     }
 
+    get x() {
+        return parseInt(this.shadowRoot.querySelector("style").textContent.match(/left: (\d+)px;/)[1]);
+    }
+    set x(value) {
+        let css = this.shadowRoot.querySelector("style").textContent;
+        css = css.replace(/left: (-?\d+)px;/, "left: " + Math.round(value) + "px;");
+        this.shadowRoot.querySelector("style").textContent = css;
+    }
+    get y() {
+        return parseInt(this.shadowRoot.querySelector("style").textContent.match(/top: (\d+)px;/)[1]);
+    }
+    set y(value) {
+        let css = this.shadowRoot.querySelector("style").textContent;
+        css = css.replace(/top: (-?\d+)px;/, "top: " + Math.round(value) + "px;");
+        this.shadowRoot.querySelector("style").textContent = css;
+    }
+
     get xIndex() {
         return parseInt(this.getAttribute("x"));
     }
@@ -101,16 +129,16 @@ export default class Character extends HTMLElement {
         return this.setAttribute("y", value);
     }
     get xPixel() {
-        return parseInt(this.style.left.replace("px", "")) + CHARACTER_WIDTH / 2;
+        return this.x + CHARACTER_WIDTH / 2;
     }
     set xPixel(value) {
-        this.style.left = value - CHARACTER_WIDTH / 2 + "px";
+        this.x = value - CHARACTER_WIDTH / 2;
     }
     get yPixel() {
-        return parseInt(this.style.top.replace("px", "")) + CHARACTER_HEIGHT / 2;
+        return this.y + CHARACTER_HEIGHT / 2;
     }
     set yPixel(value) {
-        this.style.top = value - CHARACTER_HEIGHT / 2 + "px";
+        this.y = value - CHARACTER_HEIGHT / 2;
     }
     moveTo(x, y) {
         this.xIndex = x;
