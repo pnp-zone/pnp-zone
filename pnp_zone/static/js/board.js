@@ -5,6 +5,9 @@ import Character from "./character.js";
 import { handleCursors } from "./cursors.js";
 import { deleteBackground, updateBackground } from "./backgrounds.js";
 
+// Register custom tags
+window.customElements.define("board-character", Character);
+
 const SCALE_SPEED = 1.1;
 
 export const characters = {};

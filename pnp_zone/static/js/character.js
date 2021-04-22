@@ -1,6 +1,6 @@
 import tags from "./lib/tagFactory.js";
 import { EventListener, EventGroup } from "./lib/eventHandler.js";
-import {endDrag, getDragged, LEFT_BUTTON, Drag, registerContextMenu} from "./lib/mouse.js";
+import { endDrag, getDragged, LEFT_BUTTON, Drag, registerContextMenu } from "./lib/mouse.js";
 import Hexagon from "./hexagon.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
@@ -112,5 +112,3 @@ export default class Character extends HTMLElement {
         this.yIndex = y;
     }
 }
-
-window.customElements.define("board-character", Character);
