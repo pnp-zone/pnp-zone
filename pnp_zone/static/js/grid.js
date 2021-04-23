@@ -7,7 +7,7 @@ export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
 export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
 export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 
-class Tile extends BoardElement {
+export class Tile extends BoardElement {
     static observedAttributes = ["background", "border"];
     static stylesheet = "/static/css/board/tile.css";
 
@@ -41,8 +41,6 @@ class Tile extends BoardElement {
     set backgroundColor(value) { this.setAttribute("background", value); }
     set borderColor(value) { this.setAttribute("border", value); }
 }
-
-window.customElements.define("board-tile", Tile);
 
 export class Grid {
     constructor(container) {

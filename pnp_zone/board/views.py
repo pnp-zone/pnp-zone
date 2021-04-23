@@ -30,6 +30,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "menu": menu.get(),
             "room": room,
             "characters": room.character_set.all(),
+            "tiles": room.tile_set.all(),
             "is_moderator": request.user.username in [x.user.username for x in campaign.game_master.all()] or request.user.is_superuser,
             "x_range": list(range(25)), "y_range": list(range(17)),
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,

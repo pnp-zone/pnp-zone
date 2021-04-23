@@ -1,12 +1,13 @@
 import {MIDDLE_BUTTON, LEFT_BUTTON, Drag, addMouseExtension} from "./lib/mouse.js";
 import socket from "./socket.js";
-import { Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
+import { Tile, Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from "./grid.js";
 import Character from "./character.js";
 import { handleCursors } from "./cursors.js";
 import { deleteBackground, updateBackground } from "./backgrounds.js";
 
 // Register custom tags
 window.customElements.define("board-character", Character);
+window.customElements.define("board-tile", Tile);
 
 const SCALE_SPEED = 1.1;
 
@@ -25,7 +26,7 @@ socket.registerEvent("new", (event) => {
     character.setAttribute("x", event.x);
     character.setAttribute("y", event.y);
     character.setAttribute("color", event.color);
-    document.getElementById("characters").appendChild(character);
+    document.getElementById("coloredGrid").appendChild(character);
     characters[event.id] = character;
 });
 socket.registerEvent("error", (event) => {

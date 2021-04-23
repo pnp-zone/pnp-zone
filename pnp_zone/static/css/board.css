@@ -10,9 +10,6 @@
 #grid {
     z-index: 0;
 }
-#characters {
-    z-index: 50;
-}
 #cursors {
     z-index: 100;
 }

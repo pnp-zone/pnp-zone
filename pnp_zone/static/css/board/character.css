@@ -1,8 +1,8 @@
 :host {
+    z-index: 50;
     transition-property: left, top;
     transition-duration: 1s;
     position: absolute;
-    z-index: inherit;
     cursor: grab;
     width: 80px;
     height: 92px;
