@@ -22,7 +22,11 @@
             <div id="backgroundGrid" class="board-element" style="color: {{ room.defaultBorder }}"></div>
             <div id="backgroundHitboxes" class="board-element"></div>
             <div id="coloredGrid" class="board-element">
-                <div id="characters" class="board-element"></div>
+                <div id="characters" class="board-element">
+                    {% for c in characters %}
+                        <board-character id="{{ c.identifier }}" color="{{ c.color }}" x="{{ c.x }}" y="{{ c.y }}"></board-character>
+                    {% endfor %}
+                </div>
             </div>
             <div id="cursors" class="board-element"></div>
         </div>

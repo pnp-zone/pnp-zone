@@ -40,11 +40,6 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale}
         )
 
-        for c in self.room.character_set.all():
-            events.append(
-                {"type": "new", "id": c.identifier, "x": c.x, "y": c.y, "color": c.color}
-            )
-
         tiles = defaultdict(list)
         for t in self.room.tile_set.all():
             tiles[(t.background, t.border)].append([t.x, t.y])
