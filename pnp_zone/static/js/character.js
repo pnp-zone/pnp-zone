@@ -4,31 +4,26 @@ import { endDrag, getDragged, LEFT_BUTTON, Drag, registerContextMenu } from "./l
 import Hexagon from "./hexagon.js";
 import { Coord } from "./grid.js";
 import socket from "./socket.js";
-import createEditableStyle from "./lib/style.js";
+import { BoardElement } from "./boardElement.js";
 
 const CHARACTER_WIDTH = 80;
 const CHARACTER_HEIGHT = 92;
 
-export default class Character extends HTMLElement {
+export default class Character extends BoardElement {
     static observedAttributes = ["id", "color", "x", "y"];
 
     constructor() {
         super();
-        const shadowRoot = this.attachShadow({mode: 'open'});
-
-        shadowRoot.appendChild(tags.link({
+        this.shadowRoot.insertBefore(tags.link({
             rel: "stylesheet",
             href: "/static/css/board/character.css",
-        }));
-        this.hiddenStyle = createEditableStyle();
-        this.hiddenStyle.setSelector(":host");
+        }), this.hiddenStyle);
         this.hiddenStyle.addEntry("left", "10px");
         this.hiddenStyle.addEntry("top", "10px");
         this.hiddenStyle.addEntry("transition", "");
         this.hiddenStyle.addEntry("cursor", "");
-        shadowRoot.appendChild(this.hiddenStyle);
-        shadowRoot.appendChild(Hexagon.generateSVG(512, 12));
-        shadowRoot.appendChild(tags.p({}));
+        this.shadowRoot.appendChild(Hexagon.generateSVG(512, 12));
+        this.shadowRoot.appendChild(tags.p({}));
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
