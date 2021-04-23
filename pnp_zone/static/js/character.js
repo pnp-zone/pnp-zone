@@ -11,13 +11,10 @@ const CHARACTER_HEIGHT = 92;
 
 export default class Character extends BoardElement {
     static observedAttributes = ["id", "color", "x", "y"];
+    static stylesheet = "/static/css/board/character.css";
 
     constructor() {
         super();
-        this.shadowRoot.insertBefore(tags.link({
-            rel: "stylesheet",
-            href: "/static/css/board/character.css",
-        }), this.hiddenStyle);
         this.hiddenStyle.addEntry("left", "10px");
         this.hiddenStyle.addEntry("top", "10px");
         this.hiddenStyle.addEntry("transition", "");

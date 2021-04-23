@@ -1,4 +1,5 @@
 import createEditableStyle from "./lib/style.js";
+import tags from "./lib/tagFactory.js";
 
 
 export function getNumericStyle(node, property, unit="px") {
@@ -10,9 +11,18 @@ export function setNumericStyle(node, property, value, unit="px") {
 }
 
 export class BoardElement extends HTMLElement {
+    static stylesheet = "";
+
     constructor() {
         super();
         this.attachShadow({mode: "open"});
+
+        if (this.constructor.stylesheet !== "") {
+            this.shadowRoot.appendChild(tags.link({
+                rel: "stylesheet",
+                href: this.constructor.stylesheet,
+            }));
+        }
 
         this.hiddenStyle = createEditableStyle();
         this.hiddenStyle.setSelector(":host");
