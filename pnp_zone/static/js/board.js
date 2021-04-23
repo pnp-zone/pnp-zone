@@ -4,6 +4,8 @@ import { Tile, Grid, Coord, Line, ROW_HEIGHT, TILE_WIDTH, BackgroundGrid } from 
 import Character from "./character.js";
 import { handleCursors } from "./cursors.js";
 import { deleteBackground, updateBackground } from "./backgrounds.js";
+import { BoardElement } from "./boardElement.js";
+import tags from "./lib/tagFactory.js";
 
 // Register custom tags
 window.customElements.define("board-character", Character);
@@ -11,14 +13,12 @@ window.customElements.define("board-tile", Tile);
 
 const SCALE_SPEED = 1.1;
 
-export const characters = {};
-
 // Setup socket
 document.addEventListener("DOMContentLoaded", () => {
     socket.open();
 });
 socket.registerEvent("move", (event) => {
-    characters[event.id].moveTo(event.x, event.y);
+    document.getElementById(event.id).moveTo(event.x, event.y);
 });
 socket.registerEvent("new", (event) => {
     const character = document.createElement("board-character");
@@ -27,13 +27,12 @@ socket.registerEvent("new", (event) => {
     character.setAttribute("y", event.y);
     character.setAttribute("color", event.color);
     document.getElementById("coloredGrid").appendChild(character);
-    characters[event.id] = character;
 });
 socket.registerEvent("error", (event) => {
     console.error(event.message);
 });
 socket.registerEvent("delete", (event) => {
-    characters[event.id].obj.remove();
+    document.getElementById(event.id).remove();
 });
 socket.registerEvent("colorTile", (event) => {
     for (let i = 0; i < event.tiles.length; i++) {
@@ -67,19 +66,33 @@ if (newCharacter) {
     }
 }
 
-class Board {
+class Board extends BoardElement {
+    static observedAttributes = ["x", "y", "scale"];
+    static stylesheet = "/static/css/board/board.css";
+
     _mouseStart;
     _boardStart;  // values shared across event listeners
     _generateTimeout;
 
     constructor() {
-        this.obj = document.getElementById("board");
+        super();
+        this.shadowRoot.appendChild(tags.slot({}));
+        this.hiddenStyle.addEntry("left", "0px");
+        this.hiddenStyle.addEntry("top", "0px");
+        this.hiddenStyle.addEntry("transform", "scale(1)");
+
+        this.tiles = new Grid(document.getElementById("coloredGrid"));
+        this.grid = new BackgroundGrid(document.getElementById("backgroundGrid"));
+    }
+
+    connectedCallback() {
         document.addEventListener("DOMContentLoaded", () => {
             this.generateVisible();
             new ResizeObserver(() => {
                 this.generateVisible();
-            }).observe(this.obj.parentElement);
+            }).observe(this.parentElement);
         });
+
         window.addEventListener("beforeunload", (event) => {
             socket.send({
                 type: "session",
@@ -89,20 +102,13 @@ class Board {
             });
         });
 
-        this.tiles = new Grid(document.getElementById("coloredGrid"));
-        this.grid = new BackgroundGrid(document.getElementById("backgroundGrid"));
-
-        this.scale = 1
-        this.x = 0;
-        this.y = 0;
-
         // dragStart
-        new Drag(this, this.obj, LEFT_BUTTON).enable();
-        new Drag(this, this.obj, MIDDLE_BUTTON).enable();
+        new Drag(this, this, LEFT_BUTTON).enable();
+        new Drag(this, this, MIDDLE_BUTTON).enable();
 
         // scaling
-        this.obj.addEventListener("wheel", (event) => {
-            const oldRect = this.obj.parentElement.getBoundingClientRect();
+        this.addEventListener("wheel", (event) => {
+            const oldRect = this.parentElement.getBoundingClientRect();
             const oldScale = this.scale;
 
             // down
@@ -116,7 +122,7 @@ class Board {
             }
 
             const factor = this.scale / oldScale;
-            const newRect = this.obj.parentElement.getBoundingClientRect();
+            const newRect = this.parentElement.getBoundingClientRect();
 
             this.x += (event.clientX - newRect.x - this.x) - factor*(event.clientX - oldRect.x - this.x);
             this.y += (event.clientY - newRect.y - this.y) - factor*(event.clientY - oldRect.y - this.y);
@@ -128,30 +134,32 @@ class Board {
         });
     }
 
-    get scale() {
-        return parseFloat(this.obj.style.transform.match(/scale\(([\d.]+)\)/)[1]);
-    }
-    get x() {
-        return parseInt(this.obj.style.left.replace("px", ""));
-    }
-    get y() {
-        return parseInt(this.obj.style.top.replace("px", ""));
-    }
-    set scale(value) {
-        if (value < 0.05) {
-            value = 0.05;
+    attributeChangedCallback(attr, oldValue, newValue) {
+        switch (attr) {
+            case "x":
+                this.hiddenStyle.left = "" + newValue + "px";
+                this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
+                break;
+            case "y":
+                this.hiddenStyle.top = "" + newValue + "px";
+                this.grid.y = this.top - (this.top % ROW_HEIGHT);
+                this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
+                break;
+            case "scale":
+                if (parseFloat(newValue) < 0.05) {
+                    newValue = "0.05";
+                }
+                this.hiddenStyle.transform = `scale(${newValue})`;
+                break;
         }
-        this.obj.style.transform = `scale(${value})`;
     }
-    set x(value) {
-        this.obj.style.left = "" + value + "px";
-        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
-    }
-    set y(value) {
-        this.obj.style.top = "" + value + "px";
-        this.grid.y = this.top - (this.top % ROW_HEIGHT);
-        this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
-    }
+
+    get scale() { return parseFloat(this.getAttribute("scale")); }
+    get x() { return parseInt(this.getAttribute("x")); }
+    get y() { return parseInt(this.getAttribute("y")); }
+    set scale(value) { this.setAttribute("scale", value); }
+    set x(value) { this.setAttribute("x", value); }
+    set y(value) { this.setAttribute("y", value); }
 
     /*
      * The boundary rect of what is visible
@@ -159,8 +167,8 @@ class Board {
      */
     get left() { return Math.floor((-this.x)/this.scale); }
     get top() { return Math.floor((-this.y)/this.scale); }
-    get right() { return Math.ceil((this.obj.parentElement.offsetWidth-this.x)/this.scale); }
-    get bottom() { return Math.ceil((this.obj.parentElement.offsetHeight-this.y)/this.scale); }
+    get right() { return Math.ceil((this.parentElement.offsetWidth-this.x)/this.scale); }
+    get bottom() { return Math.ceil((this.parentElement.offsetHeight-this.y)/this.scale); }
     get visibleRect() {
         return { left: this.left, top: this.top, right: this.right, bottom: this.bottom, };
     }
@@ -168,8 +176,8 @@ class Board {
     jumpTo(character) {
         const x = character.xPixel;
         const y = character.yPixel;
-        this.x = (this.obj.parentElement.offsetWidth / 2) - (x * this.scale);
-        this.y = (this.obj.parentElement.offsetHeight / 2) - (y * this.scale);
+        this.x = (this.parentElement.offsetWidth / 2) - (x * this.scale);
+        this.y = (this.parentElement.offsetHeight / 2) - (y * this.scale);
         this.generateVisible();
     }
 
@@ -206,11 +214,12 @@ class Board {
         document.body.style.cursor = "default";
     }
 }
+window.customElements.define("board-board", Board);
 
-export const board = new Board();
+export const board = document.getElementById("board");
 
 addMouseExtension((event) => {
-    const boardViewRect = board.obj.parentElement.getBoundingClientRect();
+    const boardViewRect = board.parentElement.getBoundingClientRect();
 
     // is the cursor over the board?
     //const overBoard = (boardViewRect.left < event.clientX && event.clientX < boardViewRect.right)
@@ -249,7 +258,7 @@ class PaintBrush {
 
         this.previously = null;  //previously colored Tile
 
-        this.drag = new Drag(this, board.obj);
+        this.drag = new Drag(this, board);
 
         this.form["active"].onchange = () => {
             this.active = this.form["active"].checked;
@@ -304,10 +313,10 @@ class PaintBrush {
 
     set active(value) {
         if (value) {
-            board.obj.parentElement.style.cursor = "crosshair";
+            board.parentElement.style.cursor = "crosshair";
             this.drag.enable();
         } else {
-            board.obj.parentElement.style.cursor = "";
+            board.parentElement.style.cursor = "";
             this.drag.disable();
         }
     }

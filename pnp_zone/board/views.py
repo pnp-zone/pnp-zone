@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.http.response import Http404, HttpResponse
 
-from board.models import Room
+from board.models import Room, UserSession
 from campaign.models import CampaignModel
 from pnp_zone import menu
 
@@ -25,11 +25,17 @@ class BoardView(LoginRequiredMixin, TemplateView):
                 request.user.username not in [x.user.username for x in campaign.game_master.all()]:
             return HttpResponse("You're not allowed in this room")
 
+        try:
+            session = UserSession.objects.get(room=room, user=request.user)
+        except UserSession.DoesNotExist:
+            session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
+
         return render(request, template_name=self.template_name, context={
             "title": room.name,
             "menu": menu.get(),
             "room": room,
             "characters": room.character_set.all(),
+            "session": session,
             "tiles": room.tile_set.all(),
             "is_moderator": request.user.username in [x.user.username for x in campaign.game_master.all()] or request.user.is_superuser,
             "x_range": list(range(25)), "y_range": list(range(17)),

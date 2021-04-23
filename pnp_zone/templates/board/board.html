@@ -17,7 +17,7 @@
     {% endif %}
 
     <div id="board-view">
-        <div id="board" class="board-element noselect">
+        <board-board id="board" class="noselect" x="{{ session.board_x }}" y="{{ session.board_y }}" scale="{{ session.board_scale }}">
             <div id="backgrounds" class="board-element"></div>
             <div id="backgroundGrid" class="board-element" style="color: {{ room.defaultBorder }}"></div>
             <div id="backgroundHitboxes" class="board-element"></div>
@@ -30,7 +30,7 @@
                 {% endfor %}
             </div>
             <div id="cursors" class="board-element"></div>
-        </div>
+        </board-board>
     </div>
 
     {% if is_moderator %}

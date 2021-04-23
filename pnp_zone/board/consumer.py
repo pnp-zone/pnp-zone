@@ -32,14 +32,6 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     def init_events(self):
         events = []
 
-        try:
-            session = UserSession.objects.get(room=self.room, user=self.user)
-        except UserSession.DoesNotExist:
-            session = UserSession.objects.create(room=self.room, user=self.user, board_x=0, board_y=0, board_scale=1)
-        events.append(
-            {"type": "session", "x": session.board_x, "y": session.board_y, "scale": session.board_scale}
-        )
-
         for b in self.room.backgroundimage_set.all():
             events.append(
                 {"type": "background.update", "id": b.identifier, "url": b.url,
