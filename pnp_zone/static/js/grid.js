@@ -1,33 +1,48 @@
 import tags from "./lib/tagFactory.js";
 import Hexagon from "./hexagon.js";
+import { BoardElement } from "./boardElement.js";
 
 export const TILE_HEXAGON = new Hexagon(100);
 export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
 export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
 export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 
-export class Tile {
-    constructor(container, x, y) {
-        this.position = Coord.fromIndex(x, y);
-        this.obj = tags.div({
-            class: "board-element",
-            style: {
-                left: this.position.left+"px",
-                top: this.position.top+"px",
-                width: TILE_WIDTH+"px",
-                height: TILE_HEIGHT+"px",
-            },
-            ondragstart: () => { return false; },
-            children: [Hexagon.generateSVG(512, 8)],
-        });
-        container.appendChild(this.obj);
+class Tile extends BoardElement {
+    static observedAttributes = ["background", "border"];
+    static stylesheet = "/static/css/board/tile.css";
+
+    constructor() {
+        super();
+        this.hiddenStyle.addEntry("left", "0");
+        this.hiddenStyle.addEntry("top", "0");
+        this.shadowRoot.appendChild(Hexagon.generateSVG(512, 8));
     }
 
-    // get backgroundColor() { return this.obj.firstChild.style.fill; }
-    set backgroundColor(value) { this.obj.firstChild.firstChild.style.fill = ""+value; }
-    // get borderColor() { return this.obj.lastChild.style.fill; }
-    set borderColor(value) { this.obj.firstChild.lastChild.style.fill = ""+value; }
+    attributeChangedCallback(attr, oldValue, newValue) {
+        switch (attr) {
+            case "background":
+                this.shadowRoot.querySelector("polygon").style.fill = newValue;
+                break;
+            case "border":
+                this.shadowRoot.querySelector("path").style.fill = newValue;
+                break;
+        }
+    }
+
+    connectedCallback() {
+        const coord = Coord.fromIndex(
+            parseInt(this.getAttribute("x")),
+            parseInt(this.getAttribute("y"))
+        );
+        this.hiddenStyle.left = coord.left + "px";
+        this.hiddenStyle.top = coord.top + "px";
+    }
+
+    set backgroundColor(value) { this.setAttribute("background", value); }
+    set borderColor(value) { this.setAttribute("border", value); }
 }
+
+window.customElements.define("board-tile", Tile);
 
 export class Grid {
     constructor(container) {
@@ -46,7 +61,11 @@ export class Grid {
     }
 
     newTile(x, y) {
-        return new Tile(this.container, x, y);
+        const tile = document.createElement("board-tile");
+        tile.setAttribute("x", x);
+        tile.setAttribute("y", y);
+        this.container.appendChild(tile);
+        return tile;
     }
 }
 

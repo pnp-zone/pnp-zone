@@ -1,0 +1,9 @@
+:host {
+    position: absolute;
+    width: 100px;
+    height: 115px;
+}
+
+polygon {
+    fill: none;
+}
