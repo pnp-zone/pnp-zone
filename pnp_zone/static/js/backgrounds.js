@@ -35,11 +35,14 @@ export function updateBackground(event) {
 
     let background = backgrounds[id];
     if (!background) {
-        background = new Background(id, url);
+        background = document.createElement("img", {is: "background-image"});
+        background.id = id;
+        background.src = url;
+        CONTAINER.appendChild(background);
         backgrounds[id] = background;
     }
 
-    background.url = url;
+    background.src = url;
     background.x = x;
     background.y = y;
     background.width = width;
@@ -52,7 +55,7 @@ export function deleteBackground(event) {
     if (is_moderator) {
         background.hitbox.main.remove();
     }
-    background.outer.remove();
+    background.remove();
     delete backgrounds[id];
 }
 
@@ -243,13 +246,22 @@ class Hitbox {
     get ratio() { return this.height / this.width; }
 }
 
-class Background {
+class Background extends HTMLImageElement {
+    static observedAttributes = ["x", "y", "width", "height"];
 
-    constructor(id, url) {
-        this.id = id;
-
+    constructor() {
+        super();
         if (is_moderator) {
             this.hitbox = new Hitbox(this);
+        }
+        this.style.left = "0px";
+        this.style.right = "0px";
+        this.style.padding = "" + DELTA + "px";
+        this.classList.add("board-element");
+    }
+
+    connectedCallback() {
+        if (is_moderator) {
             registerContextMenu(this.hitbox.main, () => {
                 return [
                     tags.button({
@@ -262,68 +274,47 @@ class Background {
             }).enable();
 
         }
-
-        this.inner = tags.img({src: url});
-        this.outer = tags.div({
-            class: "board-element",
-            style: {
-                left: "0px",
-                top: "0px",
-                padding: "" + DELTA + "px",
-            },
-            children: [
-                this.inner,
-            ]
-        });
-        CONTAINER.appendChild(this.outer);
-
-        // Get size for outer from inner after rendering it
-        setTimeout(() => {
-            if (this.width == NaN) {
-                this.width = this.inner.offsetWidth;
-            }
-            if (this.height == NaN) {
-                this.height = this.inner.offsetHeight;
-            }
-            this.inner.style.width = "100%";
-            this.inner.style.height = "100%";
-        }, 1000);
     }
 
-    get url() { return this.inner.src; }
-    set url(value) { this.inner.src = value; }
-    get x() { return getNumericStyle(this.outer, "left"); }
-    get y() { return getNumericStyle(this.outer, "top"); }
-    set x(value) {
-        setNumericStyle(this.outer, "left", value);
-        if (is_moderator) {
-            this.hitbox.x = value;
+    attributeChangedCallback(attr, oldValue, newValue) {
+        switch (attr) {
+            case "width":
+                if (newValue === "0") {
+                    newValue = this.naturalWidth;
+                    this.width = this.naturalWidth;
+                }
+                if (is_moderator) {
+                    this.hitbox.width = parseInt(newValue);
+                }
+                break;
+            case "height":
+                if (newValue === "0") {
+                    newValue = this.naturalHeight;
+                    this.height = this.naturalHeight;
+                }
+                if (is_moderator) {
+                    this.hitbox.height = parseInt(newValue);
+                }
+                break;
+            case "x":
+                setNumericStyle(this, "left", newValue, "px");
+                if (is_moderator) {
+                    this.hitbox.x = newValue;
+                }
+                break;
+            case "y":
+                setNumericStyle(this, "top", newValue, "px");
+                if (is_moderator) {
+                    this.hitbox.y = newValue;
+                }
+                break;
         }
     }
-    set y(value) {
-        setNumericStyle(this.outer, "top", value);
-        if (is_moderator) {
-            this.hitbox.y = value;
-        }
-    }
-    get width() { return getNumericStyle(this.outer, "width"); }
-    get height() { return getNumericStyle(this.outer, "height"); }
-    set width(value) {
-        if (value < 0) {
-            value = this.inner.naturalWidth;
-        }
-        setNumericStyle(this.outer, "width", value);
-        if (is_moderator) {
-            this.hitbox.width = value;
-        }
-    }
-    set height(value) {
-        if (value < 0) {
-            value = this.inner.naturalHeight;
-        }
-        setNumericStyle(this.outer, "height", value);
-        if (is_moderator) {
-            this.hitbox.height = value;
-        }
-    }
+
+    get x() { return parseInt(this.getAttribute("x")); }
+    get y() { return parseInt(this.getAttribute("y")); }
+    set x(value) { this.setAttribute("x", value); }
+    set y(value) { this.setAttribute("y", value); }
 }
+
+window.customElements.define("background-image", Background, {extends: "img"});
