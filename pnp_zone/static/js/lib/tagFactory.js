@@ -41,7 +41,7 @@ class TagFactory {
                     break;
 
                 default:
-                    elem[key] = value;
+                    elem.setAttribute(key, value);
             }
         }
         return elem;
@@ -58,7 +58,11 @@ class TagFactory {
 // Syntactic sugar
 const tags = new Proxy(new TagFactory(), {
     get(target, prop) {
-        return target.forTag(prop);
+        if (prop === "createElement") {
+            return target.createElement;
+        } else {
+            return target.forTag(prop);
+        }
     }
 });
 
