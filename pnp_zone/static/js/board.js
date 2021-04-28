@@ -146,10 +146,14 @@ class Board extends BoardElement {
                 this.grid.x = this.left - (this.left % TILE_WIDTH) + (this.grid.y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
                 break;
             case "scale":
-                if (parseFloat(newValue) < 0.05) {
-                    newValue = "0.05";
+                newValue = parseFloat(newValue);
+                if (newValue < 0.05) {
+                    this.setAttribute("scale", "0.05");
+                } else if (newValue > 10) {
+                    this.setAttribute("scale", "10");
+                } else {
+                    this.hiddenStyle.transform = `scale(${newValue})`;
                 }
-                this.hiddenStyle.transform = `scale(${newValue})`;
                 break;
         }
     }
