@@ -32,8 +32,10 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
             return Http404
 
         return render(request, self.template_name, {
-            "players": campaign.players.all(),
-            "gamemasters": campaign.game_master.all(),
+            "added_players": campaign.players.all(),
+            "added_gamemasters": campaign.game_master.all(),
+            "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
+            "not_added_gamemasters": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
             "boards": campaign.room.all(),
             "cid": campaign.id,
         })

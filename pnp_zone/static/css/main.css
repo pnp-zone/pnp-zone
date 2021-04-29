@@ -292,3 +292,65 @@ input[type=number] {
     margin-top: 0.5rem;
     margin-bottom: 1rem;
 }
+
+.modalBackground {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+.modal {
+    background-color: #192734;
+}
+
+.modalContent {
+    display: flex;
+    flex-direction: column;
+    padding: 0 2rem 2rem 2rem;
+}
+
+.modalContent input {
+    margin-top: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.modalContent label {
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.modalContent button {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.modalClose {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.modalClose button {
+    border-radius: 0;
+    background-color: #5e42a6;
+    transition: background-color 100ms linear;
+    display: flex;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.modalClose button:hover {
+    background-color: #233549;
+}
+
+.modalClose img {
+    width: 1rem;
+    filter: invert(100%);
+}

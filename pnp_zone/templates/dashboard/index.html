@@ -1,22 +1,33 @@
 {% extends "base.html" %}
+{% load static %}
 {% block body %}
     <div class="dashboardContent">
         <h2>Your campaigns:</h2>
         <div class="campaignRow">
+        <button id="modalCreateCampaignOpen">Create Campaign</button>
         {% for campaign in campaign_list %}
             <a class="campaignLink" href="/campaign/show/{{ campaign.id }}">
                 <div class="campaignItem">{{ campaign.name }}</div>
             </a>
         {% endfor %}
         </div>
-        <form method="POST" action="/campaign/create">
-            {% csrf_token %}
-            <div class="campaignCreator">
-                <h2>Create campaign</h2>
-                <label for="campaign_name">Name:</label>
-                <input id="campaign_name" name="name" required>
-                <button>Submit</button>
-            </div>
-        </form>
     </div>
+    <form method="POST" action="/campaign/create">
+    {% csrf_token %}
+        <div class="modalBackground" id="modalCreateCampaignBackground">
+            <div class="modal" id="modalCreateCampaign">
+                <div class="modalClose">
+                    <button id="modalCreateCampaignClose" type="button">
+                        <img src="{% static 'img/close.svg' %}" alt="Close">
+                    </button>
+                </div>
+                <div class="modalContent">
+                    <h2>Create campaign</h2>
+                    <label for="campaign_name">Name:</label>
+                    <input id="campaign_name" name="name" required>
+                    <button>Submit</button>
+                </div>
+            </div>
+        </div>
+    </form>
 {% endblock %}
