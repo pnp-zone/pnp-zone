@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block body %}
 <h2>Added Players</h2>
 {% for player in added_players %}
     <div class="campaignItem">{{ player }}</div>
 {% endfor %}
-<h2>Not added Players<h2>
+<h2>Not added Players</h2>
 {% for player in not_added_players %}
     <div class="campaignItem">{{ player }}</div>
 {% endfor %}
@@ -28,5 +29,24 @@
 {% endfor %}
 </div>
 <h2>Integrations</h2>
-Coming soon...
+<h3>BBB</h3>
+<button id="modalJoinBBBOpen">Join BBB</button>
+<form method="POST" action="/campaign/show/{{ cid }}/joinBBB">
+{% csrf_token %}
+    <div class="modalBackground" id="modalJoinBBBBackground">
+        <div class="modal" id="modalJoinBBB">
+            <div class="modalClose">
+                <button id="modalJoinBBBClose" type="button">
+                    <img src="{% static 'img/close.svg' %}" alt="Close">
+                </button>
+            </div>
+            <div class="modalContent">
+                <h2>Join BBB</h2>
+                <label for="character_name">Name:</label>
+                <input id="character_name" name="name" required>
+                <button>Submit</button>
+            </div>
+        </div>
+    </div>
+</form>
 {% endblock %}
