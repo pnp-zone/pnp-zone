@@ -41,7 +41,11 @@ class TagFactory {
                     break;
 
                 default:
-                    elem.setAttribute(key, value);
+                    if (elem[key] === undefined) {
+                        elem.setAttribute(key, value);
+                    } else {
+                        elem[key] = value;
+                    }
             }
         }
         return elem;
