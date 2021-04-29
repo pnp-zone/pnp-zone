@@ -72,10 +72,10 @@ class JoinBBB(LoginRequiredMixin, View):
             return Http404
         b = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
         # TODO: INSECURE AS SHIT
-        attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest()
-        moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest()
+        attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest().replace("&", "-")
+        moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest().replace("&", "-")
         try:
-            b.create_meeting(hashlib.md5(campaign.name.encode("utf-8")).hexdigest(), {"attendeePw": attendee, "moderatorPw": moderator})
+            b.create_meeting(hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-"), {"attendeePw": attendee, "moderatorPw": moderator})
         except Exception:
             pass
-        return redirect(b.get_join_meeting_url(request.POST["name"], hashlib.md5(campaign.name.encode("utf-8")).hexdigest(), moderator if len([x for x in campaign.game_master.all() if x.user.username == request.user]) > 0 else attendee))
+        return redirect(b.get_join_meeting_url(request.POST["name"], hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-"), moderator if len([x for x in campaign.game_master.all() if x.user.username == request.user]) > 0 else attendee))
