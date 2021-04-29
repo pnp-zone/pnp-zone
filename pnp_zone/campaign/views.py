@@ -74,6 +74,8 @@ class JoinBBB(LoginRequiredMixin, View):
         # TODO: INSECURE AS SHIT
         attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest()
         moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest()
-        b.create_meeting(campaign.name, {"attendeePw": attendee,
-                                         "moderatorPw": moderator})
+        try:
+            b.create_meeting(campaign.name, {"attendeePw": attendee, "moderatorPw": moderator})
+        except Exception:
+            pass
         return redirect(b.get_join_meeting_url(request.POST["name"], campaign.name, moderator if len([x for x in campaign.game_master.all() if x.user.username == request.user]) > 0 else attendee))
