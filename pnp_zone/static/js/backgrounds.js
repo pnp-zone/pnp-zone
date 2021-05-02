@@ -52,7 +52,7 @@ export function deleteBackground(event) {
 
     let background = backgrounds[id];
     if (is_moderator) {
-        background.hitbox.main.remove();
+        background.hitbox.remove();
     }
     background.remove();
     delete backgrounds[id];

@@ -63,18 +63,18 @@ class ResizingBobble extends BoardElement {
 
                 // position
                 if (ns === "N") {
-                    this.hiddenStyle.top = 0;
+                    this.hiddenStyle.top = "-3px";
                 }
                 if (ns === "S") {
                     this.hiddenStyle.top = "auto";
-                    this.hiddenStyle.bottom = 0;
+                    this.hiddenStyle.bottom = "-3px";
                 }
                 if (we === "W") {
-                    this.hiddenStyle.left = 0;
+                    this.hiddenStyle.left = "-3px";
                 }
                 if (we === "E") {
                     this.hiddenStyle.left = "auto";
-                    this.hiddenStyle.right = 0;
+                    this.hiddenStyle.right = "-3px";
                 }
 
                 if (pos.length === 1) {
@@ -256,7 +256,6 @@ class Hitbox extends BoardElement {
     }
 
     resize(direction, amount) {
-        console.log(this.owner);
         switch (direction) {
             case "N":
                 this.y += amount;
