@@ -30,23 +30,17 @@
 </div>
 <h2>Integrations</h2>
 <h3>BBB</h3>
-<button id="modalJoinBBBOpen">Join BBB</button>
-<form method="POST" action="/campaign/show/{{ cid }}/joinBBB">
-{% csrf_token %}
-    <div class="modalBackground" id="modalJoinBBBBackground">
-        <div class="modal" id="modalJoinBBB">
-            <div class="modalClose">
-                <button id="modalJoinBBBClose" type="button">
-                    <img src="{% static 'img/close.svg' %}" alt="Close">
-                </button>
-            </div>
-            <div class="modalContent">
-                <h2>Join BBB</h2>
-                <label for="character_name">Name:</label>
-                <input id="character_name" name="name" required>
-                <button>Submit</button>
-            </div>
-        </div>
+<button onclick="modal.show(0);">Join BBB</button>
+{% endblock %}
+
+{% block modals %}
+    <div class="modalContent">
+        <form method="POST" action="/campaign/show/{{ cid }}/joinBBB">
+            {% csrf_token %}
+            <h2>Join BBB</h2>
+            <label for="character_name">Name:</label>
+            <input id="character_name" name="name" required>
+            <button>Submit</button>
+        </form>
     </div>
-</form>
 {% endblock %}

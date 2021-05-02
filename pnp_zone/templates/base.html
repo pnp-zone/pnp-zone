@@ -23,6 +23,17 @@
         {% block body %}
         {% endblock %}
     </div>
-<script src="{% static 'js/frontend.js' %}"></script>
+
+    <script>
+        let modal;
+        import("/static/js/lib/modal.js").then((module) => {
+            modal = document.querySelector("modal-controller");
+            modal.removeAttribute("style");
+        });
+    </script>
+    <modal-controller style="display: none">
+        {% block modals %}
+        {% endblock %}
+    </modal-controller>
 </body>
 </html>
