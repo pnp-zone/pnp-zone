@@ -2,12 +2,17 @@
 
 :host {
     position: absolute;
+    outline: none;
 }
 
 .bobble {
     position: absolute;
     background-color: #00f;
-    border: 1px solid #ccc;
+    border: 0.01vw solid #ccc;
+    width: 0.5vw;
+    height: 0.5vw;
+    left: -0.25vw;
+    top: -0.25vw;
 }
 
 :host .view-port {
@@ -19,11 +24,11 @@
 
 :host .frame {
     position: absolute;
-    width: calc(100% - 6px);
-    height: calc(100% - 6px);
-    top: -3px;  /* = border width */
-    left: -3px; /*                */
-    border: 6px solid #ccc;
+    width: calc(100% - 0.01vw);
+    height: calc(100% - 0.01vw);
+    top: -0.005vw;  /* = border width */
+    left: -0.005vw; /*                */
+    border: 0.01vw solid #ccc;
 }
 
 :host[visible="false"] {

@@ -21,12 +21,6 @@ class ResizingBobble extends BoardElement {
 
         this.shadowRoot.appendChild(tags.div({
             class: "bobble",
-            style: {
-                width: "" + this.constructor.size + "px",
-                height: "" + this.constructor.size + "px",
-                left: "-" + this.constructor.size/2 + "px",
-                top: "-" + this.constructor.size/2 + "px",
-            }
         }));
     }
 
@@ -63,18 +57,18 @@ class ResizingBobble extends BoardElement {
 
                 // position
                 if (ns === "N") {
-                    this.hiddenStyle.top = "-3px";
+                    this.hiddenStyle.top = "-0.025vw";
                 }
                 if (ns === "S") {
                     this.hiddenStyle.top = "auto";
-                    this.hiddenStyle.bottom = "-3px";
+                    this.hiddenStyle.bottom = "-0.025vw";
                 }
                 if (we === "W") {
-                    this.hiddenStyle.left = "-3px";
+                    this.hiddenStyle.left = "-0.025vw";
                 }
                 if (we === "E") {
                     this.hiddenStyle.left = "auto";
-                    this.hiddenStyle.right = "-3px";
+                    this.hiddenStyle.right = "-0.025vw";
                 }
 
                 if (pos.length === 1) {
