@@ -223,6 +223,22 @@ class Hitbox extends BoardElement {
         this.shadowRoot.querySelector(".view-port").addEventListener("mousedown", () => {
             this.focus();
         });
+
+        // Make focusable, hide by default and show no focus
+        this.tabIndex = 0;
+        this.setAttribute("visible", "false");
+        this.addEventListener("focus", () => {
+            this.setAttribute("visible", "true");
+        });
+        this.addEventListener("blur", () => {
+            this.setAttribute("visible", "false");
+        });
+
+        if (this.children.length > 0) {
+            this.owner = this.children[0];
+            this.width = this.owner.offsetWidth;
+            this.height = this.owner.offsetHeight;
+        }
     }
 
     dragStart(event) {

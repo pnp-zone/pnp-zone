@@ -70,23 +70,11 @@ class Background extends HTMLImageElement {
             // Receive size changes
             this.hitbox.owner = this;
 
-            // Make focusable
-            this.hitbox.tabIndex = 0;
-
             // Send new size over socket
             this.hitbox.sizeChangedCallback = function() {
                 socket.send({type: "background.move", id: this.id, url: this.url,
                     x: this.x, y: this.y, width: this.width, height: this.height});
             }.bind(this);
-
-            // Start hidden and appear/disappear with focus
-            this.hitbox.setAttribute("visible", "false");
-            this.hitbox.addEventListener("focus", () => {
-                this.hitbox.setAttribute("visible", "true");
-            });
-            this.hitbox.addEventListener("blur", () => {
-                this.hitbox.setAttribute("visible", "false");
-            });
         }
         this.style.left = "0px";
         this.style.right = "0px";
