@@ -70,12 +70,18 @@ class JoinBBB(LoginRequiredMixin, View):
             account = AccountModel.objects.get(user__username=request.user)
         except AccountModel.DoesNotExist:
             return Http404
-        b = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
+
+        bbb = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
         # TODO: INSECURE AS SHIT
         attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest().replace("&", "-")
         moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest().replace("&", "-")
+        meeting_id = hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-")
+
         try:
-            b.create_meeting(hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-"), params={"attendeePW": attendee, "moderatorPW": moderator})
+            bbb.create_meeting(meeting_id, params={"attendeePW": attendee, "moderatorPW": moderator})
         except Exception:
             pass
-        return redirect(b.get_join_meeting_url(request.POST["name"], hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-"), moderator if len([x for x in campaign.game_master.all() if x.user.username == request.user]) > 0 else attendee))
+
+        is_moderator = request.user.id in [x.user.id for x in campaign.game_master.all()] or request.user.is_superuser
+        url = bbb.get_join_meeting_url(request.POST["name"], meeting_id, moderator if is_moderator else attendee)
+        return redirect(url)
