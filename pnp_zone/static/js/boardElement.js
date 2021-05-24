@@ -1,4 +1,4 @@
-import createEditableStyle from "./lib/style.js";
+import createEditableStyle from "./customElements/editable-style.js";
 import tags from "./lib/tagFactory.js";
 
 

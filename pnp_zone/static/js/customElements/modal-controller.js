@@ -1,5 +1,5 @@
-import tags from "./tagFactory.js";
-import createEditableStyle from "./style.js";
+import tags from "../lib/tagFactory.js";
+import createEditableStyle from "./editable-style.js";
 
 class ModalController extends HTMLElement {
     static stylesheet = "/static/css/lib/modal.css";

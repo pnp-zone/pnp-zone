@@ -1,5 +1,5 @@
-import {Drag} from "./mouse.js";
-import tags from "./tagFactory.js";
+import {Drag} from "../lib/mouse.js";
+import tags from "../lib/tagFactory.js";
 import {BoardElement} from "../boardElement.js";
 
 
@@ -189,6 +189,7 @@ class Hitbox extends BoardElement {
         this.hiddenStyle.addEntry("top", "auto");
         this.hiddenStyle.addEntry("width", "auto");
         this.hiddenStyle.addEntry("height", "auto");
+        this.hiddenStyle.addEntry("z-index", "0");
     }
 
     get x() { return parseFloat(this.hiddenStyle.left.replace("px", "")); }
@@ -203,8 +204,10 @@ class Hitbox extends BoardElement {
     attributeChangedCallback(attr, oldValue, newValue) {
         if (newValue === "false") {
             this.shadowRoot.querySelector(".frame").style.display = "none";
+            this.hiddenStyle["z-index"] = 0;
         } else if (oldValue === "false") {
             this.shadowRoot.querySelector(".frame").style.display = "";
+            this.hiddenStyle["z-index"] = 999;
         }
     }
 
@@ -232,6 +235,12 @@ class Hitbox extends BoardElement {
             this.owner = this.children[0];
             this.width = this.owner.offsetWidth;
             this.height = this.owner.offsetHeight;
+            this.owner.addEventListener("focus", () => {
+                this.setAttribute("visible", "true");
+            });
+            this.owner.addEventListener("blur", () => {
+                this.setAttribute("visible", "false");
+            });
         }
     }
 

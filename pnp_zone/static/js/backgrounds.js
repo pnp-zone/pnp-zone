@@ -1,7 +1,7 @@
 import tags from "./lib/tagFactory.js";
 import {registerContextMenu} from "./lib/mouse.js";
 import socket from "./socket.js";
-import "./lib/hitbox.js";
+import "./customElements/hitbox-hitbox.js";
 
 const CONTAINER = document.getElementById("backgrounds");
 const HITBOXES = document.getElementById("backgroundHitboxes");
