@@ -53,7 +53,10 @@
                     </tr>
                     <tr>
                         <td><label for="newColor">Color: </label></td>
-                        <td><input id="newColor" name="color" type="text"></td>
+                        <td>
+                            <button data-jscolor="{valueElement:'#newColor'}"></button>
+                            <input id="newColor" name="color" type="hidden" value="#FFFFFF">
+                        </td>
                     </tr>
                     <tr><td></td><td><input value="New" type="submit"></td></tr>
                 </table>
@@ -63,11 +66,17 @@
                 <table>
                     <tr>
                         <td><label for="colorBg">Background: </label></td>
-                        <td><input id="colorBg" name="background" type="text"></td>
+                        <td>
+                            <button data-jscolor="{valueElement:'#colorBg'}"></button>
+                            <input id="colorBg" name="background" type="hidden" value="#FFFFFF">
+                        </td>
                     </tr>
                     <tr>
                         <td><label for="colorBr">Border: </label></td>
-                        <td><input id="colorBr" name="border" type="text" value=""></td>
+                        <td>
+                            <button data-jscolor="{valueElement:'#colorBr'}"></button>
+                            <input id="colorBr" name="color" type="hidden" value="#000000">
+                        </td>
                     </tr>
                     <tr><td></td><td><label>Active <input name="active" type="checkbox"></label></td></tr>
                 </table>
@@ -92,6 +101,22 @@
     let board; import("{% static "js/board.js" %}").then((module) => { board = module.board; });
     let grid; import("{% static "js/grid.js" %}").then((module) => { grid = module; });
     let socket; import("{% static "js/socket.js" %}").then((module) => { socket = module.default; });
+</script>
+<script src="{% static "js/jscolor/jscolor.min.js" %}"></script>
+<script>
+    jscolor.presets.default = {
+        position: 'right',
+        previewSize: 60,          // make the color preview bigger
+        backgroundColor: '#15202b',
+        borderColor: '#422d78',
+        format: 'hexa',
+        palette: [
+            '#000000', '#7d7d7d', '#870014', '#ec1c23', '#ff7e26',
+            '#fef100', '#22b14b', '#00a1e7', '#3f47cc', '#a349a4',
+            '#ffffff', '#c3c3c3', '#b87957', '#feaec9', '#ffc80d',
+            '#eee3af', '#b5e61d', '#99d9ea', '#7092be', '#c8bfe7',
+        ],
+    };
 </script>
 
 {% if jitsi_domain %}
