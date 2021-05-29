@@ -1,7 +1,6 @@
 import hashlib
 import uuid
 
-import bigbluebutton_api_python
 from bigbluebutton_api_python import BigBlueButton
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponseRedirect
@@ -51,6 +50,7 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
             return Http404
 
         return render(request, self.template_name, {
+            "title": campaign.name,
             "added_players": campaign.players.all(),
             "added_gamemasters": campaign.game_master.all(),
             "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
