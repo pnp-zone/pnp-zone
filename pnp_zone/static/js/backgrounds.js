@@ -97,6 +97,9 @@ class Background extends HTMLImageElement {
     }
 
     attributeChangedCallback(attr, oldValue, newValue) {
+        if (oldValue == newValue) {
+            return;
+        }
         switch (attr) {
             case "width":
                 if (newValue === "0") {
