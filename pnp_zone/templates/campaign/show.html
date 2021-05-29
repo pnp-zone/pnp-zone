@@ -1,17 +1,25 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
-<h2>Added Players</h2>
+<h2>Players</h2>
 <div class="campaignRow">
     {% for player in added_players %}
         <div class="campaignItem">{{ player }}</div>
     {% endfor %}
 </div>
-<h2>Not added Players</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>
+        <select name="invite">
+            {% for player in not_added_players %}
+                <option>{{ player }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <button>Invite</button>
+</form>
+
 <div class="campaignRow">
-    {% for player in not_added_players %}
-        <div class="campaignItem">{{ player }}</div>
-    {% endfor %}
 </div>
 <h2>Added Gamemasters</h2>
 {% for gm in added_gamemasters %}

@@ -4,7 +4,7 @@ import uuid
 import bigbluebutton_api_python
 from bigbluebutton_api_python import BigBlueButton
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import TemplateView
@@ -28,6 +28,21 @@ class CreateCampaignView(LoginRequiredMixin, View):
 
 class ShowCampaignView(LoginRequiredMixin, TemplateView):
     template_name = "campaign/show.html"
+
+    def post(self, request, cid="", *args, **kwargs):
+        try:
+            campaign = CampaignModel.objects.get(id=cid)
+        except CampaignModel.DoesNotExist:
+            return Http404
+
+        if "invite" in request.POST:
+            try:
+                account = AccountModel.objects.get(user__username=request.POST["invite"])
+                campaign.players.add(account)
+            except AccountModel.DoesNotExist:
+                pass
+
+        return HttpResponseRedirect(request.path)
 
     def get(self, request, cid="", *args, **kwargs):
         try:
