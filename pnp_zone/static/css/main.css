@@ -42,6 +42,14 @@ input[type=number] {
 
 }
 
+select {
+    background-color: #15202b;
+    padding: 0.5em 1em 0.5em 1em;
+    color: white;
+    border-radius: 5px;
+    border: 1px solid #422d78;
+}
+
 .content {
     flex-grow: 1;
 
