@@ -14,3 +14,13 @@ clickable_url.__name__ = "url"
 @admin.register(models.Room)
 class RoomAdmin(admin.ModelAdmin):
     list_display = ("__str__", clickable_url)
+
+
+@admin.register(models.BackgroundImage)
+class BackgroundAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(models.Tile)
+class TileAdmin(admin.ModelAdmin):
+    list_display = ("room", "x", "y", "border", "background")
