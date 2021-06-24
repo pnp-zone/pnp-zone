@@ -20,9 +20,9 @@ class BoardView(LoginRequiredMixin, TemplateView):
         except Room.DoesNotExist:
             raise Http404
 
-        campaign = CampaignModel.objects.filter(room__in=[room.id])[0]
-        if request.user.username not in [x.user.username for x in campaign.players.all()] and\
-                request.user.username not in [x.user.username for x in campaign.game_master.all()]:
+        campaign: CampaignModel = room.campaignmodel_set.first()
+        if not campaign.players.filter(user__username=request.user.username).exists() and \
+                not campaign.game_master.filter(user__username=request.user.username).exists():
             return HttpResponse("You're not allowed in this room")
 
         try:
@@ -37,8 +37,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "characters": room.character_set.all(),
             "session": session,
             "tiles": room.tile_set.all(),
-            "is_moderator": request.user.id in [x.user.id for x in campaign.game_master.all()] or request.user.is_superuser,
-            "x_range": list(range(25)), "y_range": list(range(17)),
+            "is_moderator": campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser,
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
         })

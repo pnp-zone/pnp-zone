@@ -97,6 +97,6 @@ class JoinBBB(LoginRequiredMixin, View):
         except Exception:
             pass
 
-        is_moderator = request.user.id in [x.user.id for x in campaign.game_master.all()] or request.user.is_superuser
+        is_moderator = campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser
         url = bbb.get_join_meeting_url(request.POST["name"], meeting_id, moderator if is_moderator else attendee)
         return redirect(url)
