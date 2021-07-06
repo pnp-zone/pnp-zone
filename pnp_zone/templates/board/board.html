@@ -16,22 +16,7 @@
         <div id="jitsi"></div>
     {% endif %}
 
-    <div id="board-view">
-        <board-board id="board" class="noselect" x="{{ session.board_x }}" y="{{ session.board_y }}" scale="{{ session.board_scale }}">
-            <div id="backgrounds" class="board-element"></div>
-            <div id="backgroundGrid" class="board-element" style="color: {{ room.defaultBorder }}"></div>
-            <div id="backgroundHitboxes" class="board-element"></div>
-            <div id="coloredGrid" class="board-element">
-                {% for c in characters %}
-                    <board-character id="{{ c.identifier }}" color="{{ c.color }}" x="{{ c.x }}" y="{{ c.y }}"></board-character>
-                {% endfor %}
-                {% for t in tiles %}
-                    <board-tile border="{{ t.border }}" background="{{ t.background }}" x="{{ t.x }}" y="{{ t.y }}"></board-tile>
-                {% endfor %}
-            </div>
-            <div id="cursors" class="board-element"></div>
-        </board-board>
-    </div>
+    <div id="board-view"></div>
 
     {% if is_moderator %}
         <input type="checkbox" class="toggleModerator" checked="">
@@ -95,13 +80,27 @@
     {% endif %}
 </div>
 
-<script type="module" src="{% static "js/board.js" %}"></script>
 <script>
-    // Expose some modules for debugging
-    let board; import("{% static "js/board.js" %}").then((module) => { board = module.board; });
-    let grid; import("{% static "js/grid.js" %}").then((module) => { grid = module; });
-    let socket; import("{% static "js/socket.js" %}").then((module) => { socket = module.default; });
+        document.initialData = {
+            x: {{ session.board_x }},
+            y: {{ session.board_y }},
+            scale: {{ session.board_scale }},
+            characters: {
+                {% for c in characters %}
+                    "{{ c.identifier }}": {x: {{ c.x }}, y: {{ c.y }}, id: "{{ c.identifier }}", color: "{{ c.color }}", },
+                {% endfor %}
+            },
+            tiles: {
+                {% for tile in tiles %}
+                    "{{ tile.x }} | {{ tile.y }}": {x: {{ tile.x }}, y: {{ tile.y }}, border: "{{ tile.border }}", background: "{{ tile.background }}",},
+                {% endfor %}
+            },
+            backgrounds: {
+            },
+        };
 </script>
+<script src="{% static "react/init.js" %}" type="module"></script>
+
 <script src="{% static "js/jscolor/jscolor.min.js" %}"></script>
 <script>
     jscolor.presets.default = {

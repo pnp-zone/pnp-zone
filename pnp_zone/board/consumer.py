@@ -1,5 +1,3 @@
-from collections import defaultdict
-
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -72,7 +70,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"type": "error", "message": f"'{event['type']}' can only be used by moderators"})
                 return
 
-            response_sender, response_others = await handler(self.room, self.user, event)
+            # Run the event handler
+            try:
+                response_sender, response_others = await handler(self.room, self.user, event)
+            except KeyError as err:
+                raise EventError(f"Missing attribute {err} for event '{event['type']}'")
 
             # Respond to sender
             if response_sender:

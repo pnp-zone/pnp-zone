@@ -55,15 +55,10 @@
 }
 
 #context-menu {
-    display: none;
-    position: absolute;
-    left: 0;
-    top: 0;
     background: #192734;
     color: #ffffff;
-}
-#context-menu[active="true"] {
-    display: block;
+    z-index: 999;
+    position: absolute;
 }
 
 .hitbox div {
@@ -72,4 +67,35 @@
 
 .hitbox:focus div {
     display: block;
+}
+
+/* Character */
+.character {
+    z-index: 50;
+    transition-property: left, top;
+    transition-duration: 1s;
+    position: absolute;
+    cursor: grab;
+    width: 80px;
+    height: 92px;
+}
+.character-hexagon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: inherit;
+    height: inherit;
+}
+.character-name {
+    position: absolute;
+    left: 0;
+    top: 0;
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: inherit;
+    height: inherit;
+    margin: 0;
+    text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }

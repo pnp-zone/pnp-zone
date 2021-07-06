@@ -1,139 +1,128 @@
-import tags from "./lib/tagFactory.js";
+import React from "https://cdn.skypack.dev/react";
+
+const e = React.createElement;
+
 import Hexagon from "./hexagon.js";
-import { BoardElement } from "./boardElement.js";
 
 export const TILE_HEXAGON = new Hexagon(100);
 export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
 export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
 export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
+export const BORDER_WIDTH = Math.ceil(TILE_WIDTH / 50);
+export const INNER_HEXAGON = new Hexagon(TILE_WIDTH - 2*BORDER_WIDTH);
 
-export class Tile extends BoardElement {
-    static observedAttributes = ["background", "border"];
-    static stylesheet = "/static/css/board/tile.css";
+export function Tile(props) {
+    const {x, y, border, background} = props;
+    const position = Coord.fromIndex(x, y);
 
-    constructor() {
-        super();
-        this.hiddenStyle.addEntry("left", "0");
-        this.hiddenStyle.addEntry("top", "0");
-        this.shadowRoot.appendChild(Hexagon.generateSVG(512, 8));
-    }
-
-    attributeChangedCallback(attr, oldValue, newValue) {
-        switch (attr) {
-            case "background":
-                this.shadowRoot.querySelector("polygon").style.fill = newValue;
-                break;
-            case "border":
-                this.shadowRoot.querySelector("path").style.fill = newValue;
-                break;
-        }
-    }
-
-    connectedCallback() {
-        const coord = Coord.fromIndex(
-            parseInt(this.getAttribute("x")),
-            parseInt(this.getAttribute("y"))
-        );
-        this.hiddenStyle.left = coord.left + "px";
-        this.hiddenStyle.top = coord.top + "px";
-    }
-
-    set backgroundColor(value) { this.setAttribute("background", value); }
-    set borderColor(value) { this.setAttribute("border", value); }
+    return e("svg", {
+        version: "1.1",
+        xmlns: "http://www.w3.org/2000/svg",
+        className: "field",
+        viewBox: "-"+TILE_HEXAGON.width/2+" -"+TILE_HEXAGON.height/2+" "+TILE_HEXAGON.width+" "+TILE_HEXAGON.height,
+        style: {
+            position: "absolute",
+            left: position.left + "px",
+            top: position.top + "px",
+            width: `${TILE_WIDTH}px`,
+            height: `${TILE_HEIGHT}px`,
+        },
+    }, [
+        e("polygon", {
+            key: "background",
+            points: TILE_HEXAGON.asPolygon,
+            style: {
+                fill: background,
+            },
+        }),
+        e("path", {
+            key: "border",
+            fillRule: "evenodd",
+            d: `${TILE_HEXAGON.asPath} ${INNER_HEXAGON.asPath}`,
+            style: {
+                fill: border,
+            },
+        }),
+    ]);
 }
 
-export class Grid {
-    constructor(container) {
-        this.container = container;
-        this.lookup = {};
-    }
+export class PatchGrid extends React.Component {
+    render() {
+        const {size, left, right, top, bottom} = this.props;
 
-    getOrCreate(x, y) {
-        const p = [x, y];
-        let tile = this.lookup[p]
-        if (!tile) {
-            tile = this.newTile(x, y);
-            this.lookup[p] = tile;
-        }
-        return tile;
-    }
-
-    newTile(x, y) {
-        const tile = document.createElement("board-tile");
-        tile.setAttribute("x", x);
-        tile.setAttribute("y", y);
-        this.container.appendChild(tile);
-        return tile;
-    }
-}
-
-export class BackgroundGrid extends Grid {
-    constructor(container,
-                patchSize = 16,
-                width=100,
-                borderWidth=2) {
-        super(container);
-
-        this.patchSize = patchSize;
-
-        // Generate an svg for the patches
-        const border = this.container.style.color;
-        const borders = [];
-        for (let ix = -1; ix < this.patchSize+1; ix++) {
-            for (let iy = -1; iy < this.patchSize+1; iy++) {
-                // Generate new hexagons
-                const coord = Coord.fromIndex(ix, iy);
-                const bigH = new Hexagon(width);
-                const smallH = new Hexagon(width - 2*borderWidth);
-
-                // Translate hexagons
-                for (let i = 0; i < 6; i++) {
-                    bigH.points[i][0] += coord.xPixel;
-                    bigH.points[i][1] += coord.yPixel;
-                    smallH.points[i][0] += coord.xPixel;
-                    smallH.points[i][1] += coord.yPixel;
-                }
-
-                // Combine hexagons
-                borders.push(`<path fill='${border}' fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`);
+        const patches = [];
+        const start = Coord.fromPixel(left, top);
+        const end = Coord.fromPixel(right, bottom);
+        const w = Math.abs(start.xIndex - end.xIndex);
+        const h = Math.abs(start.yIndex - end.yIndex);
+        for (let x = -size; x <= w; x += size) {
+            for (let y = -size; y <= h; y += size) {
+                patches.push([x, y]);
+                //patches.push(e(HexPatch, {key: `${x} | ${y}`, size: size, x, y}));
             }
         }
-        const viewBox = "0 0 "+TILE_WIDTH * this.patchSize+" "+ROW_HEIGHT * this.patchSize;
-        const header = "<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='"+viewBox+"'>\n";
-        const svg = header + borders.join("\n") + "\n</svg>";
 
-        // Set svg as background image
-        const css = document.createElement("style");
-        css.innerHTML = `.patch${this.patchSize} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}");}`;
-        document.body.appendChild(css);
-    }
+        const y = top - (top % ROW_HEIGHT);
+        const x = left - (left % TILE_WIDTH) + (y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
 
-    newTile(x, y) {
-        const position = Coord.fromIndex(x, y);
-        const tile = tags.div({
-            class: "board-element patch" + this.patchSize,
+        return e("div", {
             style: {
-                left: position.left+"px",
-                top: position.top+"px",
-                width: TILE_WIDTH * this.patchSize + "px",
-                height: ROW_HEIGHT * this.patchSize + "px",
+                position: "absolute",
+                left: `${x}px`,
+                top: `${y}px`,
             },
-        });
-        this.container.appendChild(tile);
-        return tile;
+        }, [
+            e(PatchCss, {
+                size: size,
+                key: "css",
+            }),
+            ...patches.map(([x, y]) => e(HexPatch, {key: `${x} | ${y}`, size, x, y})),
+        ]);
     }
-
-    getOrCreate(x, y) {
-        x -= x % this.patchSize;
-        y -= y % this.patchSize;
-        return super.getOrCreate(x, y);
-    }
-
-    get x() { return parseInt(this.container.style.left.replace("px", "")); }
-    get y() { return parseInt(this.container.style.top.replace("px", "")); }
-    set x(value) { this.container.style.left = "" + value + "px"; }
-    set y(value) { this.container.style.top = "" + value + "px"; }
 }
+function HexPatch(props) {
+    const {x, y, size} = props;
+    const position = Coord.fromIndex(x, y);
+    return e("div", {
+        className: `board-element patch${size}`,
+        style: {
+            left: position.left+"px",
+            top: position.top+"px",
+        },
+    });
+}
+
+// React.memo wraps a component and only re-renders it when it has actually changed
+const PatchCss = React.memo(function PatchCss(props) {
+    const {size} = props;
+    // Generate an svg for the patches
+    const border = "black";
+    const borders = [];
+    for (let ix = -1; ix < size+1; ix++) {
+        for (let iy = -1; iy < size+1; iy++) {
+            // Generate new hexagons
+            const coord = Coord.fromIndex(ix, iy);
+            const bigH = new Hexagon(TILE_WIDTH);
+            const smallH = new Hexagon(TILE_WIDTH - 2*BORDER_WIDTH);
+
+            // Translate hexagons
+            for (let i = 0; i < 6; i++) {
+                bigH.points[i][0] += coord.xPixel;
+                bigH.points[i][1] += coord.yPixel;
+                smallH.points[i][0] += coord.xPixel;
+                smallH.points[i][1] += coord.yPixel;
+            }
+
+            // Combine hexagons
+            borders.push(`<path fill='${border}' fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`);
+        }
+    }
+    const viewBox = `0 0 ${TILE_WIDTH * size} ${TILE_HEIGHT * size}`;
+    const header = `<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}'>\n`;
+    const svg = header + borders.join("\n") + "\n</svg>";
+
+    return e("style", {}, `.patch${size} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}"); width: ${TILE_WIDTH * size}px; height: ${TILE_HEIGHT * size}px;}`)
+});
 
 export class Coord {
     constructor() {

@@ -1,4 +1,6 @@
-import { EventGroup, EventListener } from "./eventHandler.js";
+import React from "https://cdn.skypack.dev/react";
+import ReactDOM from "https://cdn.skypack.dev/react-dom";
+const e = React.createElement;
 
 
 /*
@@ -60,55 +62,59 @@ export function addMouseExtension(extension) {
  * Context Menus
  * -------------
  */
-let isMenuActive = false;
-const menu = document.getElementById("context-menu");
-document.addEventListener("DOMContentLoaded", () => {
-    menu.remove();
-    document.body.appendChild(menu);
-});
+export class Menu extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            visible: false,
+            children: [],
+            x: 0,
+            y: 0,
+        };
+    }
 
-function showMenu() {
-    if (!isMenuActive) {
-        isMenuActive = true;
-        menu.setAttribute("active", "true");
+    show() { this.setState({visible: true}); }
+    hide() { this.setState({visible: false, children: []}); }
+
+    render() {
+        const {visible, children, x, y} = this.state;
+        if (!visible) {
+            return null;
+        } else {
+            return e("div", {
+                style: {
+                    position: "absolute",
+                    left: `${x}px`,
+                    top: `${y}px`,
+                }
+            }, children);
+        }
+    }
+
+    static handler(getItems) {
+        return function (event) {
+            event.preventDefault();
+            menu.setState((state, props) => ({
+                visible: true,
+                children: [...state.children, ...getItems()],
+                x: event.pageX,
+                y: event.pageY,
+            }));
+        };
     }
 }
-function hideMenu() {
-    if (isMenuActive) {
-        isMenuActive = false;
-        menu.setAttribute("active", "false");
-    }
-}
+const menu = ReactDOM.render(e(Menu), document.getElementById("context-menu"));
 
 // Close menu on any mouse click or ESC key press
 document.addEventListener("keyup", (event) => {
     if (event.key === "Escape") {
-        hideMenu();
+        menu.hide();
     }
 }, true);
-document.addEventListener("mousedown", hideMenu, true);
-menu.addEventListener("mousedown", showMenu, true);
-
-export function registerContextMenu(target, getItems) {
-    const eventListener = new EventListener(target, "contextmenu", (event) => {
-        event.preventDefault();
-
-        menu.style.left = event.pageX + "px";
-        menu.style.top = event.pageY + "px";
-
-        const items = getItems();
-        while (menu.children.length > 0) {
-            menu.children[0].remove();
-        }
-        for (let i = 0; i < items.length; i++) {
-            menu.appendChild(items[i]);
-        }
-
-        showMenu();
-    });
-
-    return eventListener;
-}
+document.addEventListener("mousedown", () => {
+    menu.hide();
+}, true);
+//menu.addEventListener("mousedown", showMenu, true);
 
 
 /*
@@ -134,71 +140,60 @@ export function registerContextMenu(target, getItems) {
  * It takes your callback object and the mouse button.
  */
 let dragged_for_button = {};
-const dragHandler = new EventGroup(
-        new EventListener(document, "mousemove", (event) => {
-            const pressed_buttons = buttons(event);
-            for (let button in dragged_for_button) {
-                if (pressed_buttons[button] && dragged_for_button[button]) {
-                    dragged_for_button[button].dragMove(event);
-                }
-            }
-        }),
-        new EventListener(document, "mouseup", (event) => {
-            if (dragged_for_button[event.button]) {
-                dragged_for_button[event.button].dragEnd(event);
-                dragged_for_button[event.button] = null;
-            }
-        }),
-);
-dragHandler.enable();
-
-// Map from target (something an EventListener is added to) to tha actual EventListener
-const targetHandler = new Map();
-const targetMouseObjects = new Map();
+document.addEventListener("mousemove", (event) => {
+    const pressed_buttons = buttons(event);
+    for (let button in dragged_for_button) {
+        if (pressed_buttons[button] && dragged_for_button[button]) {
+            dragged_for_button[button].dragMove(event);
+        }
+    }
+});
+document.addEventListener("mouseup", (event) => {
+    if (dragged_for_button[event.button]) {
+        dragged_for_button[event.button].dragEnd(event);
+        dragged_for_button[event.button] = null;
+    }
+});
 
 export class Drag {
-    constructor(object, target = null, button = LEFT_BUTTON) {
-        if (!target) {
-            target = object;
-        }
-        this.object = object;
-        this.target = target;
-        this.button = button;
+    constructor() {
+        this.button2objects = new Map();
 
-        if (!targetHandler.has(target)) {
-            targetHandler.set(target, new EventListener(target, "mousedown", (event) => {
-                const mouseObjects = targetMouseObjects.get(target);
-                if (mouseObjects.has(event.button)) {
-                    const objects = mouseObjects.get(event.button);
-                    if (objects.length > 0) {
-                        if (startDrag(objects[0], event.button)) {
-                            objects[0].dragStart(event);
-                            event.stopPropagation();
-                        }
-                    }
+        const button2objects = this.button2objects;
+        this.onMouseDown = function (event) {
+            const objects = button2objects[event.button];
+            if (objects && objects.length > 0) {
+                if (startDrag(objects[0], event.button)) {
+                    objects[0].dragStart(event);
+                    event.stopPropagation();
                 }
-            }).enable());
-        }
-
-        if (!targetMouseObjects.has(target)) {
-            targetMouseObjects.set(target, new Map());
-        }
-        const mouseObjects = targetMouseObjects.get(target);
-        if (!mouseObjects.has(button)) {
-            mouseObjects.set(button, []);
+            }
         }
     }
 
-    disable() {
-        const objects = targetMouseObjects.get(this.target).get(this.button);
-        const index = objects.indexOf(this.object);
-        if (index !== -1) {
-            objects.splice(index, 1);
+    register(button, object) {
+        // Add object to objects list
+        if (!this.button2objects.has(button)) {
+            this.button2objects[button] = [];
         }
-    }
+        const objects = this.button2objects[button];
+        objects.push(object);
 
-    enable() {
-        targetMouseObjects.get(this.target).get(this.button).unshift(this.object);
+        // Return toggle function
+        let enabled = true;
+        function toggleFunc() {
+            if (!enabled) {
+                objects.unshift(object);
+            } else {
+                const index = objects.indexOf(object);
+                if (index !== -1) {
+                    objects.splice(index, 1);
+                }
+            }
+            enabled = !enabled;
+            return toggleFunc;
+        }
+        return toggleFunc;
     }
 }
 
@@ -208,7 +203,6 @@ export function startDrag(obj, button=LEFT_BUTTON) {
         return false;
     } else {
         dragged_for_button[button] = obj;
-        dragHandler.enable();
         return true
     }
 }

@@ -43,7 +43,7 @@ async def process_cursor(room, user, data):
     return None, dict(data, name=user.get_username())
 
 
-@register("move")
+@register("character.move")
 @database_sync_to_async
 def process_move_character(room, user, data):
     if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
@@ -56,7 +56,7 @@ def process_move_character(room, user, data):
         return data, data
 
 
-@register("new")
+@register("character.new")
 @moderators_only
 @database_sync_to_async
 def process_new_character(room, user, data):
@@ -68,13 +68,13 @@ def process_new_character(room, user, data):
         return data, data
 
 
-@register("delete")
+@register("character.delete")
 @moderators_only
 @database_sync_to_async
 def process_delete_character(room, user, data):
     try:
         Character.objects.get(identifier=data["id"], room=room).delete()
-        return None, data
+        return data, data
     except Character.DoesNotExist:
         raise EventError(f"No character with id: {data['id']}") from None
 
@@ -104,7 +104,7 @@ def process_color_tile(room, user, data):
     else:
         tiles.delete()
 
-    return None, data
+    return data, data
 
 
 def _background2data(bg: BackgroundImage):
