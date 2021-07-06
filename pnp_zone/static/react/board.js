@@ -1,5 +1,4 @@
 import React from "https://cdn.skypack.dev/react";
-import ReactDOM from "https://cdn.skypack.dev/react-dom";
 
 import {Coord, Tile, PatchGrid} from "./grid.js";
 import {addMouseExtension, Drag, LEFT_BUTTON, Menu, MIDDLE_BUTTON} from "../js/lib/mouse.js";
@@ -7,6 +6,7 @@ import socket from "../js/socket.js";
 import Character from "./character.js";
 import "../js/board.js";
 import {Cursor} from "./cursors.js";
+import Layer from "./layer.js";
 
 const e = React.createElement;
 
@@ -164,46 +164,6 @@ export default class Board extends React.Component {
     }
 
     render() {
-        const backgrounds = [];
-        for (const key in this.state.backgrounds) {
-            if (this.state.backgrounds.hasOwnProperty(key)) {
-                const {url, x, y, width, height} = this.state.backgrounds[key];
-                backgrounds.push(e("img", {
-                    key: key,
-                    src: url,
-                    alt: key,
-                    style: {
-                        position: "absolute",
-                        left: `${x}px`,
-                        top: `${y}px`,
-                        width: `${width}px`,
-                        height: `${height}px`,
-                    }
-                }));
-            }
-        }
-
-        const tiles = [];
-        for (const key in this.state.tiles) {
-            if (this.state.tiles.hasOwnProperty(key)) {
-                tiles.push(e(Tile, {key: key, ...this.state.tiles[key]}));
-            }
-        }
-
-        const characters = [];
-        for (const key in this.state.characters) {
-            if (this.state.characters.hasOwnProperty(key)) {
-                characters.push(e(Character, {key: key, ...this.state.characters[key]}));
-            }
-        }
-
-        const cursors = [];
-        for (const key in this.state.cursors) {
-            if (this.state.cursors.hasOwnProperty(key)) {
-                cursors.push(e(Cursor, {key: key, ...this.state.cursors[key]}));
-            }
-        }
-
         return e("div", {
             style: {
                 position: "absolute",
@@ -224,22 +184,41 @@ export default class Board extends React.Component {
                 top: this.top,
                 bottom: this.bottom,
             }),
-            e("div", {
+            e(Layer, {
                 id: "backgrounds",
                 key: "backgrounds",
-            }, backgrounds),
-            e("div", {
+                childrenData: this.state.backgrounds,
+                childrenComponent: ({key, url, x, y, width, height}) => e("img", {
+                    key: key,
+                    src: url,
+                    alt: key,
+                    style: {
+                        position: "absolute",
+                        left: `${x}px`,
+                        top: `${y}px`,
+                        width: `${width}px`,
+                        height: `${height}px`,
+                    }
+                }),
+            }),
+            e(Layer, {
                 id: "tiles",
                 key: "tiles",
-            }, tiles),
-            e("div", {
+                childrenData: this.state.tiles,
+                childrenComponent: Tile,
+            }),
+            e(Layer, {
                 id: "characters",
                 key: "characters",
-            }, characters),
-            e("div", {
+                childrenData: this.state.characters,
+                childrenComponent: Character,
+            }),
+            e(Layer, {
                 id: "cursors",
                 key: "cursors",
-            }, cursors),
+                childrenData: this.state.cursors,
+                childrenComponent: Cursor,
+            }),
         ]);
     }
 
