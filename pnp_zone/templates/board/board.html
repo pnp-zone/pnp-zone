@@ -21,61 +21,7 @@
     {% if is_moderator %}
         <input type="checkbox" class="toggleModerator" checked="">
         <div id="moderator" class="flex-horizontal">
-            <form class="moderator-child" id="newCharacter">
-                <h2>New character</h2>
-                <table>
-                    <tr>
-                        <td><label for="newId">Identifier: </label></td>
-                        <td><input id="newId" name="id" type="text"></td>
-                    </tr>
-                    <tr>
-                        <td><label for="newX">X: </label></td>
-                        <td><input id="newX" name="x" type="text"></td>
-                    </tr>
-                    <tr>
-                        <td><label for="newY">Y: </label></td>
-                        <td><input id="newY" name="y" type="text"></td>
-                    </tr>
-                    <tr>
-                        <td><label for="newColor">Color: </label></td>
-                        <td>
-                            <button data-jscolor="{valueElement:'#newColor'}"></button>
-                            <input id="newColor" name="color" type="hidden" value="#FFFFFF">
-                        </td>
-                    </tr>
-                    <tr><td></td><td><input value="New" type="submit"></td></tr>
-                </table>
-            </form>
-            <form class="moderator-child" id="colorTile" onsubmit="return false;">
-                <h2>Color tile</h2>
-                <table>
-                    <tr>
-                        <td><label for="colorBg">Background: </label></td>
-                        <td>
-                            <button data-jscolor="{valueElement:'#colorBg'}"></button>
-                            <input id="colorBg" name="background" type="hidden" value="#FFFFFF">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><label for="colorBr">Border: </label></td>
-                        <td>
-                            <button data-jscolor="{valueElement:'#colorBr'}"></button>
-                            <input id="colorBr" name="color" type="hidden" value="#000000">
-                        </td>
-                    </tr>
-                    <tr><td></td><td><label>Active <input name="active" type="checkbox"></label></td></tr>
-                </table>
-            </form>
-            <form class="moderator-child" id="addBackground" onsubmit="return false;">
-                <h2>Add Background</h2>
-                <table>
-                    <tr>
-                        <td><label for="bgUrl">Background Url: </label></td>
-                        <td><input id="bgUrl" name="url" type="text"></td>
-                    </tr>
-                    <tr><td></td><td><input value="Add" type="submit"></td></tr>
-                </table>
-            </form>
+
         </div>
     {% endif %}
 </div>

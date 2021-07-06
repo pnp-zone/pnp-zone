@@ -4,7 +4,6 @@ import {Coord, Tile, PatchGrid} from "./grid.js";
 import {addMouseExtension, Drag, LEFT_BUTTON, Menu, MIDDLE_BUTTON} from "../js/lib/mouse.js";
 import socket from "../js/socket.js";
 import Character from "./character.js";
-import "../js/board.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
 

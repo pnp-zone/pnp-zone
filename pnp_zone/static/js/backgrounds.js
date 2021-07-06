@@ -10,16 +10,6 @@ const is_moderator = document.getElementById("moderator") !== null;
 
 const backgrounds = {};
 
-// Add submit action to add background form
-const addBackground = document.forms["addBackground"];
-if (addBackground) {
-    addBackground.onsubmit = () => {
-        socket.send({type: "background.new",
-            url: addBackground["url"].value,
-        });
-        return false;
-    }
-}
 
 function getNumericStyle(node, property, unit="px") {
     return parseFloat(node.style[property].replace(unit, ""));
