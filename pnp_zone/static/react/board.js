@@ -6,6 +6,7 @@ import socket from "../js/socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
+import Hitbox from "./hitbox.js";
 
 const e = React.createElement;
 
@@ -187,18 +188,7 @@ export default class Board extends React.Component {
                 id: "backgrounds",
                 key: "backgrounds",
                 childrenData: this.state.backgrounds,
-                childrenComponent: ({key, url, x, y, width, height}) => e("img", {
-                    key: key,
-                    src: url,
-                    alt: key,
-                    style: {
-                        position: "absolute",
-                        left: `${x}px`,
-                        top: `${y}px`,
-                        width: `${width}px`,
-                        height: `${height}px`,
-                    }
-                }),
+                childrenComponent: Background,
             }),
             e(Layer, {
                 id: "tiles",
@@ -242,6 +232,21 @@ export default class Board extends React.Component {
     dragEnd(event) {
         document.body.style.cursor = "default";
     }
+}
+
+function Background({key, url, x, y, width, height}) {
+    return e("img", {
+        key: key,
+        src: url,
+        alt: key,
+        style: {
+            position: "absolute",
+            left: `${x}px`,
+            top: `${y}px`,
+            width: `${width}px`,
+            height: `${height}px`,
+        }
+    });
 }
 
 const boardView = document.getElementById("board-view");

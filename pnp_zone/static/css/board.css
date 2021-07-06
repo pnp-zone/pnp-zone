@@ -61,14 +61,6 @@
     position: absolute;
 }
 
-.hitbox div {
-    display: none;
-}
-
-.hitbox:focus div {
-    display: block;
-}
-
 /* Character */
 .character {
     z-index: 50;
@@ -98,4 +90,76 @@
     height: inherit;
     margin: 0;
     text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+}
+
+/* Hitbox */
+.hitbox {
+    --frameWidth: max(0.01vw, 1px);
+
+    position: absolute;
+}
+.hitbox-frame {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: calc(-1 * var(--frameWidth));
+    left: calc(-1 * var(--frameWidth));
+    border: var(--frameWidth) solid #ccc;
+    cursor: move;
+}
+.hitbox-bobble {
+    --bobbleSize: 0.5vw;
+    --borderSize: 0.01vw;
+    --corner: calc(-1 * var(--bobbleSize) / 2 - var(--frameWidth));
+    --edge: calc(50% - var(--bobbleSize) / 2);
+
+    position: absolute;
+    background-color: #00f;
+    border: var(--borderSize) solid #ccc;
+    width: calc(var(--bobbleSize) - 2 * var(--borderSize));
+    height: calc(var(--bobbleSize) - 2 * var(--borderSize));
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+}
+.hitbox-bobble.n{
+    left: var(--edge);
+    top: var(--corner);
+    cursor: ns-resize;
+}
+.hitbox-bobble.ne {
+    top: var(--corner);
+    right: var(--corner);
+    cursor: nesw-resize;
+}
+.hitbox-bobble.e {
+    top: var(--edge);
+    right: var(--corner);
+    cursor: ew-resize;
+}
+.hitbox-bobble.se {
+    right: var(--corner);
+    bottom: var(--corner);
+    cursor: nwse-resize;
+}
+.hitbox-bobble.s {
+    left: var(--edge);
+    bottom: var(--corner);
+    cursor: ns-resize;
+}
+.hitbox-bobble.sw {
+    left: var(--corner);
+    bottom: var(--corner);
+    cursor: nesw-resize;
+}
+.hitbox-bobble.w {
+    left: var(--corner);
+    top: var(--edge);
+    cursor: ew-resize;
+}
+.hitbox-bobble.nw {
+    left: var(--corner);
+    top: var(--corner);
+    cursor: nwse-resize;
 }
