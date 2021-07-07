@@ -17,14 +17,14 @@ export default class Board extends React.Component {
 
     constructor(props) {
         super(props);
-        const { x, y, scale, characters, tiles, backgrounds } = this.props;
+        const { x, y, scale, characters, tiles, images } = this.props;
         this.state = {
             x,
             y,
             scale,
             characters,
             tiles,
-            backgrounds,
+            images,
             cursors: {},
         };
 
@@ -50,8 +50,8 @@ export default class Board extends React.Component {
             this.setState({});
         });
         socket.registerEvent("cursor", this.subStateSetter("cursors"));
-        socket.registerEvent("background.update", this.subStateSetter("backgrounds"));
-        socket.registerEvent("background.delete", this.subStateDeleter("backgrounds"));
+        socket.registerEvent("image.update", this.subStateSetter("images"));
+        socket.registerEvent("image.delete", this.subStateDeleter("images"));
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
             socket.send({
@@ -162,8 +162,8 @@ export default class Board extends React.Component {
             e(Layer, {
                 id: "backgrounds",
                 key: "backgrounds",
-                childrenData: this.state.backgrounds,
-                childrenComponent: Background,
+                childrenData: this.state.images,
+                childrenComponent: Image,
             }),
             e(PatchGrid, {
                 id: "grid",
@@ -186,10 +186,10 @@ export default class Board extends React.Component {
             e(Layer, {
                 id: "background-hitboxes",
                 key: "background-hitboxes",
-                childrenData: this.state.backgrounds,
-                childrenComponent: BackgroundHitbox,
+                childrenData: this.state.images,
+                childrenComponent: ImageHitbox,
                 commonProps: {
-                    setBackground: this.subStateSetter("backgrounds"),
+                    setImage: this.subStateSetter("images"),
                 }
             }),
             e(Layer, {
@@ -229,14 +229,14 @@ export default class Board extends React.Component {
     }
 }
 
-function BackgroundHitbox(props) {
-    const {id, x, y, width, height, setBackground} = props;
+function ImageHitbox(props) {
+    const {id, x, y, width, height, setImage} = props;
     return e(Hitbox, {
         rect: {x, y, width, height},
-        setRect: (rect) => setBackground({id, ...rect}),
+        setRect: (rect) => setImage({id, ...rect}),
         dragEnd() {
             socket.send({
-                type: "background.move",
+                type: "image.move",
                 id, x, y, width, height,
             });
         },
@@ -244,16 +244,16 @@ function BackgroundHitbox(props) {
             return [
                 e("button", {
                     onClick: () => {
-                        socket.send({type: "background.delete", id,});
+                        socket.send({type: "image.delete", id,});
                         Menu.close();
                     },
-                }, "Delete background"),
+                }, "Delete Image"),
             ];
         }),
     });
 }
 
-function Background({url, x, y, width, height}) {
+function Image({url, x, y, width, height}) {
     return e("img", {
         src: url,
         style: {

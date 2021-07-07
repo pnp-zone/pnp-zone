@@ -91,7 +91,7 @@ export default class Moderator extends React.PureComponent {
 
                     const img = new Image();
                     img.onload = () => {
-                        socket.send({type: "background.new",
+                        socket.send({type: "image.new",
                             url: img.src,
                             width: img.width,
                             height: img.height,

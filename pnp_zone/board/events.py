@@ -2,7 +2,7 @@ import uuid
 
 from channels.db import database_sync_to_async
 
-from board.models import Character, Tile, UserSession, BackgroundImage
+from board.models import Character, Tile, UserSession, Image
 
 event_handlers = {}
 
@@ -109,9 +109,9 @@ def process_color_tile(room, user, data):
     return data, data
 
 
-def _background2data(bg: BackgroundImage):
+def _image2data(bg: Image):
     return {
-        "type": "background.update",
+        "type": "image.update",
         "id": bg.identifier,
         "url": bg.url,
         "x": bg.x,
@@ -121,11 +121,11 @@ def _background2data(bg: BackgroundImage):
     }
 
 
-@register("background.new")
+@register("image.new")
 @moderators_only
 @database_sync_to_async
-def new_background(room, user, data: dict):
-    background = BackgroundImage.objects.create(
+def new_image(room, user, data: dict):
+    image = Image.objects.create(
         room=room,
         identifier=str(uuid.uuid4()),
         url=data["url"],
@@ -135,38 +135,38 @@ def new_background(room, user, data: dict):
         height=data["height"] if "height" in data else -1,
     )
 
-    data = _background2data(background)
+    data = _image2data(image)
     return data, data
 
 
-@register("background.move")
+@register("image.move")
 @moderators_only
 @database_sync_to_async
-def move_background(room, user, data):
+def move_image(room, user, data):
     try:
-        background = BackgroundImage.objects.get(room=room, identifier=data["id"])
-    except BackgroundImage.DoesNotExist:
+        image = Image.objects.get(room=room, identifier=data["id"])
+    except Image.DoesNotExist:
         return None, None
 
-    background.x = data["x"]
-    background.y = data["y"]
-    background.width = data["width"]
-    background.height = data["height"]
-    background.save()
+    image.x = data["x"]
+    image.y = data["y"]
+    image.width = data["width"]
+    image.height = data["height"]
+    image.save()
 
-    data = _background2data(background)
+    data = _image2data(image)
     return None, data
 
 
-@register("background.delete")
+@register("image.delete")
 @moderators_only
 @database_sync_to_async
-def delete_background(room, user, data):
+def delete_image(room, user, data):
     try:
-        background = BackgroundImage.objects.get(room=room, identifier=data["id"])
-    except BackgroundImage.DoesNotExist:
+        image = Image.objects.get(room=room, identifier=data["id"])
+    except Image.DoesNotExist:
         return None, None
 
-    background.delete()
+    image.delete()
 
     return data, data

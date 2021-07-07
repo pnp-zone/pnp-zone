@@ -12,7 +12,7 @@ class Main extends React.Component {
     }
 
     render() {
-        const {x, y, scale, characters, tiles, backgrounds} = this.props;
+        const {x, y, scale, characters, tiles, images} = this.props;
         const {isModerator} = this.props;
         return e(React.Fragment, {}, [
             e("div", {
@@ -24,7 +24,7 @@ class Main extends React.Component {
                 key: "board",
                 ref: (node) => {if (this.boardView === null) {this.boardView = node; this.setState({})}},
             }, [
-                e(Board, {parent: this.boardView, x, y, scale, characters, tiles, backgrounds}),
+                e(Board, {parent: this.boardView, x, y, scale, characters, tiles, images}),
             ]),
             ...(isModerator ? [
                 e("input", {

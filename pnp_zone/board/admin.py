@@ -16,8 +16,8 @@ class RoomAdmin(admin.ModelAdmin):
     list_display = ("__str__", clickable_url)
 
 
-@admin.register(models.BackgroundImage)
-class BackgroundAdmin(admin.ModelAdmin):
+@admin.register(models.Image)
+class ImageAdmin(admin.ModelAdmin):
     pass
 
 

@@ -59,7 +59,7 @@ class UserSession(models.Model):
         return f"{self.user} in {self.room}"
 
 
-class BackgroundImage(models.Model):
+class Image(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
@@ -67,6 +67,7 @@ class BackgroundImage(models.Model):
     y = models.IntegerField()
     width = models.IntegerField()
     height = models.IntegerField()
+    layer = models.CharField(max_length=1, choices=(("T", "Top"), ("M", "Middle"), ("B", "Bottom")), default="B")
 
     class Meta:
         unique_together = ("room", "identifier")
