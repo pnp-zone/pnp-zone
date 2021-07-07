@@ -32,11 +32,11 @@ export default class Board extends React.Component {
         this.drag.register(LEFT_BUTTON, this);
         this.drag.register(MIDDLE_BUTTON, this);
 
-        document.addEventListener("DOMContentLoaded", () => {
+        /*document.addEventListener("DOMContentLoaded", () => {
             new ResizeObserver(() => {
                 this.setState({}); // Force re-render
             }).observe(boardView);
-        });
+        });*/
         socket.registerEvent("error", ({message}) => { console.error(message); });
         socket.registerEvent("session", this.setState.bind(this));
         socket.registerEvent("character.new", this.subStateSetter("characters"));
@@ -60,7 +60,8 @@ export default class Board extends React.Component {
             });
         });
         addMouseExtension((event) => {
-            const boardViewRect = boardView.getBoundingClientRect();
+            //const boardViewRect = this.props.parent.getBoundingClientRect();
+            const boardViewRect = {x: 0, y: 0};
 
             // is the cursor over the board?
             //const overBoard = (boardViewRect.left < event.clientX && event.clientX < boardViewRect.right)
@@ -68,8 +69,9 @@ export default class Board extends React.Component {
 
             // get the cursor coordinates in the board
             // (taking position and scale into consideration)
-            const boardX = (event.clientX - boardViewRect.x)/this.state.scale + this.left;
-            const boardY = (event.clientY - boardViewRect.y)/this.state.scale + this.top;
+            const {left, top} = this.rect;
+            const boardX = (event.clientX - boardViewRect.x)/this.state.scale + left;
+            const boardY = (event.clientY - boardViewRect.y)/this.state.scale + top;
 
             event.boardX = boardX;
             event.boardY = boardY;
@@ -112,15 +114,8 @@ export default class Board extends React.Component {
         }.bind(this);
     }
 
-    jumpTo(coord) {
-        this.setState((state, props) => ({
-            x: (boardView.offsetWidth / 2) - (coord.xPixel * state.scale),
-            y: (boardView.offsetHeight / 2) - (coord.yPixel * state.scale),
-        }));
-    }
-
     onWheel(event) {
-        const rect = boardView.getBoundingClientRect();
+        const rect = this.props.parent.getBoundingClientRect();
         let newScale;
 
         // down
@@ -164,20 +159,17 @@ export default class Board extends React.Component {
             onWheel: this.onWheel.bind(this),
             //onContextMenu: Menu.handler(() => [e("p", {}, "Hello World")]),
         }, [
-            e(PatchGrid, {
-                id: "grid",
-                key: "grid",
-                size: PATCH_SIZE,
-                left: this.left,
-                right: this.right,
-                top: this.top,
-                bottom: this.bottom,
-            }),
             e(Layer, {
                 id: "backgrounds",
                 key: "backgrounds",
                 childrenData: this.state.backgrounds,
                 childrenComponent: Background,
+            }),
+            e(PatchGrid, {
+                id: "grid",
+                key: "grid",
+                size: PATCH_SIZE,
+                ...this.rect,
             }),
             e(Layer, {
                 id: "tiles",
@@ -209,10 +201,15 @@ export default class Board extends React.Component {
         ]);
     }
 
-    get left() { return Math.floor((-this.state.x)/this.state.scale); }
-    get top() { return Math.floor((-this.state.y)/this.state.scale); }
-    get right() { return Math.ceil((boardView.offsetWidth-this.state.x)/this.state.scale); }
-    get bottom() { return Math.ceil((boardView.offsetHeight-this.state.y)/this.state.scale); }
+    get rect() {
+        const parent = (this.props.parent || {offsetWidth: 0, offsetHeight: 0});
+        return {
+            left: Math.floor((-this.state.x)/this.state.scale),
+            top: Math.floor((-this.state.y)/this.state.scale),
+            right: Math.ceil((parent.offsetWidth-this.state.x)/this.state.scale),
+            bottom: Math.ceil((parent.offsetHeight-this.state.y)/this.state.scale),
+        };
+    }
 
     dragStart(event) {
         document.body.style.cursor = "move";
@@ -268,5 +265,3 @@ function Background({url, x, y, width, height}) {
         },
     });
 }
-
-const boardView = document.getElementById("board-view");

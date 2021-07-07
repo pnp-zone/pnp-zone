@@ -11,23 +11,15 @@
 
 <div id="context-menu"></div>
 
-<div class="flex-vertical" style="height: 100vh;">
-    {% if jitsi_domain %}
-        <div id="jitsi"></div>
-    {% endif %}
-
-    <div id="board-view"></div>
-
-    {% if is_moderator %}
-        <input type="checkbox" class="toggleModerator" checked="">
-        <div id="moderator" class="flex-horizontal">
-
-        </div>
-    {% endif %}
-</div>
+<div id="root" class="flex-vertical" style="height: 100vh;"></div>
 
 <script>
         document.initialData = {
+            {% if is_moderator %}
+            isModerator: true,
+            {% else %}
+            isModerator: false,
+            {% endif %}
             x: {{ session.board_x }},
             y: {{ session.board_y }},
             scale: {{ session.board_scale }},
@@ -48,7 +40,7 @@
             },
         };
 </script>
-<script src="{% static "react/init.js" %}" type="module"></script>
+<script src="{% static "react/main.js" %}" type="module"></script>
 
 <script src="{% static "js/jscolor/jscolor.min.js" %}"></script>
 <script>
