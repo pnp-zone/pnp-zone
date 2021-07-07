@@ -10,11 +10,11 @@ class Socket {
         };
 
         this.socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            if (this.event_handlers.has(message.type)) {
-                this.event_handlers.get(message.type)(message);
+            const {type, ...message} = JSON.parse(event.data);
+            if (this.event_handlers.has(type)) {
+                this.event_handlers.get(type)(message);
             } else {
-                console.error("Unknown message type:", message.type);
+                console.error("Unknown message type:", type);
             }
         };
 

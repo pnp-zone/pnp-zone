@@ -17,25 +17,7 @@ export default class Board extends React.Component {
 
     constructor(props) {
         super(props);
-
         const { x, y, scale, characters, tiles, backgrounds } = this.props;
-
-        const setRect = function (key) {
-            return function (rect) {
-                this.state.backgrounds[key] = {
-                    ...this.state.backgrounds[key],
-                    ...rect,
-                };
-                this.setState({});
-            }.bind(this);
-        }.bind(this);
-
-        for (const key in backgrounds) {
-            if (backgrounds.hasOwnProperty(key)) {
-                backgrounds[key].setRect = setRect(key);
-            }
-        }
-
         this.state = {
             x,
             y,
@@ -55,65 +37,26 @@ export default class Board extends React.Component {
                 this.setState({}); // Force re-render
             }).observe(boardView);
         });
-        socket.registerEvent("error", (event) => {
-            console.error(event.message);
-        });
-        socket.registerEvent("session", (event) => {
-            this.setState({
-                x: event.x,
-                y: event.y,
-                scale: event.scale,
-            });
-        });
-        socket.registerEvent("character.new", (event) => {
-            const {id, name, x, y, color} = event;
-            this.state.characters[id] = {id, name, x, y, color};
-            this.setState({});
-        });
-        socket.registerEvent("character.move", (event) => {
-            const {id, x, y} = event;
-            const char = this.state.characters[id];
-            char.x = x;
-            char.y = y;
-            this.setState({});
-        });
-        socket.registerEvent("character.delete", (event) => {
-            const {id} = event;
-            delete this.state.characters[id]
-            this.setState({});
-        });
-        socket.registerEvent("colorTile", (event) => {
-            const {tiles, background, border} = event;
+        socket.registerEvent("error", ({message}) => { console.error(message); });
+        socket.registerEvent("session", this.setState.bind(this));
+        socket.registerEvent("character.new", this.subStateSetter("characters"));
+        socket.registerEvent("character.move", this.subStateSetter("characters"));
+        socket.registerEvent("character.delete", this.subStateDeleter("characters"));
+        socket.registerEvent("colorTile", ({tiles, background, border}) => {
             for (let i = 0; i < tiles.length; i++) {
                 const [x, y] = tiles[i];
                 this.state.tiles[`${x} | ${y}`] = {x, y, border, background};
             }
             this.setState({});
         });
-        socket.registerEvent("cursor", (event) => {
-            const {id, x, y, name} = event;
-            this.state.cursors[id] = {x, y, name};
-            this.setState({});
-        });
-        socket.registerEvent("background.update", (event) => {
-            const {id, url, x, y, width, height} = event;
-            this.state.backgrounds[id] = {
-                id, url, x, y, width, height,
-                setRect: setRect(id),
-            };
-            this.setState({});
-        });
-        socket.registerEvent("background.delete", (event) => {
-            const {id} = event;
-            delete this.state.backgrounds[id]
-            this.setState({});
-        });
+        socket.registerEvent("cursor", this.subStateSetter("cursors"));
+        socket.registerEvent("background.update", this.subStateSetter("backgrounds"));
+        socket.registerEvent("background.delete", this.subStateDeleter("backgrounds"));
         window.addEventListener("beforeunload", (event) => {
+            const {x, y, scale} = this.state;
             socket.send({
                 type: "session",
-                x: this.state.x,
-                y: this.state.y,
-                scale: this.state.scale,
+                x, y, scale,
             });
         });
         addMouseExtension((event) => {
@@ -145,6 +88,28 @@ export default class Board extends React.Component {
                     return coord.yIndex;
                 }});
         });
+    }
+
+    subStateSetter(subState, keyFromObj = ({id}) => id) {
+        return function (obj) {
+            this.setState((state) => ({
+                [subState]: {
+                    ...state[subState],
+                    [keyFromObj(obj)]: {
+                        ...state[subState][keyFromObj(obj)],
+                        ...obj
+                    }
+                }
+            }));
+        }.bind(this);
+    }
+    subStateDeleter(subState, keyFromObj = ({id}) => id) {
+        return function (obj) {
+            this.setState((state) => {
+                const {[keyFromObj(obj)]: toBeRemoved, ...toKeep} = state[subState];
+                return {[subState]: toKeep};
+            });
+        }.bind(this);
     }
 
     jumpTo(coord) {
@@ -231,6 +196,9 @@ export default class Board extends React.Component {
                 key: "background-hitboxes",
                 childrenData: this.state.backgrounds,
                 childrenComponent: BackgroundHitbox,
+                commonProps: {
+                    setBackground: this.subStateSetter("backgrounds"),
+                }
             }),
             e(Layer, {
                 id: "cursors",
@@ -265,10 +233,10 @@ export default class Board extends React.Component {
 }
 
 function BackgroundHitbox(props) {
-    const {id, x, y, width, height, setRect} = props;
+    const {id, x, y, width, height, setBackground} = props;
     return e(Hitbox, {
         rect: {x, y, width, height},
-        setRect,
+        setRect: (rect) => setBackground({id, ...rect}),
         dragEnd() {
             socket.send({
                 type: "background.move",
