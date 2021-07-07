@@ -122,15 +122,15 @@ def _background2data(bg: BackgroundImage):
 @register("background.new")
 @moderators_only
 @database_sync_to_async
-def new_background(room, user, data):
+def new_background(room, user, data: dict):
     background = BackgroundImage.objects.create(
         room=room,
         identifier=str(uuid.uuid4()),
         url=data["url"],
         x=0,
         y=0,
-        width=-1,
-        height=-1,
+        width=data["width"] if "width" in data else -1,
+        height=data["height"] if "height" in data else -1,
     )
 
     data = _background2data(background)

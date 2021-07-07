@@ -88,9 +88,17 @@ export default class Moderator extends React.PureComponent {
                 className: "moderator-child",
                 onSubmit: (event) => {
                     const addBackground = document.forms["addBackground"];
-                    socket.send({type: "background.new",
-                        url: addBackground["url"].value,
-                    });
+
+                    const img = new Image();
+                    img.onload = () => {
+                        socket.send({type: "background.new",
+                            url: img.src,
+                            width: img.width,
+                            height: img.height,
+                        });
+                    };
+                    img.src = addBackground["url"].value;
+
                     event.preventDefault();
                 },
             }, [
