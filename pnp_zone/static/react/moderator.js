@@ -184,10 +184,10 @@ class PaintBrush {
         const boardView = document.getElementById("board-view");
         if (value) {
             boardView.style.cursor = "crosshair";
-            boardView.addEventListener("mousedown", this.drag.onMouseDown);
+            boardView.addEventListener("mousedown", this.drag.onMouseDown, true);
         } else {
             boardView.style.cursor = "";
-            boardView.removeEventListener("mousedown", this.drag.onMouseDown);
+            boardView.removeEventListener("mousedown", this.drag.onMouseDown, true);
         }
     }
 }
