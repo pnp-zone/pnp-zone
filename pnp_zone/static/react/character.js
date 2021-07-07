@@ -63,6 +63,7 @@ export default class Character extends React.Component {
                 e("button", {
                     onClick: () => {
                         socket.send({type: "character.delete", id: this.props.id});
+                        Menu.close();
                     },
                 }, "Delete character"),
             ];

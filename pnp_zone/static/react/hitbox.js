@@ -110,7 +110,8 @@ export default class Hitbox extends React.Component {
     }
 
     render() {
-        const {x, y, width, height} = this.props.rect;
+        const {rect, setRect, dragEnd, ...unconsumedProps} = this.props;
+        const {x, y, width, height} = rect;
         const {visible} = this.state;
 
         return e("div", {
@@ -132,6 +133,7 @@ export default class Hitbox extends React.Component {
             onBlur: function () {
                 this.setState({visible: false});
             }.bind(this),
+            ...unconsumedProps,
         }, visible ? [
             e("div", {
                 key: "frame",

@@ -103,6 +103,11 @@ export default class Board extends React.Component {
             };
             this.setState({});
         });
+        socket.registerEvent("background.delete", (event) => {
+            const {id} = event;
+            delete this.state.backgrounds[id]
+            this.setState({});
+        });
         window.addEventListener("beforeunload", (event) => {
             socket.send({
                 type: "session",
@@ -225,19 +230,7 @@ export default class Board extends React.Component {
                 id: "background-hitboxes",
                 key: "background-hitboxes",
                 childrenData: this.state.backgrounds,
-                childrenComponent: function BackgroundHitbox(props) {
-                    const {id, x, y, width, height, setRect} = props;
-                    return e(Hitbox, {
-                        rect: {x, y, width, height},
-                        setRect,
-                        dragEnd() {
-                            socket.send({
-                                type: "background.move",
-                                id, x, y, width, height,
-                            });
-                        },
-                    });
-                },
+                childrenComponent: BackgroundHitbox,
             }),
             e(Layer, {
                 id: "cursors",
@@ -271,6 +264,30 @@ export default class Board extends React.Component {
     }
 }
 
+function BackgroundHitbox(props) {
+    const {id, x, y, width, height, setRect} = props;
+    return e(Hitbox, {
+        rect: {x, y, width, height},
+        setRect,
+        dragEnd() {
+            socket.send({
+                type: "background.move",
+                id, x, y, width, height,
+            });
+        },
+        onContextMenu: Menu.handler(() => {
+            return [
+                e("button", {
+                    onClick: () => {
+                        socket.send({type: "background.delete", id,});
+                        Menu.close();
+                    },
+                }, "Delete background"),
+            ];
+        }),
+    });
+}
+
 function Background({url, x, y, width, height}) {
     return e("img", {
         src: url,
@@ -280,7 +297,7 @@ function Background({url, x, y, width, height}) {
             top: `${y}px`,
             width: `${width}px`,
             height: `${height}px`,
-        }
+        },
     });
 }
 

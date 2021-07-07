@@ -71,50 +71,51 @@ export class Menu extends React.Component {
             x: 0,
             y: 0,
         };
+        this.div = React.createRef(null);
     }
-
-    show() { this.setState({visible: true}); }
-    hide() { this.setState({visible: false, children: []}); }
 
     render() {
         const {visible, children, x, y} = this.state;
-        if (!visible) {
-            return null;
-        } else {
-            return e("div", {
-                style: {
-                    position: "absolute",
-                    left: `${x}px`,
-                    top: `${y}px`,
+        return e("div", {
+            ref: this.div,
+            style: {
+                position: "absolute",
+                left: `${x}px`,
+                top: `${y}px`,
+            },
+            tabIndex: -1,
+            onFocus: function () { this.setState({visible: true}); }.bind(this),
+            onBlur: function (event) {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    // Not triggered when swapping focus between children or moving it to a child
+                    this.setState({visible: false, children: []});
                 }
-            }, children);
-        }
+            }.bind(this),
+            onKeyDown: (event) => {
+                if (event.key === "Escape") {
+                    Menu.close();
+                }
+            },
+        }, visible ? children : []);
+    }
+
+    static close() {
+        document.activeElement.blur();
     }
 
     static handler(getItems) {
         return function (event) {
             event.preventDefault();
             menu.setState((state, props) => ({
-                visible: true,
                 children: [...state.children, ...getItems()],
                 x: event.pageX,
                 y: event.pageY,
             }));
+            menu.div.current.focus();
         };
     }
 }
 const menu = ReactDOM.render(e(Menu), document.getElementById("context-menu"));
-
-// Close menu on any mouse click or ESC key press
-document.addEventListener("keyup", (event) => {
-    if (event.key === "Escape") {
-        menu.hide();
-    }
-}, true);
-document.addEventListener("mousedown", () => {
-    menu.hide();
-}, true);
-//menu.addEventListener("mousedown", showMenu, true);
 
 
 /*
