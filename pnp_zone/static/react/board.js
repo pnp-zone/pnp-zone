@@ -6,7 +6,7 @@ import socket from "../js/socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
-import Hitbox, {StatefulHitbox} from "./hitbox.js";
+import Hitbox, {StatefulHitbox} from "./resizing.js";
 
 const e = React.createElement;
 
@@ -197,7 +197,7 @@ export default class Board extends React.Component {
             },
             onMouseDown: this.drag.onMouseDown,
             onWheel: this.onWheel.bind(this),
-            onContextMenu: Menu.handler(() => [e("p", {}, "Hello World")]),
+            //onContextMenu: Menu.handler(() => [e("p", {}, "Hello World")]),
         }, [
             e(PatchGrid, {
                 id: "grid",
