@@ -22,7 +22,7 @@ export default class Moderator extends React.PureComponent {
                 onSubmit: (event) => {
                     const form = document.forms["newCharacter"];
                     socket.send({type: "character.new",
-                        id: form["id"].value,
+                        name: form["name"].value,
                         x: form["x"].value,
                         y: form["y"].value,
                         color:form["color"].value,
@@ -33,8 +33,8 @@ export default class Moderator extends React.PureComponent {
                 e("h2", {}, "New character"),
                 e("table", {}, [
                     e(TableRow, {}, [
-                        e("label", {htmlFor: "newId"}, "Identifier: "),
-                        e("input", {id: "newId", name: "id", type: "text"}),
+                        e("label", {htmlFor: "newName"}, "Name: "),
+                        e("input", {id: "newName", name: "name", type: "text"}),
                     ]),
                     e(TableRow, {}, [
                         e("label", {htmlFor: "newX"}, "X: "),

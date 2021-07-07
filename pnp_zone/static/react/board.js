@@ -66,8 +66,8 @@ export default class Board extends React.Component {
             });
         });
         socket.registerEvent("character.new", (event) => {
-            const {id, x, y, color} = event;
-            this.state.characters[id] = {id, x, y, color};
+            const {id, name, x, y, color} = event;
+            this.state.characters[id] = {id, name, x, y, color};
             this.setState({});
         });
         socket.registerEvent("character.move", (event) => {

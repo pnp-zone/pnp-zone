@@ -21,10 +21,11 @@ class Room(models.Model):
 
 class Character(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255)
+    identifier = models.CharField(max_length=255, default="")
+    name = models.CharField(max_length=255, default="Unnamed")
     x = models.IntegerField()
     y = models.IntegerField()
-    color = models.CharField(max_length=255)
+    color = models.CharField(max_length=255, default="#FF0000")
 
     class Meta:
         unique_together = ("room", "identifier")

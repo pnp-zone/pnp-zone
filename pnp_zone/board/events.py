@@ -60,11 +60,13 @@ def process_move_character(room, user, data):
 @moderators_only
 @database_sync_to_async
 def process_new_character(room, user, data):
-    if room.character_set.filter(identifier=data["id"]).count() > 0:
-        raise EventError("This character already exists")
+    if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
+        raise EventError("This space is already occupied!")
     else:
-        character = Character(identifier=data["id"], x=data["x"], y=data["y"], color=data["color"], room=room)
+        character = Character(identifier=str(uuid.uuid4()), name=data["name"],
+                              x=data["x"], y=data["y"], color=data["color"], room=room)
         character.save()
+        data["id"] = character.identifier
         return data, data
 
 

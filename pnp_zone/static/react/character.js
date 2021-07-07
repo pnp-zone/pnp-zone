@@ -140,7 +140,7 @@ export default class Character extends React.Component {
                 key: "name",
                 className: CSS.NAME,
             }, [
-                this.props.id
+                this.props.name,
             ]),
         ]);
     }

@@ -33,7 +33,7 @@
             scale: {{ session.board_scale }},
             characters: {
                 {% for c in characters %}
-                    "{{ c.identifier }}": {x: {{ c.x }}, y: {{ c.y }}, id: "{{ c.identifier }}", color: "{{ c.color }}", },
+                    "{{ c.identifier }}": {x: {{ c.x }}, y: {{ c.y }}, id: "{{ c.identifier }}", color: "{{ c.color }}", name: "{{ c.name }}"},
                 {% endfor %}
             },
             tiles: {
