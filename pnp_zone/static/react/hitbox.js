@@ -8,44 +8,18 @@ const CSS = {
     FRAME: "hitbox-frame",
 }
 
-function dragStart(ns, we) {
-    return function (event) {
-        switch (ns) {
-            case "n":
-                this.setState((state) => ({
-                    y: state.onBottom ? state.y : (state.y + state.height),
-                    onBottom: true,
-                }));
-                break;
-            case "s":
-                this.setState((state) => ({
-                    y: state.onBottom ? (state.y - state.height) : state.y,
-                    onBottom: false,
-                }));
-                break;
-        }
-        switch (we) {
-            case "w":
-                this.setState((state) => ({
-                    x: state.onRight ? state.x : (state.x + state.width),
-                    onRight: true,
-                }));
-                break;
-            case "e":
-                this.setState((state) => ({
-                    x: state.onRight ? (state.x - state.width) : state.x,
-                    onRight: false,
-                }));
-                break;
-        }
-    }
-}
-
 function dragMove(ns, we) {
     return function (event) {
-        const {x, y,} = this.state;
-        let {width, height} = this.state;
+        const {setRect, rect} = this.props;
+        let {x, y, width, height} = rect;
         const ratio = width / height;
+
+        if (ns === "n") {
+            y += height;
+        }
+        if (we === "w") {
+            x += width;
+        }
 
         if (ns !== "") {
             height = Math.abs(y - event.boardY);
@@ -62,7 +36,14 @@ function dragMove(ns, we) {
             }
         }
 
-        this.setState({width, height});
+        if (ns === "n") {
+            y -= height;
+        }
+        if (we === "w") {
+            x -= width;
+        }
+
+        setRect({x, y, width, height});
     }
 }
 
@@ -83,12 +64,7 @@ export default class Hitbox extends React.Component {
         super(props);
 
         this.state = {
-            x: 100,
-            y: 100,
-            width: 100,
-            height: 100,
-            onRight: false,
-            onBottom: false,
+            visible: false,
         };
 
         this.resizeDrag = {};
@@ -96,47 +72,67 @@ export default class Hitbox extends React.Component {
             const [ns, we] = Hitbox.orientations[i];
             const drag = new Drag();
             drag.register(LEFT_BUTTON, {
-                dragStart: dragStart(ns, we).bind(this),
+                dragStart() {},
                 dragMove: dragMove(ns, we).bind(this),
-                dragEnd() {}
+                dragEnd: this.dragEnd.bind(this),
             });
             this.resizeDrag[ns+we] = drag;
         }
 
-        let prevX, prevY;
+        let offsetX, offsetY;
         const drag = new Drag();
         drag.register(LEFT_BUTTON, {
-            dragStart(event) {
-                prevX = event.nativeEvent.boardX;
-                prevY = event.nativeEvent.boardY;
-            },
-            dragMove: function (event) {
-                const dx = event.boardX - prevX;
-                const dy = event.boardY - prevY;
-                prevX = event.boardX;
-                prevY = event.boardY;
-                this.setState((state) => ({
-                    x: state.x + dx,
-                    y: state.y + dy,
-                }));
+            dragStart: function (event) {
+                const {rect} = this.props;
+                const {x, y} = rect;
+                offsetX = x - event.nativeEvent.boardX;
+                offsetY = y - event.nativeEvent.boardY;
             }.bind(this),
-            dragEnd() {},
+            dragMove: function (event) {
+                const {setRect} = this.props;
+                setRect({
+                    x: event.boardX + offsetX,
+                    y: event.boardY + offsetY,
+                });
+            }.bind(this),
+            dragEnd: this.dragEnd.bind(this),
         });
         this.moveDrag = drag;
+
+        this.div = React.createRef(null);
+    }
+
+    dragEnd() {
+        const {dragEnd} = this.props;
+        if (dragEnd) {
+            dragEnd();
+        }
     }
 
     render() {
-        const {x, y, width, height, onRight, onBottom} = this.state;
+        const {x, y, width, height} = this.props.rect;
+        const {visible} = this.state;
 
         return e("div", {
+            ref: this.div,
             className: CSS.HITBOX,
             style: {
                 width: `${width}px`,
                 height: `${height}px`,
-                left: `${x - (onRight ? width : 0)}px`,
-                top: `${y - (onBottom ? height : 0)}px`,
+                left: `${x}px`,
+                top: `${y}px`,
             },
-        }, [
+            tabIndex: -1,
+            onClick: function () {
+                this.div.current.focus();
+            }.bind(this),
+            onFocus: function () {
+                this.setState({visible: true});
+            }.bind(this),
+            onBlur: function () {
+                this.setState({visible: false});
+            }.bind(this),
+        }, visible ? [
             e("div", {
                 key: "frame",
                 className: CSS.FRAME,
@@ -147,9 +143,23 @@ export default class Hitbox extends React.Component {
                     key: ns+we,
                     className: `${CSS.BOBBLE} ${ns+we}`,
                     onMouseDown: this.resizeDrag[ns+we].onMouseDown,
+                    onDragStart(event) {
+                        event.preventDefault();
+                    }
                 });
             }),
             ...(this.props.children || []),
-        ]);
+        ] : []);
     }
+}
+
+export function StatefulHitbox(props) {
+    const {children} = props;
+    const [rect, setRect] = React.useState({
+        x: 0,
+        y: 0,
+        width: 100,
+        height: 100,
+    });
+    return e(Hitbox, {rect, setRect, dragEnd: () => {console.log("Ended drag with:", rect)}}, children);
 }

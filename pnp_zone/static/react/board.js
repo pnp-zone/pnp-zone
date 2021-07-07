@@ -6,7 +6,7 @@ import socket from "../js/socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
-import Hitbox from "./hitbox.js";
+import Hitbox, {StatefulHitbox} from "./hitbox.js";
 
 const e = React.createElement;
 
@@ -19,6 +19,22 @@ export default class Board extends React.Component {
         super(props);
 
         const { x, y, scale, characters, tiles, backgrounds } = this.props;
+
+        const setRect = function (key) {
+            return function (rect) {
+                this.state.backgrounds[key] = {
+                    ...this.state.backgrounds[key],
+                    ...rect,
+                };
+                this.setState({});
+            }.bind(this);
+        }.bind(this);
+
+        for (const key in backgrounds) {
+            if (backgrounds.hasOwnProperty(key)) {
+                backgrounds[key].setRect = setRect(key);
+            }
+        }
 
         this.state = {
             x,
@@ -81,7 +97,10 @@ export default class Board extends React.Component {
         });
         socket.registerEvent("background.update", (event) => {
             const {id, url, x, y, width, height} = event;
-            this.state.backgrounds[id] = {url, x, y, width, height};
+            this.state.backgrounds[id] = {
+                id, url, x, y, width, height,
+                setRect: setRect(id),
+            };
             this.setState({});
         });
         window.addEventListener("beforeunload", (event) => {
@@ -203,6 +222,24 @@ export default class Board extends React.Component {
                 childrenComponent: Character,
             }),
             e(Layer, {
+                id: "background-hitboxes",
+                key: "background-hitboxes",
+                childrenData: this.state.backgrounds,
+                childrenComponent: function BackgroundHitbox(props) {
+                    const {id, x, y, width, height, setRect} = props;
+                    return e(Hitbox, {
+                        rect: {x, y, width, height},
+                        setRect,
+                        dragEnd() {
+                            socket.send({
+                                type: "background.move",
+                                id, x, y, width, height,
+                            });
+                        },
+                    });
+                },
+            }),
+            e(Layer, {
                 id: "cursors",
                 key: "cursors",
                 childrenData: this.state.cursors,
@@ -234,11 +271,9 @@ export default class Board extends React.Component {
     }
 }
 
-function Background({key, url, x, y, width, height}) {
+function Background({url, x, y, width, height}) {
     return e("img", {
-        key: key,
         src: url,
-        alt: key,
         style: {
             position: "absolute",
             left: `${x}px`,
