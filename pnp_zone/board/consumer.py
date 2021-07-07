@@ -26,18 +26,6 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         game_master = CampaignModel.objects.filter(room__in=[self.room.id])[0].game_master.all()
         self.is_moderator = self.user.username in [x.user.username for x in game_master] or self.user.is_superuser
 
-    @database_sync_to_async
-    def init_events(self):
-        events = []
-
-        for b in self.room.backgroundimage_set.all():
-            events.append(
-                {"type": "background.update", "id": b.identifier, "url": b.url,
-                 "x": b.x, "y": b.y, "width": b.width, "height": b.height}
-            )
-
-        return events
-
     @property
     def user(self):
         return self.scope["user"]
@@ -53,10 +41,6 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 "BACKEND is unconfigured or doesn't support groups"
             )
         self.groups.append(self.room.identifier)
-
-        # Send events to initialize board
-        for event in await self.init_events():
-            await self.send_json(event)
 
     async def receive_json(self, event, **kwargs):
         try:

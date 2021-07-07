@@ -38,10 +38,13 @@
             },
             tiles: {
                 {% for tile in tiles %}
-                    "{{ tile.x }} | {{ tile.y }}": {x: {{ tile.x }}, y: {{ tile.y }}, border: "{{ tile.border }}", background: "{{ tile.background }}",},
+                    "{{ tile.x }} | {{ tile.y }}": {x: {{ tile.x }}, y: {{ tile.y }}, border: "{{ tile.border }}", background: "{{ tile.background }}"},
                 {% endfor %}
             },
             backgrounds: {
+                {% for img in backgrounds %}
+                    "{{ img.identifier }}": {id: "{{ img.identifier }}", x: {{ img.x }}, y: {{ img.y }}, width: {{ img.width }}, height: {{ img.height }}, url: "{{ img.url }}"},
+                {% endfor %}
             },
         };
 </script>
