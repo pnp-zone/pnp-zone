@@ -38,8 +38,8 @@ input:active {
     border: 1px solid #5e42a6;
 }
 
-input[type=number] {
-
+input[type=color] {
+    padding: 0;
 }
 
 select {
