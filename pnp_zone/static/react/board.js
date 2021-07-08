@@ -6,8 +6,8 @@ import socket from "../js/socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
-import Hitbox, {StatefulHitbox} from "./resizing.js";
-import {Contextmenu} from "./contextmenu.js";
+import Hitbox from "./resizing.js";
+import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;
 
@@ -15,6 +15,7 @@ const PATCH_SIZE = 16;
 const SCALE_SPEED = 1.1;
 
 export default class Board extends React.Component {
+    static contextType = ContextMenu;
 
     constructor(props) {
         super(props);
@@ -158,7 +159,7 @@ export default class Board extends React.Component {
             },
             onMouseDown: this.drag.onMouseDown,
             onWheel: this.onWheel.bind(this),
-            onContextMenu: Contextmenu.handler(() => []),
+            onContextMenu: this.context.handler(() => []),
         }, [
             e(Layer, {
                 id: "background-images",
@@ -251,6 +252,8 @@ export default class Board extends React.Component {
 
 function ImageHitbox(props) {
     const {id, x, y, width, height, setImage, layer} = props;
+    const contextMenu = React.useContext(ContextMenu);
+
     return e(Hitbox, {
         rect: {x, y, width, height},
         setRect: (rect) => setImage({id, ...rect}),
@@ -260,18 +263,18 @@ function ImageHitbox(props) {
                 id, x, y, width, height,
             });
         },
-        onContextMenu: Contextmenu.handler(() => {
+        onContextMenu: contextMenu.handler(() => {
             return [
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.change_layer", id, layer: layer === "B" ? "T" : "B"});
-                        Contextmenu.close();
+                        contextMenu.close();
                     },
                 }, layer === "B" ? "Move to foreground" : "Move to background"),
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.delete", id,});
-                        Contextmenu.close();
+                        contextMenu.close();
                     },
                 }, "Delete image"),
             ];

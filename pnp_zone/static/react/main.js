@@ -2,7 +2,8 @@ import React from "https://cdn.skypack.dev/react";
 import ReactDOM from "https://cdn.skypack.dev/react-dom";
 import Board from "./board.js";
 import Moderator from "./moderator.js";
-import CheckBox, {StatefulCheckBox} from "./forms/checkbox.js";
+import CheckBox from "./forms/checkbox.js";
+import {ContextMenuController} from "./contextmenu.js";
 const e = React.createElement;
 
 function Main(props) {
@@ -18,7 +19,9 @@ function Main(props) {
         }
     });
 
-    return e(React.Fragment, {}, [
+    return e(ContextMenuController, {
+        containerId: "context-menu",
+    }, [
         e("div", {
             id: "board-view",
             key: "board",

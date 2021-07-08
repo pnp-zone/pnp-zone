@@ -2,8 +2,12 @@ import React from "https://cdn.skypack.dev/react";
 import ReactDOM from "https://cdn.skypack.dev/react-dom";
 const e = React.createElement;
 
+const ContextMenu = React.createContext();
+ContextMenu.displayName = "ContextMenu";
+export default ContextMenu;
 
-export class Contextmenu extends React.Component {
+export class ContextMenuController extends React.Component {
+
     constructor(props) {
         super(props);
         this.state = {
@@ -13,11 +17,106 @@ export class Contextmenu extends React.Component {
             x: 0,
             y: 0,
         };
-        this.div = React.createRef(null);
+        this.container = document.getElementById(this.props.containerId);
+        const setState = this.setState.bind(this);
+        this.controls = {
+            close () {
+                setState({visible: false, children: []});
+            },
+            setPos({x, y}) {
+                setState({x, y});
+            },
+            handler(getItems) {
+                return function (event) {
+                    if (!event.defaultPrevented) {
+                        event.preventDefault();
+                        setState((state) => {
+                            const initialChildren = [];
+                            for (const key in state.defaultChildren) {
+                                if (state.defaultChildren.hasOwnProperty(key)) {
+                                    initialChildren.push(state.defaultChildren[key](event));
+                                }
+                            }
+
+                            return {
+                                children: initialChildren,
+                                x: event.clientX,
+                                y: event.clientY,
+                                visible: true,
+                            };
+                        });
+                    }
+
+                    setState((state) => ({
+                        children: [...state.children, e("hr"), getItems(event)],
+                    }));
+                };
+            },
+            addDefaultItems(key, getItems) {
+                setState((state) => ({
+                    defaultChildren: {...state.defaultChildren, [key]: getItems}
+                }));
+            }
+        };
+    }
+
+    componentWillUpdate(prevProps) {
+        if (prevProps.containerId !== this.props.containerId) {
+            this.container = document.getElementById(this.props.containerId);
+        }
     }
 
     render() {
-        const {visible, children, x, y} = this.state;
+        const {children} = this.props;
+        const {visible} = this.state;
+
+        return e(ContextMenu.Provider, {
+            value: this.controls,
+            onContextMenu: function (event) {
+                event.preventDefault();
+            }.bind(this),
+        }, [
+            ReactDOM.createPortal(
+                visible ? e(ContextMenuComponent, this.state) : e(React.Fragment),
+                this.container,
+            ),
+            ...children
+        ]);
+    }
+}
+
+export class ContextMenuComponent extends React.Component {
+    static contextType = ContextMenu;
+
+    constructor(props) {
+        super(props);
+
+        this.div = React.createRef();
+    }
+
+    componentDidMount() {
+        const div = this.div.current;
+        div.focus();
+
+        const {x, y, width, height} = div.getBoundingClientRect();
+        const maxWidth = window.innerWidth;
+        const maxHeight = window.innerHeight;
+
+        const newPos = {};
+        if (y + height > maxHeight) {
+            newPos.y = maxHeight - height;
+        }
+        if (x + width > maxWidth) {
+            newPos.x = maxWidth - width;
+        }
+
+        if (newPos.x || newPos.y) {
+            this.context.setPos(newPos);
+        }
+    }
+
+    render() {
+        const {children, x, y} = this.props;
         return e("div", {
             ref: this.div,
             style: {
@@ -26,56 +125,16 @@ export class Contextmenu extends React.Component {
                 top: `${y}px`,
             },
             tabIndex: -1,
-            onFocus: function () { this.setState({visible: true}); }.bind(this),
             onBlur: function (event) {
                 if (!event.currentTarget.contains(event.relatedTarget)) {
-                    // Not triggered when swapping focus between children or moving it to a child
-                    this.setState({visible: false, children: []});
+                    this.context.close();
                 }
             }.bind(this),
             onKeyDown: (event) => {
                 if (event.key === "Escape") {
-                    Menu.close();
+                    this.context.close();
                 }
             },
-        }, visible ? children : []);
-    }
-
-    static close() {
-        document.activeElement.blur();
-    }
-
-    static addDefaultItems(key, getItems) {
-        menu.setState((state) => ({
-            defaultChildren: {...state.defaultChildren, [key]: getItems}
-        }));
-    }
-
-    static handler(getItems) {
-        return function (event) {
-            if (!event.defaultPrevented) {
-                event.preventDefault();
-                menu.setState((state) => {
-                    const initialChildren = [];
-                    for (const key in state.defaultChildren) {
-                        if (state.defaultChildren.hasOwnProperty(key)) {
-                            initialChildren.push(state.defaultChildren[key](event));
-                        }
-                    }
-
-                    return {
-                        children: initialChildren,
-                        x: event.clientX,
-                        y: event.clientY,
-                    };
-                });
-            }
-
-            menu.setState((state) => ({
-                children: [...state.children, e("hr"), getItems(event)],
-            }));
-            menu.div.current.focus();
-        };
+        }, children);
     }
 }
-const menu = ReactDOM.render(e(Contextmenu), document.getElementById("context-menu"));

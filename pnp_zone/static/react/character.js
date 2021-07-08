@@ -4,7 +4,7 @@ import Hexagon from "./hexagon.js";
 import {Coord} from "./grid.js";
 import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
 import socket from "../js/socket.js";
-import {Contextmenu} from "./contextmenu.js";
+import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;
 
@@ -20,6 +20,7 @@ const CHARACTER_HEIGHT = 92;
 
 export default class Character extends React.Component {
 
+    static contextType = ContextMenu;
     static OUTER_HEXAGON = new Hexagon(512);
     static INNER_HEXAGON = new Hexagon(512 - 2 * 12); // 12 = border width
 
@@ -64,7 +65,7 @@ export default class Character extends React.Component {
                 e("button", {
                     onClick: () => {
                         socket.send({type: "character.delete", id: this.props.id});
-                        Contextmenu.close();
+                        this.context.close();
                     },
                 }, "Delete character"),
             ];
@@ -111,7 +112,7 @@ export default class Character extends React.Component {
                 cursor: this.state.isDragged ? "grabbing" : "",
             },
             onMouseDown: this.drag.onMouseDown,
-            onContextMenu: Contextmenu.handler(this.contextMenuItems),
+            onContextMenu: this.context.handler(this.contextMenuItems),
             onMouseUp: this.onMouseUp,
         }, [
             e("svg", {

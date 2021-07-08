@@ -4,7 +4,7 @@ import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
-import {Contextmenu} from "./contextmenu.js";
+import ContextMenu from "./contextmenu.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -13,6 +13,8 @@ function TableRow(props) {
 }
 
 export default class Moderator extends React.PureComponent {
+    static contextType = ContextMenu;
+
     constructor(props) {
         super(props);
         this.state = {
@@ -42,7 +44,8 @@ export default class Moderator extends React.PureComponent {
 
     render() {
         const setState = this.setState.bind(this);
-        Contextmenu.addDefaultItems("moderator", (event) => [
+        const contextMenu = this.context;
+        contextMenu.addDefaultItems("moderator", (event) => [
             e("button", {
                 onClick: () => {
                     const {character} = this.state;
@@ -51,7 +54,7 @@ export default class Moderator extends React.PureComponent {
                         ...character,
                         x: event.nativeEvent.gridX, y: event.nativeEvent.gridY,
                     });
-                    Contextmenu.close();
+                    contextMenu.close();
                 },
             }, `Add character here`),
             e("button", {
@@ -67,6 +70,7 @@ export default class Moderator extends React.PureComponent {
                             width: img.width, height: img.height,
                             x: event.nativeEvent.boardX, y: event.nativeEvent.boardY,
                         });
+                        contextMenu.close();
                     };
                     img.src = image.url;
                 },
