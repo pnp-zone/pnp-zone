@@ -37,7 +37,9 @@ class Main extends React.Component {
                     id: "moderator",
                     className: "flex-horizontal",
                 }, [
-                    e(Moderator),
+                    e(Moderator, {
+                        board: this.boardView,
+                    }),
                 ]),
             ] : []),
         ]);
