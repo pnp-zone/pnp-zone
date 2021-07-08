@@ -160,10 +160,11 @@ export default class Board extends React.Component {
             //onContextMenu: Menu.handler(() => [e("p", {}, "Hello World")]),
         }, [
             e(Layer, {
-                id: "backgrounds",
-                key: "backgrounds",
+                id: "background-images",
+                key: "background-images",
                 childrenData: this.state.images,
                 childrenComponent: Image,
+                filter: ({layer}) => (layer === "B"),
             }),
             e(PatchGrid, {
                 id: "grid",
@@ -178,6 +179,13 @@ export default class Board extends React.Component {
                 childrenComponent: Tile,
             }),
             e(Layer, {
+                id: "foreground-images",
+                key: "foreground-images",
+                childrenData: this.state.images,
+                childrenComponent: Image,
+                filter: ({layer}) => (layer !== "B"),
+            }),
+            e(Layer, {
                 id: "characters",
                 key: "characters",
                 childrenData: this.state.characters,
@@ -188,6 +196,17 @@ export default class Board extends React.Component {
                 key: "background-hitboxes",
                 childrenData: this.state.images,
                 childrenComponent: ImageHitbox,
+                filter: ({layer}) => (layer === "B"),
+                commonProps: {
+                    setImage: this.subStateSetter("images"),
+                }
+            }),
+            e(Layer, {
+                id: "foreground-hitboxes",
+                key: "foreground-hitboxes",
+                childrenData: this.state.images,
+                childrenComponent: ImageHitbox,
+                filter: ({layer}) => (layer !== "B"),
                 commonProps: {
                     setImage: this.subStateSetter("images"),
                 }
@@ -230,7 +249,7 @@ export default class Board extends React.Component {
 }
 
 function ImageHitbox(props) {
-    const {id, x, y, width, height, setImage} = props;
+    const {id, x, y, width, height, setImage, layer} = props;
     return e(Hitbox, {
         rect: {x, y, width, height},
         setRect: (rect) => setImage({id, ...rect}),
@@ -242,6 +261,12 @@ function ImageHitbox(props) {
         },
         onContextMenu: Menu.handler(() => {
             return [
+                e("button", {
+                    onClick: () => {
+                        socket.send({type: "image.change_layer", id, layer: layer === "B" ? "T" : "B"});
+                        Menu.close();
+                    },
+                }, layer === "B" ? "Move to foreground" : "Move to background"),
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.delete", id,});

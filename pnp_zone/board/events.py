@@ -109,15 +109,16 @@ def process_color_tile(room, user, data):
     return data, data
 
 
-def _image2data(bg: Image):
+def _image2data(img: Image):
     return {
         "type": "image.update",
-        "id": bg.identifier,
-        "url": bg.url,
-        "x": bg.x,
-        "y": bg.y,
-        "width": bg.width,
-        "height": bg.height
+        "id": img.identifier,
+        "url": img.url,
+        "x": img.x,
+        "y": img.y,
+        "width": img.width,
+        "height": img.height,
+        "layer": img.layer,
     }
 
 
@@ -134,6 +135,22 @@ def new_image(room, user, data: dict):
         width=data["width"] if "width" in data else -1,
         height=data["height"] if "height" in data else -1,
     )
+
+    data = _image2data(image)
+    return data, data
+
+
+@register("image.change_layer")
+@moderators_only
+@database_sync_to_async
+def new_image(room, user, data: dict):
+    try:
+        image = Image.objects.get(room=room, identifier=data["id"])
+    except Image.DoesNotExist:
+        return None, None
+
+    image.layer = data["layer"]
+    image.save()
 
     data = _image2data(image)
     return data, data
