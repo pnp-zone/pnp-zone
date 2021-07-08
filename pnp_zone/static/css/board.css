@@ -54,10 +54,25 @@
 }
 
 #context-menu {
-    background: #192734;
     color: #ffffff;
     z-index: 999;
     position: absolute;
+}
+#context-menu div {
+    background: #192734;
+    border: 1px solid #422d78;
+    display: flex;
+    flex-direction: column;
+}
+#context-menu hr {
+    color: #422d78;
+    margin: 0;
+}
+#context-menu button {
+    border: none;
+    width: 20em;
+    text-align: left;
+    padding: 0.5em 2em;
 }
 
 /* Character */

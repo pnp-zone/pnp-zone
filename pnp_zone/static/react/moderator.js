@@ -53,7 +53,7 @@ export default class Moderator extends React.PureComponent {
                     });
                     Contextmenu.close();
                 },
-            }, `Add ${this.state.character.name} here`),
+            }, `Add character here`),
             e("button", {
                 onClick: () => {
                     const {image} = this.state;

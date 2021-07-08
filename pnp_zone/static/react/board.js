@@ -273,7 +273,7 @@ function ImageHitbox(props) {
                         socket.send({type: "image.delete", id,});
                         Contextmenu.close();
                     },
-                }, "Delete Image"),
+                }, "Delete image"),
             ];
         }),
     });

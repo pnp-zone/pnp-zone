@@ -21,7 +21,7 @@ export class Contextmenu extends React.Component {
         return e("div", {
             ref: this.div,
             style: {
-                position: "absolute",
+                position: "fixed",
                 left: `${x}px`,
                 top: `${y}px`,
             },
@@ -65,8 +65,8 @@ export class Contextmenu extends React.Component {
 
                     return {
                         children: initialChildren,
-                        x: event.pageX,
-                        y: event.pageY,
+                        x: event.clientX,
+                        y: event.clientY,
                     };
                 });
             }
