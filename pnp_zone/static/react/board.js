@@ -1,12 +1,13 @@
 import React from "https://cdn.skypack.dev/react";
 
 import {Coord, Tile, PatchGrid} from "./grid.js";
-import {addMouseExtension, Drag, LEFT_BUTTON, Menu, MIDDLE_BUTTON} from "../js/lib/mouse.js";
+import {addMouseExtension, Drag, LEFT_BUTTON, MIDDLE_BUTTON} from "../js/lib/mouse.js";
 import socket from "../js/socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";
 import Hitbox, {StatefulHitbox} from "./resizing.js";
+import {Contextmenu} from "./contextmenu.js";
 
 const e = React.createElement;
 
@@ -157,7 +158,7 @@ export default class Board extends React.Component {
             },
             onMouseDown: this.drag.onMouseDown,
             onWheel: this.onWheel.bind(this),
-            //onContextMenu: Menu.handler(() => [e("p", {}, "Hello World")]),
+            onContextMenu: Contextmenu.handler(() => []),
         }, [
             e(Layer, {
                 id: "background-images",
@@ -259,18 +260,18 @@ function ImageHitbox(props) {
                 id, x, y, width, height,
             });
         },
-        onContextMenu: Menu.handler(() => {
+        onContextMenu: Contextmenu.handler(() => {
             return [
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.change_layer", id, layer: layer === "B" ? "T" : "B"});
-                        Menu.close();
+                        Contextmenu.close();
                     },
                 }, layer === "B" ? "Move to foreground" : "Move to background"),
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.delete", id,});
-                        Menu.close();
+                        Contextmenu.close();
                     },
                 }, "Delete Image"),
             ];

@@ -2,8 +2,9 @@ import React from "https://cdn.skypack.dev/react";
 
 import Hexagon from "./hexagon.js";
 import {Coord} from "./grid.js";
-import {Drag, LEFT_BUTTON, Menu} from "../js/lib/mouse.js";
+import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
 import socket from "../js/socket.js";
+import {Contextmenu} from "./contextmenu.js";
 
 const e = React.createElement;
 
@@ -63,7 +64,7 @@ export default class Character extends React.Component {
                 e("button", {
                     onClick: () => {
                         socket.send({type: "character.delete", id: this.props.id});
-                        Menu.close();
+                        Contextmenu.close();
                     },
                 }, "Delete character"),
             ];
@@ -110,7 +111,7 @@ export default class Character extends React.Component {
                 cursor: this.state.isDragged ? "grabbing" : "",
             },
             onMouseDown: this.drag.onMouseDown,
-            onContextMenu: Menu.handler(this.contextMenuItems),
+            onContextMenu: Contextmenu.handler(this.contextMenuItems),
             onMouseUp: this.onMouseUp,
         }, [
             e("svg", {

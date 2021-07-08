@@ -1,8 +1,3 @@
-import React from "https://cdn.skypack.dev/react";
-import ReactDOM from "https://cdn.skypack.dev/react-dom";
-const e = React.createElement;
-
-
 /*
  * Utility
  */
@@ -56,66 +51,6 @@ for (let i = 0; i < mouseEvents.length; i++) {
 export function addMouseExtension(extension) {
     extensions.push(extension);
 }
-
-
-/*
- * Context Menus
- * -------------
- */
-export class Menu extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-            visible: false,
-            children: [],
-            x: 0,
-            y: 0,
-        };
-        this.div = React.createRef(null);
-    }
-
-    render() {
-        const {visible, children, x, y} = this.state;
-        return e("div", {
-            ref: this.div,
-            style: {
-                position: "absolute",
-                left: `${x}px`,
-                top: `${y}px`,
-            },
-            tabIndex: -1,
-            onFocus: function () { this.setState({visible: true}); }.bind(this),
-            onBlur: function (event) {
-                if (!event.currentTarget.contains(event.relatedTarget)) {
-                    // Not triggered when swapping focus between children or moving it to a child
-                    this.setState({visible: false, children: []});
-                }
-            }.bind(this),
-            onKeyDown: (event) => {
-                if (event.key === "Escape") {
-                    Menu.close();
-                }
-            },
-        }, visible ? children : []);
-    }
-
-    static close() {
-        document.activeElement.blur();
-    }
-
-    static handler(getItems) {
-        return function (event) {
-            event.preventDefault();
-            menu.setState((state, props) => ({
-                children: [...state.children, ...getItems()],
-                x: event.pageX,
-                y: event.pageY,
-            }));
-            menu.div.current.focus();
-        };
-    }
-}
-const menu = ReactDOM.render(e(Menu), document.getElementById("context-menu"));
 
 
 /*

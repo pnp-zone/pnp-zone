@@ -4,6 +4,7 @@ import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
+import {Contextmenu} from "./contextmenu.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -41,6 +42,36 @@ export default class Moderator extends React.PureComponent {
 
     render() {
         const setState = this.setState.bind(this);
+        Contextmenu.addDefaultItems("moderator", (event) => [
+            e("button", {
+                onClick: () => {
+                    const {character} = this.state;
+                    socket.send({
+                        type: "character.new",
+                        ...character,
+                        x: event.nativeEvent.gridX, y: event.nativeEvent.gridY,
+                    });
+                    Contextmenu.close();
+                },
+            }, `Add ${this.state.character.name} here`),
+            e("button", {
+                onClick: () => {
+                    const {image} = this.state;
+
+                    // Load the image locally to figure out its width and height
+                    const img = new Image();
+                    img.onload = () => {
+                        socket.send({
+                            type: "image.new",
+                            ...image,
+                            width: img.width, height: img.height,
+                            x: event.nativeEvent.boardX, y: event.nativeEvent.boardY,
+                        });
+                    };
+                    img.src = image.url;
+                },
+            }, `Add image here`),
+        ]);
 
         return e(React.Fragment, {}, [
             e("div", { key: "character", className: "moderator-child", }, [
