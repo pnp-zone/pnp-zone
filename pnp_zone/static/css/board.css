@@ -177,3 +177,19 @@
     top: var(--corner);
     cursor: nwse-resize;
 }
+
+/* Tabs */
+.tab {
+    cursor: pointer;
+    background-color: #15202b;
+    padding: 0.5em 1em 0.5em 1em;
+    border-radius: 0 10px 10px 0;
+    margin-right: 1vw;
+}
+.tab:hover {
+    background-color: #233549;
+}
+.active-tab {
+    margin-right: 0;
+    padding-left: 2vw;
+}
