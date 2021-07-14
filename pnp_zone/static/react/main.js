@@ -11,6 +11,7 @@ function Main(props) {
     const {isModerator} = props;
     const [boardView, setBoardView] = React.useState(null);
     const [viewToolbar, setViewToolbar] = React.useState(false);
+    const [editMode, setEditMode] = React.useState(false);
 
     const ref = React.useRef();
     React.useEffect(() => {
@@ -27,7 +28,7 @@ function Main(props) {
             key: "board",
             ref,
         }, [
-            e(Board, {parent: boardView, x, y, scale, characters, tiles, images}),
+            e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
         ]),
         e("div", {
             id: "jitsi",
@@ -50,6 +51,8 @@ function Main(props) {
             }, [
                 e(Moderator, {
                     board: boardView,
+                    editMode,
+                    setEditMode,
                 }),
             ]),
         ] : []),

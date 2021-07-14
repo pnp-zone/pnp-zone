@@ -150,6 +150,8 @@ export default class Board extends React.Component {
     }
 
     render() {
+        const {editMode} = this.props;
+
         return e("div", {
             style: {
                 position: "absolute",
@@ -193,26 +195,28 @@ export default class Board extends React.Component {
                 childrenData: this.state.characters,
                 childrenComponent: Character,
             }),
-            e(Layer, {
-                id: "background-hitboxes",
-                key: "background-hitboxes",
-                childrenData: this.state.images,
-                childrenComponent: ImageHitbox,
-                filter: ({layer}) => (layer === "B"),
-                commonProps: {
-                    setImage: this.subStateSetter("images"),
-                }
-            }),
-            e(Layer, {
-                id: "foreground-hitboxes",
-                key: "foreground-hitboxes",
-                childrenData: this.state.images,
-                childrenComponent: ImageHitbox,
-                filter: ({layer}) => (layer !== "B"),
-                commonProps: {
-                    setImage: this.subStateSetter("images"),
-                }
-            }),
+            ...(editMode ? [
+                e(Layer, {
+                    id: "background-hitboxes",
+                    key: "background-hitboxes",
+                    childrenData: this.state.images,
+                    childrenComponent: ImageHitbox,
+                    filter: ({layer}) => (layer === "B"),
+                    commonProps: {
+                        setImage: this.subStateSetter("images"),
+                    }
+                }),
+                e(Layer, {
+                    id: "foreground-hitboxes",
+                    key: "foreground-hitboxes",
+                    childrenData: this.state.images,
+                    childrenComponent: ImageHitbox,
+                    filter: ({layer}) => (layer !== "B"),
+                    commonProps: {
+                        setImage: this.subStateSetter("images"),
+                    }
+                }),
+            ]: []),
             e(Layer, {
                 id: "cursors",
                 key: "cursors",

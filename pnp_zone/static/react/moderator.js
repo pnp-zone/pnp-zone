@@ -45,6 +45,7 @@ export default class Moderator extends React.PureComponent {
     render() {
         const setState = this.setState.bind(this);
         const contextMenu = this.context;
+        const {editMode, setEditMode} = this.props;
         contextMenu.addDefaultItems("moderator", (event) => [
             e("button", {
                 onClick: () => {
@@ -186,6 +187,14 @@ export default class Moderator extends React.PureComponent {
                                 img.src = image.url;
                             },
                         }, "Add"),
+                    ]),
+                    e(TableRow, {}, [
+                        e("label", {forHtml: "move"}, "Move images"),
+                        e(CheckBox, {
+                            id: "move", name: "move",
+                            value: editMode,
+                            setValue: setEditMode,
+                        }),
                     ]),
                 ]),
             ])
