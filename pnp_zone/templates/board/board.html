@@ -41,6 +41,12 @@
         };
 </script>
 <script src="{% static "react/main.js" %}" type="module"></script>
+<script>
+    document.ondragstart = function (event) {
+        event.preventDefault();
+        return false;
+    };
+</script>
 
 {% if jitsi_domain %}
     <script src='https://{{ jitsi_domain }}/external_api.js'></script>
