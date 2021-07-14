@@ -1,4 +1,4 @@
-import React from "https://cdn.skypack.dev/react";
+import React from "../../react.js";
 const e = React.createElement;
 
 export default function CheckBox(props) {

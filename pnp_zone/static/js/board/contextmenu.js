@@ -1,5 +1,5 @@
-import React from "https://cdn.skypack.dev/react";
-import ReactDOM from "https://cdn.skypack.dev/react-dom";
+import React from "../react.js";
+import ReactDOM from "../react-dom.js";
 const e = React.createElement;
 
 const ContextMenu = React.createContext();

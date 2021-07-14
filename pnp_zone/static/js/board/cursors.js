@@ -1,6 +1,6 @@
-import React from "https://cdn.skypack.dev/react";
+import React from "../react.js";
 
-import socket from "../js/socket.js";
+import socket from "../socket.js";
 const e = React.createElement;
 
 export function Cursor(props) {

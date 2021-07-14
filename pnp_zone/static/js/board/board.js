@@ -1,8 +1,8 @@
-import React from "https://cdn.skypack.dev/react";
+import React from "../react.js";
 
 import {Coord, Tile, PatchGrid} from "./grid.js";
-import {addMouseExtension, Drag, LEFT_BUTTON, MIDDLE_BUTTON} from "../js/lib/mouse.js";
-import socket from "../js/socket.js";
+import {addMouseExtension, Drag, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
+import socket from "../socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
 import Layer from "./layer.js";

@@ -1,9 +1,9 @@
-import React from "https://cdn.skypack.dev/react";
+import React from "../react.js";
 
 import Hexagon from "./hexagon.js";
 import {Coord} from "./grid.js";
-import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
-import socket from "../js/socket.js";
+import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
+import socket from "../socket.js";
 import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;

@@ -1,9 +1,10 @@
-import React from "https://cdn.skypack.dev/react";
-import ReactDOM from "https://cdn.skypack.dev/react-dom";
+import React from "../react.js";
+import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
 import Moderator from "./moderator.js";
 import CheckBox from "./forms/checkbox.js";
 import {ContextMenuController} from "./contextmenu.js";
+import {TabList} from "./tabs.js";
 const e = React.createElement;
 
 function Main(props) {

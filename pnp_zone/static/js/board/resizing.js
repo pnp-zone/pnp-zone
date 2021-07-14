@@ -1,5 +1,5 @@
-import React from "https://cdn.skypack.dev/react";
-import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
+import React from "../react.js";
+import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
 const e = React.createElement;
 
 const CSS = {

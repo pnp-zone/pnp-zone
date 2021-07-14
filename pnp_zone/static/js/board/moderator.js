@@ -1,6 +1,6 @@
-import React from "https://cdn.skypack.dev/react";
-import socket from "../js/socket.js";
-import {Drag, LEFT_BUTTON} from "../js/lib/mouse.js";
+import React from "../react.js";
+import socket from "../socket.js";
+import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
