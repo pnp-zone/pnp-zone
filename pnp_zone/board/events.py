@@ -130,8 +130,8 @@ def new_image(room, user, data: dict):
         room=room,
         identifier=str(uuid.uuid4()),
         url=data["url"],
-        x=0,
-        y=0,
+        x=data["x"] if "x" in data else 0,
+        y=data["y"] if "y" in data else 0,
         width=data["width"] if "width" in data else -1,
         height=data["height"] if "height" in data else -1,
     )
