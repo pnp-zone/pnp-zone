@@ -31,32 +31,20 @@ function Main(props) {
         }, [
             e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
         ]),
+        e(TabList, {}, [
+            [e("img", {src: "https://docs.bigbluebutton.org/favicon.ico"}), "here be dragons"],
+            ...(isModerator ? [
+                ["Moderator", e(Moderator, {
+                    board: boardView,
+                    editMode,
+                    setEditMode,
+                })],
+            ] : []),
+        ]),
         e("div", {
             id: "jitsi",
             key: "jitsi"
         }),
-        ...(isModerator ? [
-            e(CheckBox, {
-                key: "toggle",
-                className: "toggleModerator",
-                value: viewToolbar,
-                setValue: setViewToolbar,
-            }),
-            e("div", {
-                key: "toolbar",
-                id: "moderator",
-                className: "flex-horizontal",
-                style: {
-                    display: viewToolbar ? "" : "none",
-                }
-            }, [
-                e(Moderator, {
-                    board: boardView,
-                    editMode,
-                    setEditMode,
-                }),
-            ]),
-        ] : []),
     ]);
 }
 
