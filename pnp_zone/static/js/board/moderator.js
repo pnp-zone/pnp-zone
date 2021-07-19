@@ -1,7 +1,7 @@
 import React from "../react.js";
 import socket from "../socket.js";
 import {LEFT_BUTTON} from "../lib/mouse.js";
-import {Drag} from "./drag.js";
+import DragTarget, {Drag} from "./drag.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
@@ -11,6 +11,113 @@ const e = React.createElement;
 function TableRow(props) {
     const {children} = props;
     return e("tr", {}, children.map((element) => e("td", {}, [element])));
+}
+
+export class Tiles extends React.PureComponent {
+    static contextType = DragTarget;
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            background: "#FFFFFF",
+            border: "#000000",
+            active: false,
+        };
+
+        this.toSend = [];
+        this.sendTimeout = null;
+        this.visited = {};
+        this.previously = null;  //previously colored Tile
+
+        this.drag = new Drag();
+        this.drag.register(LEFT_BUTTON, this);
+    }
+
+    send() {
+        const {background, border} = this.state;
+        socket.send({type: "colorTile", tiles: this.toSend, background, border,});
+        this.toSend = [];
+        this.sendTimeout = null;
+    }
+
+    color(x, y) {
+        if (isNaN(x) || isNaN(y)) {
+            return;
+        }
+
+        const key = ""+x+" "+y;
+        if (!this.visited.hasOwnProperty(key)) {
+            this.visited[key] = null;
+
+            this.toSend.push([x, y]);
+            if (!this.sendTimeout)  {
+                this.sendTimeout = setTimeout(this.send.bind(this), 1000);
+            }
+
+            // Directly write tile to board
+        }
+    }
+
+    dragStart(event) {
+        this.previously = Coord.fromIndex(event.gridX, event.gridY);
+        this.color(event.gridX, event.gridY);
+    }
+    dragMove(event) {
+        const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
+        for (let i = 0; i < points.length; i++) {
+            this.color(points[i].xIndex, points[i].yIndex);
+        }
+        this.previously = Coord.fromIndex(event.gridX, event.gridY);
+    }
+    dragEnd() {
+        this.visited = {};
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (this.state.active !== prevState.active) {
+            if (this.state.active) {
+                document.body.style.cursor = "crosshair";
+                this.context.addHandler(this.drag.onMouseDown);
+            } else {
+                document.body.style.cursor = "";
+                this.context.removeHandler(this.drag.onMouseDown);
+            }
+        }
+    }
+
+    render() {
+        const setState = this.setState.bind(this);
+        return e("div", {
+                className: "moderator-child"
+            }, [
+                e("table", {}, [
+                    e(TableRow, {}, [
+                        e("label", {htmlFor: "colorBg"}, "Background: "),
+                        e(TextInput, {
+                            id: "colorBg", name: "background", type: "color",
+                            value: this.state.background,
+                            setValue: (value) => {setState({background: value})},
+                        }),
+                    ]),
+                    e(TableRow, {}, [
+                        e("label", {htmlFor: "colorBr"}, "Border: "),
+                        e("input", {
+                            id: "colorBr", name: "border", type: "color",
+                            value: this.state.border,
+                            setValue: (value) => {setState({border: value})},
+                        }),
+                    ]),
+                    e(TableRow, {}, [
+                        e("label", {forHtml: "active"}, "Active"),
+                        e(CheckBox, {
+                            id: "active", name: "active",
+                            value: this.state.active,
+                            setValue: (value) => {setState({active: value})},
+                        }),
+                    ]),
+                ]),
+            ]);
+    }
 }
 
 export default class Moderator extends React.PureComponent {
@@ -25,22 +132,10 @@ export default class Moderator extends React.PureComponent {
                 y: 0,
                 color: "#FF0000",
             },
-            tile: {
-                background: "#FFFFFF",
-                border: "#000000",
-                active: false,
-            },
             image: {
                 url: "",
             },
         };
-        this.paintbrush = new PaintBrush(this);
-    }
-
-    componentDidUpdate(prevProps, prevState) {
-        if (this.state.tile.active !== prevState.tile.active) {
-            this.paintbrush.active = this.state.tile.active;
-        }
     }
 
     render() {
@@ -127,38 +222,6 @@ export default class Moderator extends React.PureComponent {
                     ]),
                 ])
             ]),
-            e("form", {
-                id: "colorTile",
-                className: "moderator-child"
-            }, [
-                e("h2", {}, "Color tile"),
-                e("table", {}, [
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "colorBg"}, "Background: "),
-                        e(TextInput, {
-                            id: "colorBg", name: "background", type: "color",
-                            value: this.state.tile.background,
-                            setValue: (value) => {setState((state) => ({tile: {...state.tile, background: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "colorBr"}, "Border: "),
-                        e("input", {
-                            id: "colorBr", name: "border", type: "color",
-                            value: this.state.tile.border,
-                            setValue: (value) => {setState((state) => ({tile: {...state.tile, border: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {forHtml: "active"}, "Active"),
-                        e(CheckBox, {
-                            id: "active", name: "active",
-                            value: this.state.tile.active,
-                            setValue: (value) => {setState((state) => ({tile: {...state.tile, active: value}}))},
-                        }),
-                    ]),
-                ]),
-            ]),
             e("div", { key: "image", className: "moderator-child", }, [
                 e("h2", {}, "Add Image"),
                 e("table", {}, [
@@ -200,69 +263,5 @@ export default class Moderator extends React.PureComponent {
                 ]),
             ])
         ]);
-    }
-}
-
-class PaintBrush {
-    constructor(moderator) {
-        this.moderator = moderator;
-
-        this.visited = {};
-        this.toSend = [];
-        this.sendTimeout = null;
-
-        this.previously = null;  //previously colored Tile
-
-        this.drag = new Drag();
-        this.drag.register(LEFT_BUTTON, this);
-    }
-
-    send() {
-        const {background, border} = this.moderator.state.tile;
-        socket.send({type: "colorTile", tiles: this.toSend, background, border,});
-        this.toSend = [];
-        this.sendTimeout = null;
-    }
-
-    color(x, y) {
-        const key = ""+x+" "+y;
-        if (!this.visited.hasOwnProperty(key)) {
-            this.visited[key] = null;
-
-            this.toSend.push([x, y]);
-            if (!this.sendTimeout)  {
-                this.sendTimeout = setTimeout(this.send.bind(this), 1000);
-            }
-
-            // Directly write tile to board
-        }
-    }
-
-    dragStart(event) {
-        this.previously = Coord.fromIndex(event.gridX, event.gridY);
-        this.color(event.gridX, event.gridY);
-    }
-    dragMove(event) {
-        const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
-        for (let i = 0; i < points.length; i++) {
-            this.color(points[i].xIndex, points[i].yIndex);
-        }
-        this.previously = Coord.fromIndex(event.gridX, event.gridY);
-    }
-    dragEnd() {
-        this.visited = {};
-    }
-
-    set active(value) {
-        const {board} = this.moderator.props;
-        if (board) {
-            if (value) {
-                board.style.cursor = "crosshair";
-                board.addEventListener("mousedown", this.drag.onMouseDown, true);
-            } else {
-                board.style.cursor = "";
-                board.removeEventListener("mousedown", this.drag.onMouseDown, true);
-            }
-        }
     }
 }

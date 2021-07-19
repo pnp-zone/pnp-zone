@@ -1,8 +1,7 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import Moderator from "./moderator.js";
-import CheckBox from "./forms/checkbox.js";
+import Moderator, {Tiles} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
 import DragTarget, {DragController} from "./drag.js";
 import {TabList} from "./tabs.js";
@@ -37,9 +36,11 @@ function Main(props) {
                 [e("img", {src: "https://docs.bigbluebutton.org/favicon.ico"}), "here be dragons"],
                 ...(isModerator ? [
                     ["Moderator", e(Moderator, {
-                        board: boardView,
                         editMode,
                         setEditMode,
+                    })],
+                    ["Tiles", e(Tiles, {
+                        board: boardView,
                     })],
                 ] : []),
             ]),
