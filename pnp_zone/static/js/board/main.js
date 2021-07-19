@@ -39,9 +39,16 @@ function Main(props) {
                         editMode,
                         setEditMode,
                     })],
-                    ["Tiles", e(Tiles, {
-                        board: boardView,
-                    })],
+                    [
+                        e("img", {
+                            src: "/static/img/paintbrush.svg",
+                            width: 24,
+                            height: 24,
+                        }),
+                        e(Tiles, {
+                            board: boardView,
+                        })
+                    ],
                 ] : []),
             ]),
             e("div", {
