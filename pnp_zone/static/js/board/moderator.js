@@ -1,6 +1,7 @@
 import React from "../react.js";
 import socket from "../socket.js";
-import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
+import {LEFT_BUTTON} from "../lib/mouse.js";
+import {Drag} from "./drag.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";

@@ -4,6 +4,7 @@ import Board from "./board.js";
 import Moderator from "./moderator.js";
 import CheckBox from "./forms/checkbox.js";
 import {ContextMenuController} from "./contextmenu.js";
+import DragTarget, {DragController} from "./drag.js";
 import {TabList} from "./tabs.js";
 const e = React.createElement;
 
@@ -24,27 +25,29 @@ function Main(props) {
     return e(ContextMenuController, {
         containerId: "context-menu",
     }, [
-        e("div", {
-            id: "board-view",
-            key: "board",
-            ref,
-        }, [
-            e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
+        e(DragController, {}, [
+            e("div", {
+                id: "board-view",
+                key: "board",
+                ref,
+            }, [
+                e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
+            ]),
+            e(TabList, {}, [
+                [e("img", {src: "https://docs.bigbluebutton.org/favicon.ico"}), "here be dragons"],
+                ...(isModerator ? [
+                    ["Moderator", e(Moderator, {
+                        board: boardView,
+                        editMode,
+                        setEditMode,
+                    })],
+                ] : []),
+            ]),
+            e("div", {
+                id: "jitsi",
+                key: "jitsi"
+            }),
         ]),
-        e(TabList, {}, [
-            [e("img", {src: "https://docs.bigbluebutton.org/favicon.ico"}), "here be dragons"],
-            ...(isModerator ? [
-                ["Moderator", e(Moderator, {
-                    board: boardView,
-                    editMode,
-                    setEditMode,
-                })],
-            ] : []),
-        ]),
-        e("div", {
-            id: "jitsi",
-            key: "jitsi"
-        }),
     ]);
 }
 

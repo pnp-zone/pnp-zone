@@ -1,5 +1,6 @@
 import React from "../react.js";
-import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
+import {LEFT_BUTTON} from "../lib/mouse.js";
+import {Drag} from "./drag.js";
 const e = React.createElement;
 
 function Tab(props) {

@@ -2,7 +2,8 @@ import React from "../react.js";
 
 import Hexagon from "./hexagon.js";
 import {Coord} from "./grid.js";
-import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
+import {LEFT_BUTTON} from "../lib/mouse.js";
+import {Drag} from "./drag.js";
 import socket from "../socket.js";
 import ContextMenu from "./contextmenu.js";
 

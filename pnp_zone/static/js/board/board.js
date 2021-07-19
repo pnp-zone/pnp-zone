@@ -1,7 +1,8 @@
 import React from "../react.js";
 
 import {Coord, Tile, PatchGrid} from "./grid.js";
-import {addMouseExtension, Drag, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
+import {addMouseExtension, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
+import DragTarget, {Drag} from "./drag.js";
 import socket from "../socket.js";
 import Character from "./character.js";
 import {Cursor} from "./cursors.js";
@@ -15,7 +16,7 @@ const PATCH_SIZE = 16;
 const SCALE_SPEED = 1.1;
 
 export default class Board extends React.Component {
-    static contextType = ContextMenu;
+    static contextType = DragTarget;
 
     constructor(props) {
         super(props);
@@ -147,83 +148,87 @@ export default class Board extends React.Component {
     componentDidMount() {
         socket.open();
         document.socket = socket;
+        this.context.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
+        this.context.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
     }
 
     render() {
         const {editMode} = this.props;
 
-        return e("div", {
-            style: {
-                position: "absolute",
-                left: `${this.state.x}px`,
-                top: `${this.state.y}px`,
-                transform: `scale(${this.state.scale})`,
-            },
-            onMouseDown: this.drag.onMouseDown,
-            onWheel: this.onWheel.bind(this),
-            onContextMenu: this.context.handler(() => []),
-        }, [
-            e(Layer, {
-                id: "background-images",
-                key: "background-images",
-                childrenData: this.state.images,
-                childrenComponent: Image,
-                filter: ({layer}) => (layer === "B"),
-            }),
-            e(PatchGrid, {
-                id: "grid",
-                key: "grid",
-                size: PATCH_SIZE,
-                ...this.rect,
-            }),
-            e(Layer, {
-                id: "tiles",
-                key: "tiles",
-                childrenData: this.state.tiles,
-                childrenComponent: Tile,
-            }),
-            e(Layer, {
-                id: "foreground-images",
-                key: "foreground-images",
-                childrenData: this.state.images,
-                childrenComponent: Image,
-                filter: ({layer}) => (layer !== "B"),
-            }),
-            e(Layer, {
-                id: "characters",
-                key: "characters",
-                childrenData: this.state.characters,
-                childrenComponent: Character,
-            }),
-            ...(editMode ? [
+        return e(ContextMenu.Consumer, {},
+            (contextMenu) => e("div", {
+                style: {
+                    position: "absolute",
+                    left: `${this.state.x}px`,
+                    top: `${this.state.y}px`,
+                    transform: `scale(${this.state.scale})`,
+                },
+                onMouseDown: this.context.onMouseDown,
+                onWheel: this.onWheel.bind(this),
+                onContextMenu: contextMenu.handler(() => []),
+            }, [
                 e(Layer, {
-                    id: "background-hitboxes",
-                    key: "background-hitboxes",
+                    id: "background-images",
+                    key: "background-images",
                     childrenData: this.state.images,
-                    childrenComponent: ImageHitbox,
+                    childrenComponent: Image,
                     filter: ({layer}) => (layer === "B"),
-                    commonProps: {
-                        setImage: this.subStateSetter("images"),
-                    }
+                }),
+                e(PatchGrid, {
+                    id: "grid",
+                    key: "grid",
+                    size: PATCH_SIZE,
+                    ...this.rect,
                 }),
                 e(Layer, {
-                    id: "foreground-hitboxes",
-                    key: "foreground-hitboxes",
-                    childrenData: this.state.images,
-                    childrenComponent: ImageHitbox,
-                    filter: ({layer}) => (layer !== "B"),
-                    commonProps: {
-                        setImage: this.subStateSetter("images"),
-                    }
+                    id: "tiles",
+                    key: "tiles",
+                    childrenData: this.state.tiles,
+                    childrenComponent: Tile,
                 }),
-            ]: []),
-            e(Layer, {
-                id: "cursors",
-                key: "cursors",
-                childrenData: this.state.cursors,
-                childrenComponent: Cursor,
-            }),
-        ]);
+                e(Layer, {
+                    id: "foreground-images",
+                    key: "foreground-images",
+                    childrenData: this.state.images,
+                    childrenComponent: Image,
+                    filter: ({layer}) => (layer !== "B"),
+                }),
+                e(Layer, {
+                    id: "characters",
+                    key: "characters",
+                    childrenData: this.state.characters,
+                    childrenComponent: Character,
+                }),
+                ...(editMode ? [
+                    e(Layer, {
+                        id: "background-hitboxes",
+                        key: "background-hitboxes",
+                        childrenData: this.state.images,
+                        childrenComponent: ImageHitbox,
+                        filter: ({layer}) => (layer === "B"),
+                        commonProps: {
+                            setImage: this.subStateSetter("images"),
+                        }
+                    }),
+                    e(Layer, {
+                        id: "foreground-hitboxes",
+                        key: "foreground-hitboxes",
+                        childrenData: this.state.images,
+                        childrenComponent: ImageHitbox,
+                        filter: ({layer}) => (layer !== "B"),
+                        commonProps: {
+                            setImage: this.subStateSetter("images"),
+                        }
+                    }),
+                ]: []),
+                e(Layer, {
+                    id: "cursors",
+                    key: "cursors",
+                    childrenData: this.state.cursors,
+                    childrenComponent: Cursor,
+                }),
+            ])
+        );
     }
 
     get rect() {
