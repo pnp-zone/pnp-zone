@@ -1,4 +1,5 @@
 import React from "../react.js";
+import {Drag, LEFT_BUTTON} from "../lib/mouse.js";
 const e = React.createElement;
 
 function Tab(props) {
@@ -14,8 +15,6 @@ function Page(props) {
     return e("div", {
         style: {
             display: isOpen ? "" : "none",
-            backgroundColor: "#16232d",
-            height: "100vh",
         },
     }, children);
 }
@@ -29,6 +28,16 @@ export class TabList extends React.Component {
             open: -1,
             width: "30vw",
         };
+
+        const setState = this.setState.bind(this);
+        this.resize = new Drag();
+        this.resize.register(LEFT_BUTTON, {
+            dragStart() {},
+            dragMove(event) {
+                setState({width: `${event.clientX / window.innerWidth * 100}vw`});
+            },
+            dragEnd() {},
+        });
     }
 
     render() {
@@ -38,20 +47,33 @@ export class TabList extends React.Component {
             className: "flex-horizontal",
             style: {
                 position: "fixed",
-                left: 0,
+                left: open === -1 ? `calc(-${width} - 0.5em)` : "0",
+                transition: "left 0.5s",
             }
         }, [
             e("div", {
                 key: "pages",
                 className: "flex-vertical",
                 style: {
-                    width: open !== -1 ? width : "",
+                    height: "100vh",
+                    backgroundColor: "#16232d",
+                    width,
+                    overflow: "hidden",
                 },
             }, children.map(
                 ([tab, content], index) => e(Page, {
                     isOpen: open === index
                 }, content),
             )),
+            e("div", {
+                style: {
+                    width: "0.5em",
+                    height: "100vh",
+                    backgroundColor: "#16232d",
+                    cursor: "ew-resize",
+                },
+                onMouseDown: this.resize.onMouseDown,
+            }, []),
             e("div", {
                 key: "tabs",
                 className: "flex-vertical",
