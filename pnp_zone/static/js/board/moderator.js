@@ -6,6 +6,7 @@ import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
 import ContextMenu from "./contextmenu.js";
+import Hexagon from "./hexagon.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -13,6 +14,8 @@ function TableRow(props) {
     return e("tr", {}, children.map((element) => e("td", {}, [element])));
 }
 
+const INNER_HEXAGON = new Hexagon(80);
+const OUTER_HEXAGON = new Hexagon(100);
 export class Tiles extends React.PureComponent {
     static contextType = DragTarget;
 
@@ -90,31 +93,79 @@ export class Tiles extends React.PureComponent {
         return e("div", {
                 className: "moderator-child"
             }, [
-                e("table", {}, [
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "colorBg"}, "Background: "),
-                        e(TextInput, {
-                            id: "colorBg", name: "background", type: "color",
-                            value: this.state.background,
-                            setValue: (value) => {setState({background: value})},
+                e("label", {forHtml: "active"}, "Active"),
+                e(CheckBox, {
+                    id: "active", name: "active",
+                    value: this.state.active,
+                    setValue: (value) => {setState({active: value})},
+                }),
+                e("div", {
+                    style: {
+                        position: "relative",
+                        width: `${OUTER_HEXAGON.width}px`,
+                        height: `${OUTER_HEXAGON.height}px`,
+                    },
+                }, [
+                    e("svg", {
+                        version: "1.1",
+                        xmlns: "http://www.w3.org/2000/svg",
+                        className: "field",
+                        viewBox: `-${OUTER_HEXAGON.width/2} -${OUTER_HEXAGON.height/2} ${OUTER_HEXAGON.width} ${OUTER_HEXAGON.height}`,
+                    }, [
+                        e("polygon", {
+                            key: "background",
+                            points: OUTER_HEXAGON.asPolygon,
+                            style: {
+                                fill: this.state.background,
+                            },
+                        }),
+                        e("path", {
+                            key: "border",
+                            fillRule: "evenodd",
+                            d: `${OUTER_HEXAGON.asPath} ${INNER_HEXAGON.asPath}`,
+                            style: {
+                                fill: this.state.border,
+                            },
                         }),
                     ]),
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "colorBr"}, "Border: "),
-                        e("input", {
-                            id: "colorBr", name: "border", type: "color",
-                            value: this.state.border,
-                            setValue: (value) => {setState({border: value})},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {forHtml: "active"}, "Active"),
-                        e(CheckBox, {
-                            id: "active", name: "active",
-                            value: this.state.active,
-                            setValue: (value) => {setState({active: value})},
-                        }),
-                    ]),
+                    e("label", {
+                        key: "border",
+                        htmlFor: "colorBr",
+                        style: {
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            width: `${OUTER_HEXAGON.width}px`,
+                            height: `${OUTER_HEXAGON.height}px`,
+                        }
+                    }),
+                    e("label", {
+                        key: "background",
+                        htmlFor: "colorBg",
+                        style: {
+                            position: "absolute",
+                            left: `${(OUTER_HEXAGON.width-INNER_HEXAGON.width)/2}px`,
+                            top: `${(OUTER_HEXAGON.height-INNER_HEXAGON.a-INNER_HEXAGON.b)/2}px`,
+                            width: `${INNER_HEXAGON.width}px`,
+                            height: `${INNER_HEXAGON.a+INNER_HEXAGON.b}px`,
+                        }
+                    }),
+                    e(TextInput, {
+                        id: "colorBg", name: "background", type: "color",
+                        value: this.state.background,
+                        setValue: (value) => {setState({background: value})},
+                        style: {
+                            display: "none",
+                        },
+                    }),
+                    e(TextInput, {
+                        id: "colorBr", name: "border", type: "color",
+                        value: this.state.border,
+                        setValue: (value) => {setState({border: value})},
+                        style: {
+                            display: "none",
+                        },
+                    }),
                 ]),
             ]);
     }
