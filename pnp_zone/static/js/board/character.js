@@ -6,6 +6,7 @@ import {LEFT_BUTTON} from "../lib/mouse.js";
 import {Drag} from "./drag.js";
 import socket from "../socket.js";
 import ContextMenu from "./contextmenu.js";
+import {HexagonDiv} from "./shapeddiv.js";
 
 const e = React.createElement;
 
@@ -33,6 +34,7 @@ export default class Character extends React.Component {
             x: position.xPixel,
             y: position.yPixel,
             isDragged: false,
+            hovered: false,
         }
         // both state and props contain a x and y value
         // props holds the grid indices where the character is placed
@@ -104,17 +106,23 @@ export default class Character extends React.Component {
             y = position.yPixel;
         }
 
-        return e("div", {
+        return e(HexagonDiv, {
             className: CSS.CHARACTER,
             style: {
                 left: (x - CHARACTER_WIDTH/2) + "px",
                 top: (y - CHARACTER_HEIGHT/2) + "px",
                 transition: this.state.isDragged ? "none" : "",
-                cursor: this.state.isDragged ? "grabbing" : "",
+                cursor: this.state.isDragged ? "grabbing" : (this.state.hovered ? "grab" : ""),
             },
             onMouseDown: this.drag.onMouseDown,
             onContextMenu: this.context.handler(this.contextMenuItems),
             onMouseUp: this.onMouseUp,
+            onMouseEnter: function () {
+                this.setState({hovered: true});
+            }.bind(this),
+            onMouseLeave: function () {
+                this.setState({hovered: false});
+            }.bind(this),
         }, [
             e("svg", {
                 key: "hexagon",

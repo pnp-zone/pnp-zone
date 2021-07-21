@@ -7,6 +7,7 @@ import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
 import ContextMenu from "./contextmenu.js";
 import Hexagon from "./hexagon.js";
+import {HexagonDiv} from "./shapeddiv.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -128,9 +129,8 @@ export class Tiles extends React.PureComponent {
                             },
                         }),
                     ]),
-                    e("label", {
+                    e(HexagonDiv, {
                         key: "border",
-                        htmlFor: "colorBr",
                         style: {
                             position: "absolute",
                             left: 0,
@@ -138,18 +138,35 @@ export class Tiles extends React.PureComponent {
                             width: `${OUTER_HEXAGON.width}px`,
                             height: `${OUTER_HEXAGON.height}px`,
                         }
-                    }),
-                    e("label", {
+                    }, [
+                        e("label", {
+                            htmlFor: "colorBr",
+                            style: {
+                                display: "block",
+                                width: "100%",
+                                height: "100%",
+                            },
+                        }),
+                    ]),
+                    e(HexagonDiv, {
                         key: "background",
-                        htmlFor: "colorBg",
                         style: {
                             position: "absolute",
                             left: `${(OUTER_HEXAGON.width-INNER_HEXAGON.width)/2}px`,
-                            top: `${(OUTER_HEXAGON.height-INNER_HEXAGON.a-INNER_HEXAGON.b)/2}px`,
+                            top: `${(OUTER_HEXAGON.height-INNER_HEXAGON.height)/2}px`,
                             width: `${INNER_HEXAGON.width}px`,
-                            height: `${INNER_HEXAGON.a+INNER_HEXAGON.b}px`,
+                            height: `${INNER_HEXAGON.height}px`,
                         }
-                    }),
+                    }, [
+                        e("label", {
+                            htmlFor: "colorBg",
+                            style: {
+                                display: "block",
+                                width: "100%",
+                                height: "100%",
+                            },
+                        }),
+                    ]),
                     e(TextInput, {
                         id: "colorBg", name: "background", type: "color",
                         value: this.state.background,
