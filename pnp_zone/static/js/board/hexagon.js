@@ -1,5 +1,10 @@
 export default class Hexagon {
     constructor(width) {
+        this.center = {
+            x: 0,
+            y: 0,
+        };
+
         this.a = width/2;
         this.b = this.a / Math.sqrt(3);
 
@@ -15,6 +20,35 @@ export default class Hexagon {
             [0, -this.height/2],
             [-this.a, -this.side/2]
         ];
+    }
+
+    contains(x, y) {
+        const nx = Math.abs(x - this.center.x);
+        const ny = Math.abs(y - this.center.y);
+
+        if (ny > this.side/2) {
+            const slope = -(this.b/this.a);
+            return ny <= slope*nx + this.height/2;
+        } else {
+            return nx <= this.width/2;
+        }
+    }
+
+    get x() { return this.center.x; }
+    get y() { return this.center.y; }
+    set x(value) {
+        const dx = value - this.center.x;
+        this.center.x += dx;
+        for (let i = 0; i < 6; i++) {
+            this.points[i][0] += dx;
+        }
+    }
+    set y(value) {
+        const dy = value - this.center.y;
+        this.center.y += dy;
+        for (let i = 0; i < 6; i++) {
+            this.points[i][1] += dy;
+        }
     }
 
     get asPath() {
