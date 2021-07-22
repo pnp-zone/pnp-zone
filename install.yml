@@ -1,0 +1,73 @@
+- name: Install pnp-zone
+  hosts: 127.0.0.1
+  vars:
+    - ansible_become: yes
+    - ansible_connection: local
+    - home: /var/lib/pnp-zone
+    - user: pnp-zone
+  tasks:
+    - name: Create user
+      ansible.builtin.user:
+        name: "{{user}}"
+        state: present
+        system: yes
+        shell: /bin/bash
+        home: "{{home}}"
+    - name: Clone repo
+      ansible.builtin.git:
+        dest: "{{home}}/repo"
+        repo: https://github.com/pnp-zone/pnp-zone.git
+        force: yes
+        version: master
+    - name: Install virtualenv
+      ansible.builtin.pip:
+        name: virtualenv
+    - name: Install requirements
+      ansible.builtin.pip:
+        chdir: "{{home}}"
+        requirements: "repo/requirements.txt"
+        virtualenv: venv
+    - name: Link settings
+      ansible.builtin.file:
+        src: /etc/pnp-zone/settings.py
+        dest: "{{home}}/repo/pnp_zone/pnp_zone/settings.py"
+        state: link
+        force: yes
+    - name: Migrate DB
+      ansible.builtin.command:
+        chdir: "{{home}}/repo/pnp_zone"
+        cmd: "{{home}}/venv/bin/python3 manage.py migrate"
+    - name: Collect static files
+      ansible.builtin.command:
+        chdir: "{{home}}/repo/pnp_zone"
+        cmd: "{{home}}/venv/bin/python3 manage.py collectstatic --no-input"
+    - name: Move systemd socket
+      ansible.builtin.copy:
+        src: "{{home}}/repo/pnp-zone.socket"
+        dest: /lib/systemd/system/pnp-zone.socket
+        remote_src: yes
+    - name: Move systemd service
+      ansible.builtin.copy:
+        src: "{{home}}/repo/pnp-zone.service"
+        dest: /lib/systemd/system/pnp-zone.service
+        remote_src: yes
+    - name: Link systemd socket
+      ansible.builtin.file:
+        src: /lib/systemd/system/pnp-zone.socket
+        dest: /etc/systemd/system/multi-user.target.wants/pnp-zone.socket
+        state: link
+    - name: Link systemd service
+      ansible.builtin.file:
+        src: /lib/systemd/system/pnp-zone.service
+        dest: /etc/systemd/system/multi-user.target.wants/pnp-zone.service
+        state: link
+    - name: Start socket
+      ansible.builtin.systemd:
+        name: pnp-zone.socket
+        daemon_reload: yes
+        state: restarted
+    - name: Start service
+      ansible.builtin.systemd:
+        name: pnp-zone.service
+        daemon_reload: yes
+        state: restarted
