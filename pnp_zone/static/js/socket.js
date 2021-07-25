@@ -35,6 +35,14 @@ class Socket {
         this.socket.send(JSON.stringify(obj))
     }
 
+    sendLocally({type, ...message}) {
+        if (this.event_handlers.has(type)) {
+            this.event_handlers.get(type)(message);
+        } else {
+            console.error("Unknown message type:", type);
+        }
+    }
+
     getEndpoint() {
         const url = window.location;
         return url.protocol.replace("http", "ws") + "//" + url.host + url.pathname;

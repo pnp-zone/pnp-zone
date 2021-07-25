@@ -106,7 +106,7 @@ def process_color_tile(room, user, data):
     else:
         tiles.delete()
 
-    return data, data
+    return None, data
 
 
 def _image2data(img: Image):

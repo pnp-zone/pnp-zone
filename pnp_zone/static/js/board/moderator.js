@@ -59,12 +59,14 @@ export class Tiles extends React.PureComponent {
             }
 
             // Directly write tile to board
+            const {background, border} = this.state;
+            socket.sendLocally({type: "colorTile", tiles: [[x, y]], background, border,});
         }
     }
 
     dragStart(event) {
-        this.previously = Coord.fromIndex(event.gridX, event.gridY);
-        this.color(event.gridX, event.gridY);
+        this.previously = Coord.fromIndex(event.nativeEvent.gridX, event.nativeEvent.gridY);
+        this.color(event.nativeEvent.gridX, event.nativeEvent.gridY);
     }
     dragMove(event) {
         const points = (new Line(this.previously, Coord.fromIndex(event.gridX, event.gridY))).points;
