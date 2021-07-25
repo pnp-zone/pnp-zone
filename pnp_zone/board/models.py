@@ -2,6 +2,22 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
+class ToDict(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def _dict(self):
+        raise NotImplemented
+
+    def to_dict(self, as_tuple=None):
+        d = self._dict()
+        if as_tuple is None:
+            return d
+        else:
+            return tuple(d for _ in range(as_tuple))
+
+
 class Room(models.Model):
     name = models.CharField(max_length=255)
     identifier = models.CharField(max_length=255, unique=True)
@@ -19,7 +35,7 @@ class Room(models.Model):
         return self.name
 
 
-class Character(models.Model):
+class Character(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255, default="")
     name = models.CharField(max_length=255, default="Unnamed")
@@ -31,7 +47,11 @@ class Character(models.Model):
         unique_together = ("room", "identifier")
 
     def __str__(self):
-        return self.identifier
+        return self.name
+
+    def _dict(self):
+        return {"type": "character", "id": self.identifier, "name": self.name,
+                "x": self.x, "y": self.y, "color": self.color}
 
 
 class Tile(models.Model):
@@ -59,7 +79,7 @@ class UserSession(models.Model):
         return f"{self.user} in {self.room}"
 
 
-class Image(models.Model):
+class Image(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
@@ -71,3 +91,10 @@ class Image(models.Model):
 
     class Meta:
         unique_together = ("room", "identifier")
+
+    def __str__(self):
+        return self.url
+
+    def _dict(self, as_tuple=None):
+        return {"type": "image", "id": self.identifier, "url": self.url,
+                "x": self.x, "y": self.y, "width": self.width, "height": self.height, "layer": self.layer}

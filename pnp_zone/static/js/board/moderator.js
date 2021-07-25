@@ -39,7 +39,7 @@ export class Tiles extends React.PureComponent {
 
     send() {
         const {background, border} = this.state;
-        socket.send({type: "colorTile", tiles: this.toSend, background, border,});
+        socket.send({type: "tiles.color", tiles: this.toSend, background, border,});
         this.toSend = [];
         this.sendTimeout = null;
     }
@@ -60,7 +60,7 @@ export class Tiles extends React.PureComponent {
 
             // Directly write tile to board
             const {background, border} = this.state;
-            socket.sendLocally({type: "colorTile", tiles: [[x, y]], background, border,});
+            socket.sendLocally({type: "tiles", tiles: [[x, y]], background, border,});
         }
     }
 

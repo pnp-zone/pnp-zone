@@ -41,11 +41,11 @@ export default class Board extends React.Component {
             }).observe(boardView);
         });*/
         socket.registerEvent("error", ({message}) => { console.error(message); });
-        socket.registerEvent("session", this.setState.bind(this));
-        socket.registerEvent("character.new", this.subStateSetter("characters"));
-        socket.registerEvent("character.move", this.subStateSetter("characters"));
+        socket.registerEvent("character", this.subStateSetter("characters"));
         socket.registerEvent("character.delete", this.subStateDeleter("characters"));
-        socket.registerEvent("colorTile", ({tiles, background, border}) => {
+        socket.registerEvent("image", this.subStateSetter("images"));
+        socket.registerEvent("image.delete", this.subStateDeleter("images"));
+        socket.registerEvent("tiles", ({tiles, background, border}) => {
             for (let i = 0; i < tiles.length; i++) {
                 const [x, y] = tiles[i];
                 this.state.tiles[`${x} | ${y}`] = {x, y, border, background};
@@ -53,8 +53,6 @@ export default class Board extends React.Component {
             this.setState({});
         });
         socket.registerEvent("cursor", this.subStateSetter("cursors"));
-        socket.registerEvent("image.update", this.subStateSetter("images"));
-        socket.registerEvent("image.delete", this.subStateDeleter("images"));
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
             socket.send({
