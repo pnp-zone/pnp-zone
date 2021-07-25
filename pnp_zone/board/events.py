@@ -101,7 +101,7 @@ def delete_character(room, user, data):
 @register("tiles.color")
 @moderators_only
 @database_sync_to_async
-def process_color_tile(room, user, data):
+def color_tile(room, user, data):
     # Sort the incoming tiles by already colored or not and prepare the orm objects
     tiles_ids = []
     new_tiles = []
@@ -119,6 +119,21 @@ def process_color_tile(room, user, data):
     Tile.objects.bulk_create(new_tiles)
 
     data["type"] = "tiles"
+    return None, data
+
+
+@register("tiles.delete")
+@moderators_only
+@database_sync_to_async
+def erase_tile(room, user, data):
+    tiles_id = []
+    for point in data["tiles"]:
+        try:
+            tiles_id.append(Tile.objects.get(room=room, x=point[0], y=point[1]).id)
+        except Tile.DoesNotExist:
+            pass
+    Tile.objects.filter(id__in=tiles_id).delete()
+
     return None, data
 
 

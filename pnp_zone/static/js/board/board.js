@@ -52,6 +52,13 @@ export default class Board extends React.Component {
             }
             this.setState({});
         });
+        socket.registerEvent("tiles.delete", ({tiles}) => {
+            for (let i = 0; i < tiles.length; i++) {
+                const [x, y] = tiles[i];
+                delete this.state.tiles[`${x} | ${y}`];
+            }
+            this.setState({});
+        });
         socket.registerEvent("cursor", this.subStateSetter("cursors"));
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;

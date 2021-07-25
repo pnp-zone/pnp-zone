@@ -15,6 +15,12 @@ function TableRow(props) {
     return e("tr", {}, children.map((element) => e("td", {}, [element])));
 }
 
+const Modes = {
+    PAINT: "paint",
+    ERASE: "erase",
+    NONE: "none",
+};
+
 const INNER_HEXAGON = new Hexagon(80);
 const OUTER_HEXAGON = new Hexagon(100);
 export class Tiles extends React.PureComponent {
@@ -25,7 +31,7 @@ export class Tiles extends React.PureComponent {
         this.state = {
             background: "#FFFFFF",
             border: "#000000",
-            active: false,
+            mode: Modes.NONE,
         };
 
         this.toSend = [];
@@ -38,8 +44,12 @@ export class Tiles extends React.PureComponent {
     }
 
     send() {
-        const {background, border} = this.state;
-        socket.send({type: "tiles.color", tiles: this.toSend, background, border,});
+        if (this.state.mode === Modes.PAINT) {
+            const {background, border} = this.state;
+            socket.send({type: "tiles.color", tiles: this.toSend, background, border,});
+        } else if (this.state.mode === Modes.ERASE) {
+            socket.send({type: "tiles.delete", tiles: this.toSend,});
+        }
         this.toSend = [];
         this.sendTimeout = null;
     }
@@ -59,8 +69,12 @@ export class Tiles extends React.PureComponent {
             }
 
             // Directly write tile to board
-            const {background, border} = this.state;
-            socket.sendLocally({type: "tiles", tiles: [[x, y]], background, border,});
+            if (this.state.mode === Modes.PAINT) {
+                const {background, border} = this.state;
+                socket.sendLocally({type: "tiles", tiles: [[x, y]], background, border,});
+            } else if (this.state.mode === Modes.ERASE) {
+                socket.sendLocally({type: "tiles.delete", tiles: [[x, y]],});
+            }
         }
     }
 
@@ -80,13 +94,13 @@ export class Tiles extends React.PureComponent {
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (this.state.active !== prevState.active) {
-            if (this.state.active) {
-                document.body.style.cursor = "crosshair";
-                this.context.addHandler(this.drag.onMouseDown);
-            } else {
-                document.body.style.cursor = "";
+        if (this.state.mode !== prevState.mode) {
+            if (this.state.mode === Modes.NONE) {
                 this.context.removeHandler(this.drag.onMouseDown);
+                document.body.style.cursor = "";
+            } else {
+                this.context.addHandler(this.drag.onMouseDown);
+                document.body.style.cursor = "crosshair";
             }
         }
     }
@@ -96,13 +110,26 @@ export class Tiles extends React.PureComponent {
         return e("div", {
                 className: "moderator-child"
             }, [
-                e("label", {forHtml: "active"}, "Active"),
-                e(CheckBox, {
-                    id: "active", name: "active",
-                    value: this.state.active,
-                    setValue: (value) => {setState({active: value})},
-                }),
+                e("button", {
+                    key: "paintMode",
+                    onClick() {setState((state) => ({mode: state.mode === Modes.PAINT ? Modes.NONE : Modes.PAINT}));},
+                    style: {
+                        backgroundColor: this.state.mode === Modes.PAINT ? "#233549" : "",
+                    },
+                }, [
+                    e("img", {src: "/static/img/paintbrush.svg", width: 32, height: 32})
+                ]),
+                e("button", {
+                    key: "eraseMode",
+                    onClick() {setState((state) => ({mode: state.mode === Modes.ERASE ? Modes.NONE : Modes.ERASE}));},
+                    style: {
+                        backgroundColor: this.state.mode === Modes.ERASE ? "#233549" : "",
+                    },
+                }, [
+                    e("img", {src: "/static/img/eraser.svg", width: 32, height: 32})
+                ]),
                 e("div", {
+                    key: "colorPicker",
                     style: {
                         position: "relative",
                         width: `${OUTER_HEXAGON.width}px`,
