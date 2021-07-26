@@ -1,8 +1,9 @@
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
+from django.views import View
 from django.views.generic import TemplateView
-from django.http.response import Http404, HttpResponse
+from django.http.response import Http404, HttpResponse, JsonResponse
 
 from board.models import Room, UserSession
 from campaign.models import CampaignModel
@@ -41,4 +42,33 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "is_moderator": campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser,
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
+        })
+
+
+class BoardData(LoginRequiredMixin, View):
+
+    def get(self, request, *args, room: str = None, **kwargs):
+        try:
+            room = Room.objects.get(identifier=room)
+        except Room.DoesNotExist:
+            raise Http404
+
+        campaign: CampaignModel = room.campaignmodel_set.first()
+        if not campaign.players.filter(user__username=request.user.username).exists() and \
+                not campaign.game_master.filter(user__username=request.user.username).exists():
+            return JsonResponse({"success": False})
+
+        try:
+            session = UserSession.objects.get(room=room, user=request.user)
+        except UserSession.DoesNotExist:
+            session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
+
+        return JsonResponse({
+            "success": True,
+            "x": session.board_x,
+            "y": session.board_y,
+            "scale": session.board_scale,
+            "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
+            "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
+            "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
         })

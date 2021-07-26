@@ -98,6 +98,33 @@ export default class Board extends React.Component {
                     return coord.yIndex;
                 }});
         });
+
+        // TODO
+        // Expose load method for debugging
+        document.loadBoard = this.loadFromUrl.bind(this);
+    }
+
+    loadFromUrl(url) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", `${url}/data`);
+
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    const result = JSON.parse(xhr.responseText);
+                    console.log("Changing board...");
+                    socket.getEndpoint = function () {
+                        return url.replace("http", "ws");
+                    }
+                    socket.socket.close();
+                    this.setState(result);
+                } else {
+                    console.error("Failed to load url:", url);
+                }
+            }
+        }.bind(this);
+
+        xhr.send();
     }
 
     subStateSetter(subState, keyFromObj = ({id}) => id) {
