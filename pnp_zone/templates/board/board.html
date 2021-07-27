@@ -1,7 +1,11 @@
 {% extends "base.html" %}
-
 {% block body %}
 {% load static %}
+
+{% include "preloader.html" %}
+{% block loader %}
+{% endblock %}
+
 <link rel="stylesheet" href="{% static "css/board.css" %}">
 <style>
     body {
