@@ -72,7 +72,7 @@ export function TabList(props) {
         }, children.map(
             ([tab, content], index) => e(Tab, {
                 isOpen: open === index,
-                open: function () { setOpen(index ? -1 : index); },
+                open: function () { setOpen(open === index ? -1 : index); },
             }, tab)
         )),
     ]);
