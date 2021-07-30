@@ -13,6 +13,7 @@ function Main(props) {
     const [boardView, setBoardView] = React.useState(null);
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
+    const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
 
     const ref = React.useRef();
     React.useEffect(() => {
@@ -35,6 +36,8 @@ function Main(props) {
                 e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
             ]),
             e(TabList, {
+                open: openTab,
+                setOpen: setOpenTab,
                 onMouseDownCapture() { setActiveDrag(true); },
                 onMouseUpCapture() { setActiveDrag(false); },
             }, [

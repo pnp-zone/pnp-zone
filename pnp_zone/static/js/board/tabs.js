@@ -20,71 +20,60 @@ function Page(props) {
     }, children);
 }
 
-export class TabList extends React.Component {
+export function TabList(props) {
+    const [width, setWidth] = React.useState("30vw");
+    const {children, open, setOpen, ...leftProps} = props;
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            open: -1,
-            width: "30vw",
-        };
-
-        const setState = this.setState.bind(this);
-        this.resize = new Drag();
-        this.resize.register(LEFT_BUTTON, {
+    const resize = React.useMemo(() => {
+        const resize = new Drag();
+        resize.register(LEFT_BUTTON, {
             dragStart() {},
-            dragMove(event) {
-                setState({width: `${event.clientX / window.innerWidth * 100}vw`});
-            },
+            dragMove(event) { setWidth(`${event.clientX / window.innerWidth * 100}vw`); },
             dragEnd() {},
         });
-    }
+        return resize;
+    }, [setWidth]);
 
-    render() {
-        const {children, ...props} = this.props;
-        const {open, width} = this.state;
-        return e("div", {
-            className: "flex-horizontal",
+    return e("div", {
+        className: "flex-horizontal",
+        style: {
+            position: "fixed",
+            left: open === -1 ? `calc(-${width} - 0.5em)` : "0",
+            transition: "left 0.5s",
+        },
+        ...leftProps,
+    }, [
+        e("div", {
+            key: "pages",
+            className: "flex-vertical",
             style: {
-                position: "fixed",
-                left: open === -1 ? `calc(-${width} - 0.5em)` : "0",
-                transition: "left 0.5s",
+                height: "100vh",
+                backgroundColor: "#16232d",
+                width,
+                overflow: "hidden",
             },
-            ...props,
-        }, [
-            e("div", {
-                key: "pages",
-                className: "flex-vertical",
-                style: {
-                    height: "100vh",
-                    backgroundColor: "#16232d",
-                    width,
-                    overflow: "hidden",
-                },
-            }, children.map(
-                ([tab, content], index) => e(Page, {
-                    isOpen: open === index
-                }, content),
-            )),
-            e("div", {
-                style: {
-                    width: "0.5em",
-                    height: "100vh",
-                    backgroundColor: "#16232d",
-                    cursor: "ew-resize",
-                },
-                onMouseDown: this.resize.onMouseDown,
-            }, []),
-            e("div", {
-                key: "tabs",
-                className: "flex-vertical",
-            }, children.map(
-                ([tab, content], index) => e(Tab, {
-                    isOpen: open === index,
-                    open: function () {this.setState({open: open === index ? -1 : index})}.bind(this)
-                }, tab)
-            )),
-        ]);
-    }
+        }, children.map(
+            ([tab, content], index) => e(Page, {
+                isOpen: open === index
+            }, content),
+        )),
+        e("div", {
+            style: {
+                width: "0.5em",
+                height: "100vh",
+                backgroundColor: "#16232d",
+                cursor: "ew-resize",
+            },
+            onMouseDown: resize.onMouseDown,
+        }, []),
+        e("div", {
+            key: "tabs",
+            className: "flex-vertical",
+        }, children.map(
+            ([tab, content], index) => e(Tab, {
+                isOpen: open === index,
+                open: function () { setOpen(index ? -1 : index); },
+            }, tab)
+        )),
+    ]);
 }
