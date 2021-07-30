@@ -49,7 +49,8 @@ function Main(props) {
                             height: 24,
                         }),
                         e("iframe", {
-                            allow: `microphone ${bbbDomain}; camera ${bbbDomain}; fullscreen`,
+                            allow: `microphone ${bbbDomain}; camera ${bbbDomain}`,
+                            allowFullScreen: true,
                             src: bbb,
                             style: {
                                 width: "100%",
