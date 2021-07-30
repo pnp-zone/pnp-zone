@@ -66,6 +66,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "tiles": room.tile_set.all(),
             "images": room.image_set.all(),
             "is_moderator": campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser,
+            "boards": campaign.room.all(),
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
             "bbb_join": bbb_join_link(account, campaign) if settings.BBB_INTEGRATION else "",

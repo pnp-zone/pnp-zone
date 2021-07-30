@@ -1,15 +1,15 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import Moderator, {Tiles} from "./moderator.js";
+import Moderator, {BoardSwitch, Tiles} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
 import DragTarget, {DragController} from "./drag.js";
 import {TabList} from "./tabs.js";
 const e = React.createElement;
 
 function Main(props) {
-    const {x, y, scale, characters, tiles, images, bbb} = props;
-    const {isModerator} = props;
+    const {x, y, scale, characters, tiles, images, bbb, boards, isModerator} = props;
+
     const [boardView, setBoardView] = React.useState(null);
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
@@ -74,6 +74,12 @@ function Main(props) {
                         e(Tiles, {
                             board: boardView,
                         })
+                    ],
+                    [
+                        "Board",
+                        e(BoardSwitch, {
+                            boards,
+                        }),
                     ],
                 ] : []),
             ]),

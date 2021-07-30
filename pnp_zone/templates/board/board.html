@@ -42,6 +42,11 @@
                     "{{ img.identifier }}": {id: "{{ img.identifier }}", x: {{ img.x }}, y: {{ img.y }}, width: {{ img.width }}, height: {{ img.height }}, url: "{{ img.url }}", layer: "{{ img.layer }}"},
                 {% endfor %}
             },
+            boards: {
+                {% for board in boards %}
+                    "{{ board.identifier }}": {name: "{{ board.name }}"},
+                {% endfor %}
+            },
             bbb: "{% autoescape off %}{{ bbb_join }}{% endautoescape %}",
         };
 </script>

@@ -194,7 +194,11 @@
     padding-left: 2vw;
 }
 
-
 iframe {
     border: none;
+}
+
+.campaignItem-hover {
+    background-color: #205067;
+    cursor: pointer;
 }
