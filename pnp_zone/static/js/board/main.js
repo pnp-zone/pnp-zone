@@ -8,7 +8,7 @@ import {TabList} from "./tabs.js";
 const e = React.createElement;
 
 function Main(props) {
-    const {x, y, scale, characters, tiles, images} = props;
+    const {x, y, scale, characters, tiles, images, bbb} = props;
     const {isModerator} = props;
     const [boardView, setBoardView] = React.useState(null);
     const [viewToolbar, setViewToolbar] = React.useState(false);
@@ -20,6 +20,8 @@ function Main(props) {
             setBoardView(ref.current);
         }
     });
+
+    const bbbDomain = bbb !== "" ? bbb.match(/https?:\/\/[^/]+/)[0] : "";
 
     return e(ContextMenuController, {
         containerId: "context-menu",
@@ -33,7 +35,23 @@ function Main(props) {
                 e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
             ]),
             e(TabList, {}, [
-                [e("img", {src: "https://docs.bigbluebutton.org/favicon.ico"}), "here be dragons"],
+                ...(bbb !== "" ? [
+                    [
+                        e("img", {
+                            src: `${bbbDomain}/favicon.ico`,
+                            width: 24,
+                            height: 24,
+                        }),
+                        e("iframe", {
+                            allow: `microphone ${bbbDomain}; camera ${bbbDomain}; fullscreen`,
+                            src: bbb,
+                            style: {
+                                width: "100%",
+                                height: "100vh",
+                            }
+                        })
+                    ],
+                ] : []),
                 ...(isModerator ? [
                     ["Moderator", e(Moderator, {
                         editMode,

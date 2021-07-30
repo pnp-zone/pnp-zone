@@ -193,3 +193,8 @@
     margin-right: 0;
     padding-left: 2vw;
 }
+
+
+iframe {
+    border: none;
+}

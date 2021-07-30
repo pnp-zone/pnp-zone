@@ -42,6 +42,7 @@
                     "{{ img.identifier }}": {id: "{{ img.identifier }}", x: {{ img.x }}, y: {{ img.y }}, width: {{ img.width }}, height: {{ img.height }}, url: "{{ img.url }}", layer: "{{ img.layer }}"},
                 {% endfor %}
             },
+            bbb: "{% autoescape off %}{{ bbb_join }}{% endautoescape %}",
         };
 </script>
 <script src="{% static "js/board/main.js" %}" type="module"></script>

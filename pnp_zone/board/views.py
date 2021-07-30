@@ -1,3 +1,6 @@
+import hashlib
+
+from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
@@ -8,6 +11,29 @@ from django.http.response import Http404, HttpResponse, JsonResponse
 from board.models import Room, UserSession
 from campaign.models import CampaignModel
 from pnp_zone import menu
+from accounts.models import AccountModel
+
+
+def bbb_join_link(account: AccountModel, campaign: CampaignModel):
+    character = campaign.characters.filter(creator=account).first()
+    if character:
+        name = character.character_name
+    else:
+        name = account.display_name
+
+    bbb = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
+    # TODO: INSECURE AS SHIT
+    attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest().replace("&", "-")
+    moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest().replace("&", "-")
+    meeting_id = hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-")
+
+    try:
+        bbb.create_meeting(meeting_id, params={"attendeePW": attendee, "moderatorPW": moderator})
+    except Exception:
+        pass
+
+    is_moderator = account in campaign.game_master.all() or account.user.is_superuser
+    return bbb.get_join_meeting_url(name, meeting_id, moderator if is_moderator else attendee)
 
 
 class BoardView(LoginRequiredMixin, TemplateView):
@@ -15,6 +41,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         room = kwargs["room"]
+        account = AccountModel.objects.get(user=request.user)
 
         try:
             room = Room.objects.get(identifier=room)
@@ -22,8 +49,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             raise Http404
 
         campaign: CampaignModel = room.campaignmodel_set.first()
-        if not campaign.players.filter(user__username=request.user.username).exists() and \
-                not campaign.game_master.filter(user__username=request.user.username).exists():
+        if account not in campaign.players.all() and account not in campaign.game_master.all():
             return HttpResponse("You're not allowed in this room")
 
         try:
@@ -42,6 +68,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "is_moderator": campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser,
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
+            "bbb_join": bbb_join_link(account, campaign) if settings.BBB_INTEGRATION else "",
         })
 
 
