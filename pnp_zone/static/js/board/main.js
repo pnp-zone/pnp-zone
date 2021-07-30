@@ -11,8 +11,8 @@ function Main(props) {
     const {x, y, scale, characters, tiles, images, bbb} = props;
     const {isModerator} = props;
     const [boardView, setBoardView] = React.useState(null);
-    const [viewToolbar, setViewToolbar] = React.useState(false);
     const [editMode, setEditMode] = React.useState(false);
+    const [activeDrag, setActiveDrag] = React.useState(false);
 
     const ref = React.useRef();
     React.useEffect(() => {
@@ -34,7 +34,10 @@ function Main(props) {
             }, [
                 e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
             ]),
-            e(TabList, {}, [
+            e(TabList, {
+                onMouseDownCapture() { setActiveDrag(true); },
+                onMouseUpCapture() { setActiveDrag(false); },
+            }, [
                 ...(bbb !== "" ? [
                     [
                         e("img", {
@@ -48,6 +51,7 @@ function Main(props) {
                             style: {
                                 width: "100%",
                                 height: "100vh",
+                                pointerEvents: activeDrag ? "none" : "",
                             }
                         })
                     ],

@@ -42,7 +42,7 @@ export class TabList extends React.Component {
     }
 
     render() {
-        const {children} = this.props;
+        const {children, ...props} = this.props;
         const {open, width} = this.state;
         return e("div", {
             className: "flex-horizontal",
@@ -50,7 +50,8 @@ export class TabList extends React.Component {
                 position: "fixed",
                 left: open === -1 ? `calc(-${width} - 0.5em)` : "0",
                 transition: "left 0.5s",
-            }
+            },
+            ...props,
         }, [
             e("div", {
                 key: "pages",
