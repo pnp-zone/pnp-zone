@@ -8,6 +8,7 @@ from board.models import Room
 class CharacterModel(models.Model):
     character_name = CharField(default="", max_length=255)
     creator = OneToOneField(AccountModel, on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.character_name
