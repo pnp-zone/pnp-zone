@@ -60,6 +60,7 @@ export default class Board extends React.Component {
             this.setState({});
         });
         socket.registerEvent("cursor", this.subStateSetter("cursors"));
+        socket.registerEvent("switch", ({url}) => {this.loadFromUrl(url);});
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
             socket.send({

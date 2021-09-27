@@ -43,6 +43,12 @@ async def process_cursor(room, user, data):
     return None, dict(data, name=user.get_username())
 
 
+@register("switch")
+@moderators_only
+def process_switch(room, user, data):
+    return data, data
+
+
 # --------- #
 # Character #
 # --------- #

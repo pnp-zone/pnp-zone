@@ -61,10 +61,18 @@ export class BoardSwitch extends React.Component {
                 e("h1", {}, selectedBoard.name),
                 e("div", {}, [
                     e("button", {
-                        onClick() {},
+                        onClick() {
+                            const last = window.location.toString();
+                            const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
+                            socket.sendLocally({type: "switch", url,});
+                        },
                     }, "Switch"),
                     e("button", {
-                        onClick() {},
+                        onClick() {
+                            const last = window.location.toString();
+                            const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
+                            socket.sendLocally({type: "switch", url,});
+                        },
                     }, "Switch for all"),
                 ]),
             ]),
