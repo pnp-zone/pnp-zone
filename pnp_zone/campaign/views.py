@@ -1,7 +1,5 @@
-import hashlib
 import uuid
 
-from bigbluebutton_api_python import BigBlueButton
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import redirect, render
@@ -11,7 +9,6 @@ from django.views.generic import TemplateView
 from accounts.models import AccountModel
 from board.models import Room
 from campaign.models import CampaignModel
-from pnp_zone import settings
 
 
 class CreateCampaignView(LoginRequiredMixin, View):
@@ -72,31 +69,3 @@ class CreateBoardView(LoginRequiredMixin, View):
         campaign.room.add(room)
         campaign.save()
         return redirect(request.META["HTTP_REFERER"])
-
-
-class JoinBBB(LoginRequiredMixin, View):
-
-    def post(self, request, cid="", *args, **kwargs):
-        try:
-            campaign = CampaignModel.objects.get(id=cid)
-        except CampaignModel.DoesNotExist:
-            return Http404
-        try:
-            account = AccountModel.objects.get(user__username=request.user)
-        except AccountModel.DoesNotExist:
-            return Http404
-
-        bbb = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
-        # TODO: INSECURE AS SHIT
-        attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest().replace("&", "-")
-        moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest().replace("&", "-")
-        meeting_id = hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-")
-
-        try:
-            bbb.create_meeting(meeting_id, params={"attendeePW": attendee, "moderatorPW": moderator})
-        except Exception:
-            pass
-
-        is_moderator = campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser
-        url = bbb.get_join_meeting_url(request.POST["name"], meeting_id, moderator if is_moderator else attendee)
-        return redirect(url)
