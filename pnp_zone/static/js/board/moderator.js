@@ -71,7 +71,7 @@ export class BoardSwitch extends React.Component {
                         onClick() {
                             const last = window.location.toString();
                             const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
-                            socket.sendLocally({type: "switch", url,});
+                            socket.send({type: "switch", url,});
                         },
                     }, "Switch for all"),
                 ]),

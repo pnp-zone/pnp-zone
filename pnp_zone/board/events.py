@@ -45,7 +45,7 @@ async def process_cursor(room, user, data):
 
 @register("switch")
 @moderators_only
-def process_switch(room, user, data):
+async def process_switch(room, user, data):
     return data, data
 
 
