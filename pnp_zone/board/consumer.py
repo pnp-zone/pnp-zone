@@ -1,9 +1,11 @@
+from typing import Optional
+
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 
 from board.events import event_handlers, EventError
-from board.models import Room, UserSession
+from board.models import Room
 from campaign.models import CampaignModel
 
 
@@ -15,6 +17,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     # but in `connect` via `database_lookups` to wait for the scope attribute
     room: Room
     is_moderator: bool
+    campaign: Optional[CampaignModel] = None
 
     @database_sync_to_async
     def database_lookups(self):
@@ -23,8 +26,20 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        game_master = CampaignModel.objects.filter(room__in=[self.room.id])[0].game_master.all()
-        self.is_moderator = self.user.username in [x.user.username for x in game_master] or self.user.is_superuser
+        self.is_moderator = self.user.is_superuser
+
+        for query in self.scope["query_string"].split(b"&"):
+            if not query:
+                continue
+
+            key, value = query.split(b"=")
+            if key == b"campaign":
+                try:
+                    campaign = CampaignModel.objects.get(id=int(value))
+                except CampaignModel.DoesNotExist:
+                    continue
+
+                self.is_moderator = self.is_moderator or campaign.game_master.filter(account__user=self.user).exists()
 
     @property
     def user(self):

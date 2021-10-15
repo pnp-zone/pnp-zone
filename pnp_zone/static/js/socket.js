@@ -44,8 +44,7 @@ class Socket {
     }
 
     getEndpoint() {
-        const url = window.location;
-        return url.protocol.replace("http", "ws") + "//" + url.host + url.pathname;
+        return window.location.toString().replace("http", "ws");
     }
 }
 

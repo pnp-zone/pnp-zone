@@ -37,7 +37,7 @@
         </div>
     </form>
 {% for board in boards %}
-    <div class="campaignItem" onclick="window.location = '/board/{{ board.identifier }}';">{{ board.name }}</div>
+    <div class="campaignItem" onclick="window.location = '/board/{{ board.identifier }}?campaign={{ cid }}';">{{ board.name }}</div>
 {% endfor %}
 </div>
 {% endblock %}
