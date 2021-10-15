@@ -50,7 +50,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
             handler = event_handlers[event["type"]]
 
             # Check if sender has required privileges
-            if hasattr(handler, "moderators_only ") and not self.is_moderator:
+            if hasattr(handler, "moderators_only") and not self.is_moderator:
                 await self.send_json({"type": "error", "message": f"'{event['type']}' can only be used by moderators"})
                 return
 
