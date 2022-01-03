@@ -1,4 +1,5 @@
 import hashlib
+import json
 
 from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
@@ -70,12 +71,14 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
             "bbb_join": bbb_join_link(account, campaign) if settings.BBB_INTEGRATION else "",
+            "initial_data": json.dumps(BoardData.get_data(request, room=room.identifier)),
         })
 
 
 class BoardData(LoginRequiredMixin, View):
 
-    def get(self, request, *args, room: str = None, **kwargs):
+    @staticmethod
+    def get_data(request, room: str):
         try:
             room = Room.objects.get(identifier=room)
         except Room.DoesNotExist:
@@ -91,12 +94,18 @@ class BoardData(LoginRequiredMixin, View):
         except UserSession.DoesNotExist:
             session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
 
-        return JsonResponse({
+        return {
             "success": True,
+            "isModerator": request.user.is_superuser or campaign.game_master.filter(account__user=request.user).exists(),
             "x": session.board_x,
             "y": session.board_y,
             "scale": session.board_scale,
             "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
             "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
             "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
-        })
+            "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
+            "bbb": bbb_join_link(AccountModel.objects.get(user=request.user), campaign),
+        }
+
+    def get(self, request, *args, room: str = None, **kwargs):
+        return JsonResponse(self.get_data(request, room))

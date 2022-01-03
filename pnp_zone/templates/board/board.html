@@ -18,37 +18,7 @@
 <div id="root"></div>
 
 <script>
-        document.initialData = {
-            {% if is_moderator %}
-            isModerator: true,
-            {% else %}
-            isModerator: false,
-            {% endif %}
-            x: {{ session.board_x }},
-            y: {{ session.board_y }},
-            scale: {{ session.board_scale }},
-            characters: {
-                {% for c in characters %}
-                    "{{ c.identifier }}": {x: {{ c.x }}, y: {{ c.y }}, id: "{{ c.identifier }}", color: "{{ c.color }}", name: "{{ c.name }}"},
-                {% endfor %}
-            },
-            tiles: {
-                {% for tile in tiles %}
-                    "{{ tile.x }} | {{ tile.y }}": {x: {{ tile.x }}, y: {{ tile.y }}, border: "{{ tile.border }}", background: "{{ tile.background }}"},
-                {% endfor %}
-            },
-            images: {
-                {% for img in images %}
-                    "{{ img.identifier }}": {id: "{{ img.identifier }}", x: {{ img.x }}, y: {{ img.y }}, width: {{ img.width }}, height: {{ img.height }}, url: "{{ img.url }}", layer: "{{ img.layer }}"},
-                {% endfor %}
-            },
-            boards: {
-                {% for board in boards %}
-                    "{{ board.identifier }}": {name: "{{ board.name }}"},
-                {% endfor %}
-            },
-            bbb: "{% autoescape off %}{{ bbb_join }}{% endautoescape %}",
-        };
+        document.initialData = JSON.parse({% autoescape off %}'{{ initial_data }}'{% endautoescape %});
 </script>
 <script src="{% static "js/board/main.js" %}" type="module"></script>
 <script>
