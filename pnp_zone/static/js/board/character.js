@@ -1,30 +1,31 @@
 import React from "../react.js";
 
-import Hexagon from "./hexagon.js";
 import {Coord} from "./grid.js";
 import {LEFT_BUTTON} from "../lib/mouse.js";
 import {Drag} from "./drag.js";
 import socket from "../socket.js";
 import ContextMenu from "./contextmenu.js";
-import {HexagonDiv} from "./shapeddiv.js";
 
 const e = React.createElement;
 
 const CSS = {
     CHARACTER: "character noselect",
-    NAME: "character-name",
-    HEXAGON: "character-hexagon",
-
 };
 
-const CHARACTER_WIDTH = 80;
-const CHARACTER_HEIGHT = 92;
+const HEXAGON_WIDTH = 80;
+const BORDER_WIDTH = 2;
 
 export default class Character extends React.Component {
 
     static contextType = ContextMenu;
-    static OUTER_HEXAGON = new Hexagon(512);
-    static INNER_HEXAGON = new Hexagon(512 - 2 * 12); // 12 = border width
+    static OUTER_HEXAGON = {
+        "--width": HEXAGON_WIDTH + "px",
+        "--height": Math.floor(HEXAGON_WIDTH / Math.sqrt(3)) + "px",
+    }
+    static INNER_HEXAGON = {
+        "--width": (HEXAGON_WIDTH - 2*BORDER_WIDTH) + "px",
+        "--height": Math.floor((HEXAGON_WIDTH - 2*BORDER_WIDTH) / Math.sqrt(3)) + "px",
+    }
 
     constructor(props) {
         super(props);
@@ -34,7 +35,6 @@ export default class Character extends React.Component {
             x: position.xPixel,
             y: position.yPixel,
             isDragged: false,
-            hovered: false,
         }
         // both state and props contain a x and y value
         // props holds the grid indices where the character is placed
@@ -106,53 +106,35 @@ export default class Character extends React.Component {
             y = position.yPixel;
         }
 
-        return e(HexagonDiv, {
+        return e("div", {
             className: CSS.CHARACTER,
             style: {
-                left: (x - CHARACTER_WIDTH/2) + "px",
-                top: (y - CHARACTER_HEIGHT/2) + "px",
+                left: x + "px",
+                top: y + "px",
                 transition: this.state.isDragged ? "none" : "",
-                cursor: this.state.isDragged ? "grabbing" : (this.state.hovered ? "grab" : ""),
+                cursor: this.state.isDragged ? "grabbing" : "",
             },
             onMouseDown: this.drag.onMouseDown,
             onContextMenu: this.context.handler(this.contextMenuItems),
             onMouseUp: this.onMouseUp,
-            onMouseEnter: function () {
-                this.setState({hovered: true});
-            }.bind(this),
-            onMouseLeave: function () {
-                this.setState({hovered: false});
-            }.bind(this),
         }, [
-            e("svg", {
-                key: "hexagon",
-                className: CSS.HEXAGON,
-                version: "1.1",
-                xmlns: "http://www.w3.org/2000/svg",
-                viewBox: "-"+Character.OUTER_HEXAGON.width/2+" -"+Character.OUTER_HEXAGON.height/2+" "+Character.OUTER_HEXAGON.width+" "+Character.OUTER_HEXAGON.height,
-            }, [
-                e("polygon", {
-                    key: "background",
-                    points: Character.OUTER_HEXAGON.asPolygon,
-                    style: {
-                        fill: this.props.color,
-                    },
-                }),
-                e("path", {
-                    key: "border",
-                    fillRule: "evenodd",
-                    d: `${Character.OUTER_HEXAGON.asPath} ${Character.INNER_HEXAGON.asPath}`,
-                    style: {
-                        fill: "black",
-                    },
-                }),
-            ]),
-            e("p", {
-                key: "name",
-                className: CSS.NAME,
-            }, [
-                this.props.name,
-            ]),
+            e("div", {
+                key: "border",
+                className: "hexagon",
+                style: {
+                    ...this.constructor.OUTER_HEXAGON,
+                    "--color": "black",
+                },
+            }),
+            e("div", {
+                key: "background",
+                className: "hexagon",
+                style: {
+                    ...this.constructor.INNER_HEXAGON,
+                    "--color": this.props.color,
+                },
+            }),
+            e("p", {key: "name"}, this.props.name),
         ]);
     }
 }

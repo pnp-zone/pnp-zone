@@ -9,76 +9,75 @@ export const TILE_WIDTH = Math.floor(TILE_HEXAGON.width);
 export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
 export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 export const BORDER_WIDTH = Math.ceil(TILE_WIDTH / 50);
-export const INNER_HEXAGON = new Hexagon(TILE_WIDTH - 2*BORDER_WIDTH);
 
+const OUTER_TILE = {
+    "--width": TILE_WIDTH + "px",
+    "--height": Math.floor(TILE_WIDTH / Math.sqrt(3)) + "px",
+};
+const INNER_TILE = {
+    "--width": (TILE_WIDTH - 2*BORDER_WIDTH) + "px",
+    "--height": Math.floor((TILE_WIDTH - 2*BORDER_WIDTH) / Math.sqrt(3)) + "px",
+};
 export function Tile(props) {
     const {x, y, border, background} = props;
     const position = Coord.fromIndex(x, y);
 
-    return e("svg", {
-        version: "1.1",
-        xmlns: "http://www.w3.org/2000/svg",
-        className: "field",
-        viewBox: "-"+TILE_HEXAGON.width/2+" -"+TILE_HEXAGON.height/2+" "+TILE_HEXAGON.width+" "+TILE_HEXAGON.height,
+    return e("div", {
         style: {
             position: "absolute",
-            left: position.left + "px",
-            top: position.top + "px",
-            width: `${TILE_WIDTH}px`,
-            height: `${TILE_HEIGHT}px`,
+            left: position.xPixel + "px",
+            top: position.yPixel + "px",
         },
     }, [
-        e("polygon", {
-            key: "background",
-            points: TILE_HEXAGON.asPolygon,
+        e("div", {
+            name: "border",
+            className: "hexagon",
             style: {
-                fill: background,
+                "--color": border,
+                ...OUTER_TILE,
             },
         }),
-        e("path", {
-            key: "border",
-            fillRule: "evenodd",
-            d: `${TILE_HEXAGON.asPath} ${INNER_HEXAGON.asPath}`,
+        e("div", {
+            name: "background",
+            className: "hexagon",
             style: {
-                fill: border,
+                "--color": background,
+                ...INNER_TILE,
             },
         }),
     ]);
 }
 
-export class PatchGrid extends React.Component {
-    render() {
-        const {size, left, right, top, bottom} = this.props;
+export function PatchGrid(props) {
+    const {size, left, right, top, bottom} = props;
 
-        const patches = [];
-        const start = Coord.fromPixel(left, top);
-        const end = Coord.fromPixel(right, bottom);
-        const w = Math.abs(start.xIndex - end.xIndex);
-        const h = Math.abs(start.yIndex - end.yIndex);
-        for (let x = -size; x <= w; x += size) {
-            for (let y = -size; y <= h; y += size) {
-                patches.push([x, y]);
-                //patches.push(e(HexPatch, {key: `${x} | ${y}`, size: size, x, y}));
-            }
+    const patches = [];
+    const start = Coord.fromPixel(left, top);
+    const end = Coord.fromPixel(right, bottom);
+    const w = Math.abs(start.xIndex - end.xIndex);
+    const h = Math.abs(start.yIndex - end.yIndex);
+    for (let x = -size; x <= w; x += size) {
+        for (let y = -size; y <= h; y += size) {
+            patches.push([x, y]);
         }
-
-        const y = top - (top % ROW_HEIGHT);
-        const x = left - (left % TILE_WIDTH) + (y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
-
-        return e("div", {
-            style: {
-                position: "absolute",
-                left: `${x}px`,
-                top: `${y}px`,
-            },
-        }, [
-            e(PatchCss, {
-                size: size,
-                key: "css",
-            }),
-            ...patches.map(([x, y]) => e(HexPatch, {key: `${x} | ${y}`, size, x, y})),
-        ]);
     }
+
+    const y = top - (top % ROW_HEIGHT);
+    const x = left - (left % TILE_WIDTH) + (y / ROW_HEIGHT % 2 !== 0 ? TILE_WIDTH/2 : 0);
+
+    return e("div", {
+        style: {
+            position: "absolute",
+            left: `${x}px`,
+            top: `${y}px`,
+        },
+    }, [
+        e(PatchCss, {
+            key: "css",
+            size: size,
+        }),
+        ...patches.map(([x, y]) => e(HexPatch, {key: `${x} | ${y}`, size, x, y})),
+    ]);
 }
 function HexPatch(props) {
     const {x, y, size} = props;
@@ -91,7 +90,6 @@ function HexPatch(props) {
         },
     });
 }
-
 // React.memo wraps a component and only re-renders it when it has actually changed
 const PatchCss = React.memo(function PatchCss(props) {
     const {size} = props;
@@ -121,7 +119,8 @@ const PatchCss = React.memo(function PatchCss(props) {
     const header = `<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}'>\n`;
     const svg = header + borders.join("\n") + "\n</svg>";
 
-    return e("style", {}, `.patch${size} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}"); width: ${TILE_WIDTH * size}px; height: ${TILE_HEIGHT * size}px;}`)
+    return e("style", {}, `.patch${size} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}");
+                                          width: ${TILE_WIDTH * size}px; height: ${TILE_HEIGHT * size}px;}`)
 });
 
 export class Coord {
