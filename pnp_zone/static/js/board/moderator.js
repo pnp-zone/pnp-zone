@@ -21,63 +21,44 @@ const Modes = {
     NONE: "none",
 };
 
-export class BoardSwitch extends React.Component {
+export function BoardSwitch(props) {
+    const {boards} = props;
+    const [selected, setSelected] = React.useState(null);
 
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            boards: props.boards,
-            selected: null,
-        };
-    }
-
-    render() {
-        const setState = this.setState.bind(this);
-        const {selected} = this.state;
-        const selectedBoard = this.state.boards[selected];
-
-        const boards = [];
-        for (const key in this.state.boards) {
-            if (this.state.boards.hasOwnProperty(key)) {
-                const board = this.state.boards[key];
-                boards.push(e("div", {
-                    key,
-                    className: "campaignItem" + (selected === key ? " campaignItem-hover" : ""),
-                    onClick() { setState(({selected}) => ({selected: selected === key ? null : key})); },
-                }, board.name));
-            }
-        }
-
-        return e("div", {}, [
+    return e("div", {}, [
+        e("div", {
+            className: "campaignRow",
+            style: {
+                margin: 0,
+            },
+        }, Object.entries(boards).map(([uuid, name]) =>
             e("div", {
-                className: "campaignRow",
-                style: {
-                    margin: 0,
-                },
-            }, boards),
-            e("hr"),
-            selected === null ? null : e("div", {}, [
-                e("h1", {}, selectedBoard.name),
-                e("div", {}, [
-                    e("button", {
-                        onClick() {
-                            const last = window.location.toString();
-                            const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
-                            socket.sendLocally({type: "switch", url,});
-                        },
-                    }, "Switch"),
-                    e("button", {
-                        onClick() {
-                            const last = window.location.toString();
-                            const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
-                            socket.send({type: "switch", url,});
-                        },
-                    }, "Switch for all"),
-                ]),
+                key: uuid,
+                className: "campaignItem" + (selected === uuid ? " campaignItem-hover" : ""),
+                onClick() { setSelected(selected === uuid ? null : uuid); },
+            }, name)
+        )),
+        e("hr"),
+        selected === null ? null : e("div", {}, [
+            e("h1", {}, boards[selected]),
+            e("div", {}, [
+                e("button", {
+                    onClick() {
+                        const last = window.location.origin + window.location.pathname;
+                        const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
+                        socket.sendLocally({type: "switch", url,});
+                    },
+                }, "Switch"),
+                e("button", {
+                    onClick() {
+                        const last = window.location.origin + window.location.pathname;
+                        const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
+                        socket.send({type: "switch", url,});
+                    },
+                }, "Switch for all"),
             ]),
-        ]);
-    }
+        ]),
+    ]);
 }
 
 const INNER_HEXAGON = new Hexagon(80);
