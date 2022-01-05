@@ -93,7 +93,7 @@ function HexPatch(props) {
 // React.memo wraps a component and only re-renders it when it has actually changed
 const PatchCss = React.memo(function PatchCss(props) {
     const {size} = props;
-    // Generate an svg for the patches
+    // Generate a svg for the patches
     const border = "black";
     const borders = [];
     for (let ix = -1; ix < size+1; ix++) {

@@ -104,7 +104,8 @@ class BoardData(LoginRequiredMixin, View):
             "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
             "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
             "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
-            "bbb": bbb_join_link(AccountModel.objects.get(user=request.user), campaign),
+            "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
+                    if settings.BBB_INTEGRATION else None),
         }
 
     def get(self, request, *args, room: str = None, **kwargs):

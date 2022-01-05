@@ -22,7 +22,7 @@ function Main(props) {
         }
     });
 
-    const bbbDomain = bbb !== "" ? bbb.match(/https?:\/\/[^/]+/)[0] : "";
+    const bbbDomain = bbb !== null ? bbb.match(/https?:\/\/[^/]+/)[0] : null
 
     return e(ContextMenuController, {
         containerId: "context-menu",
@@ -41,7 +41,7 @@ function Main(props) {
                 onMouseDownCapture() { setActiveDrag(true); },
                 onMouseUpCapture() { setActiveDrag(false); },
             }, [
-                ...(bbb !== "" ? [
+                ...(bbb !== null ? [
                     [
                         e("img", {
                             src: `${bbbDomain}/favicon.ico`,
