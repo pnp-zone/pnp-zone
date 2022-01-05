@@ -14,11 +14,12 @@ from campaign.models import CampaignModel
 class CreateCampaignView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        name = request.POST["name"]
-        account = AccountModel.objects.get(user__username=request.user)
-        campaign = CampaignModel.objects.create(name=name)
-        campaign.game_master.add(account)
-        campaign.save()
+        campaign = CampaignModel.objects.create(
+            name=request.POST["name"],
+            lobby=Room.objects.create(name="Lobby")
+        )
+        campaign.game_master.add(AccountModel.objects.get(user__username=request.user))
+        campaign.room.add(campaign.lobby)
         return redirect(f"/campaign/show/{campaign.id}")
 
 
