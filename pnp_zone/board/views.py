@@ -96,7 +96,7 @@ class BoardData(LoginRequiredMixin, View):
 
         return {
             "success": True,
-            "isModerator": request.user.is_superuser or campaign.game_master.filter(account__user=request.user).exists(),
+            "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
             "x": session.board_x,
             "y": session.board_y,
             "scale": session.board_scale,

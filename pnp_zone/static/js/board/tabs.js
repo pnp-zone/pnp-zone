@@ -21,8 +21,12 @@ function Page(props) {
 }
 
 export function TabList(props) {
-    const [width, setWidth] = React.useState("30vw");
     const {children, open, setOpen, ...leftProps} = props;
+    const [width, setWidth] = React.useState("30vw");
+
+    if (children === undefined || children.length === 0) {
+        return null;
+    }
 
     const resize = React.useMemo(() => {
         const resize = new Drag();

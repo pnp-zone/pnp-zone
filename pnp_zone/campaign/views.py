@@ -1,7 +1,7 @@
 import uuid
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect, HttpRequest
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import TemplateView
@@ -41,21 +41,24 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
 
         return HttpResponseRedirect(request.path)
 
-    def get(self, request, cid="", *args, **kwargs):
+    def get(self, request: HttpRequest, cid="", *args, **kwargs):
         try:
             campaign = CampaignModel.objects.get(id=cid)
         except CampaignModel.DoesNotExist:
             return Http404
 
-        return render(request, self.template_name, {
-            "title": campaign.name,
-            "added_players": campaign.players.all(),
-            "added_gamemasters": campaign.game_master.all(),
-            "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
-            "not_added_gamemasters": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
-            "boards": campaign.room.all(),
-            "cid": campaign.id,
-        })
+        if not campaign.game_master.filter(user=request.user).exists():
+            return redirect(campaign.lobby.get_absolute_url())
+        else:
+            return render(request, self.template_name, {
+                "title": campaign.name,
+                "added_players": campaign.players.all(),
+                "added_gamemasters": campaign.game_master.all(),
+                "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
+                "not_added_gamemasters": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
+                "boards": campaign.room.all(),
+                "cid": campaign.id,
+            })
 
 
 class CreateBoardView(LoginRequiredMixin, View):
