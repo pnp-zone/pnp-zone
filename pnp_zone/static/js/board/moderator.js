@@ -6,8 +6,6 @@ import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
 import ContextMenu from "./contextmenu.js";
-import Hexagon from "./hexagon.js";
-import {HexagonDiv} from "./shapeddiv.js";
 const e = React.createElement;
 
 function TableRow(props) {

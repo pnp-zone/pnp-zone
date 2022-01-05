@@ -25,17 +25,5 @@
         {% block body %}
         {% endblock %}
     </div>
-
-    <script>
-        let modal;
-        import("/static/js/customElements/modal-controller.js").then((module) => {
-            modal = document.querySelector("modal-controller");
-            modal.removeAttribute("style");
-        });
-    </script>
-    <modal-controller style="display: none">
-        {% block modals %}
-        {% endblock %}
-    </modal-controller>
 </body>
 </html>
