@@ -18,6 +18,11 @@ button {
     border-radius: 5px;
 }
 
+/* if a button is used as a checkbox, the active class should be set when the button is "checked" */
+button.active {
+    background-color: #233549;
+}
+
 button:hover {
     background-color: #233549;
 }

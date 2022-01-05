@@ -1,3 +1,7 @@
+:root {
+    --sqrt3: 1.7320508075688772; /* the square root of 3 is used in calculating a hexagons sides */
+}
+
 .board-element {
     position: absolute;
     z-index: inherit;
@@ -196,7 +200,7 @@ iframe {
 
 .hexagon {
 	--width: 100px;
-    --height: calc(var(--width) / 1.7320508075688772);  /* sqrt(3) */
+    --height: calc(var(--width) / var(--sqrt3));
     --color: black;
 }
 
@@ -207,8 +211,8 @@ iframe {
     position: absolute;
 }
 .hexagon {
-    left: calc(-0.5 * var(--width));
-    top: calc(-0.5 * var(--height));
+    left: calc(50% - 0.5 * var(--width));
+    top: calc(50% - 0.5 * var(--height));
 }
 .hexagon::before, .hexagon::after {
 	content: "";
@@ -220,3 +224,15 @@ iframe {
 .hexagon::after {
 	transform: rotate(-120deg);
 }
+
+.colorPicker {
+    --width: 7em;
+    --inner-width: calc(var(--width) * 0.8);
+    width: var(--width);
+    height: calc(var(--width) * 2 / var(--sqrt3));
+    margin: 5px;
+    position: relative;
+}
+.colorPicker > .hexagon:first-child {--width: inherit;}
+.colorPicker > .hexagon:last-child {--width: var(--inner-width);}
+.colorPicker input[type="color"] { display: none; }

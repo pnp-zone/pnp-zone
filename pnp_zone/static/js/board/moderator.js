@@ -15,12 +15,6 @@ function TableRow(props) {
     return e("tr", {}, children.map((element) => e("td", {}, [element])));
 }
 
-const Modes = {
-    PAINT: "paint",
-    ERASE: "erase",
-    NONE: "none",
-};
-
 export function BoardSwitch(props) {
     const {boards} = props;
     const [selected, setSelected] = React.useState(null);
@@ -61,8 +55,12 @@ export function BoardSwitch(props) {
     ]);
 }
 
-const INNER_HEXAGON = new Hexagon(80);
-const OUTER_HEXAGON = new Hexagon(100);
+const Modes = {
+    PAINT: "paint",
+    ERASE: "erase",
+    NONE: "none",
+};
+
 export class Tiles extends React.PureComponent {
     static contextType = DragTarget;
 
@@ -148,112 +146,50 @@ export class Tiles extends React.PureComponent {
     render() {
         const setState = this.setState.bind(this);
         return e("div", {
-                className: "moderator-child"
+            className: "moderator-child"
+        }, [
+            e("button", {
+                key: "paintMode",
+                className: this.state.mode === Modes.PAINT ? "active" : "",
+                onClick() {setState((state) => ({mode: state.mode === Modes.PAINT ? Modes.NONE : Modes.PAINT}));},
             }, [
-                e("button", {
-                    key: "paintMode",
-                    onClick() {setState((state) => ({mode: state.mode === Modes.PAINT ? Modes.NONE : Modes.PAINT}));},
-                    style: {
-                        backgroundColor: this.state.mode === Modes.PAINT ? "#233549" : "",
-                    },
+                e("img", {src: "/static/img/paintbrush.svg", width: 32, height: 32})
+            ]),
+            e("button", {
+                key: "eraseMode",
+                className: this.state.mode === Modes.ERASE ? "active" : "",
+                onClick() {setState((state) => ({mode: state.mode === Modes.ERASE ? Modes.NONE : Modes.ERASE}));},
+            }, [
+                e("img", {src: "/static/img/eraser.svg", width: 32, height: 32})
+            ]),
+            e("div", {
+                key: "colorPicker",
+                className: "colorPicker",
+            }, [
+                e("label", {
+                    key: "borderPicker",
+                    className: "hexagon",
+                    style: {"--color": this.state.border,},
                 }, [
-                    e("img", {src: "/static/img/paintbrush.svg", width: 32, height: 32})
-                ]),
-                e("button", {
-                    key: "eraseMode",
-                    onClick() {setState((state) => ({mode: state.mode === Modes.ERASE ? Modes.NONE : Modes.ERASE}));},
-                    style: {
-                        backgroundColor: this.state.mode === Modes.ERASE ? "#233549" : "",
-                    },
-                }, [
-                    e("img", {src: "/static/img/eraser.svg", width: 32, height: 32})
-                ]),
-                e("div", {
-                    key: "colorPicker",
-                    style: {
-                        position: "relative",
-                        width: `${OUTER_HEXAGON.width}px`,
-                        height: `${OUTER_HEXAGON.height}px`,
-                    },
-                }, [
-                    e("svg", {
-                        version: "1.1",
-                        xmlns: "http://www.w3.org/2000/svg",
-                        className: "field",
-                        viewBox: `-${OUTER_HEXAGON.width/2} -${OUTER_HEXAGON.height/2} ${OUTER_HEXAGON.width} ${OUTER_HEXAGON.height}`,
-                    }, [
-                        e("polygon", {
-                            key: "background",
-                            points: OUTER_HEXAGON.asPolygon,
-                            style: {
-                                fill: this.state.background,
-                            },
-                        }),
-                        e("path", {
-                            key: "border",
-                            fillRule: "evenodd",
-                            d: `${OUTER_HEXAGON.asPath} ${INNER_HEXAGON.asPath}`,
-                            style: {
-                                fill: this.state.border,
-                            },
-                        }),
-                    ]),
-                    e(HexagonDiv, {
-                        key: "border",
-                        style: {
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            width: `${OUTER_HEXAGON.width}px`,
-                            height: `${OUTER_HEXAGON.height}px`,
-                        }
-                    }, [
-                        e("label", {
-                            htmlFor: "colorBr",
-                            style: {
-                                display: "block",
-                                width: "100%",
-                                height: "100%",
-                            },
-                        }),
-                    ]),
-                    e(HexagonDiv, {
-                        key: "background",
-                        style: {
-                            position: "absolute",
-                            left: `${(OUTER_HEXAGON.width-INNER_HEXAGON.width)/2}px`,
-                            top: `${(OUTER_HEXAGON.height-INNER_HEXAGON.height)/2}px`,
-                            width: `${INNER_HEXAGON.width}px`,
-                            height: `${INNER_HEXAGON.height}px`,
-                        }
-                    }, [
-                        e("label", {
-                            htmlFor: "colorBg",
-                            style: {
-                                display: "block",
-                                width: "100%",
-                                height: "100%",
-                            },
-                        }),
-                    ]),
                     e(TextInput, {
-                        id: "colorBg", name: "background", type: "color",
-                        value: this.state.background,
-                        setValue: (value) => {setState({background: value})},
-                        style: {
-                            display: "none",
-                        },
-                    }),
-                    e(TextInput, {
-                        id: "colorBr", name: "border", type: "color",
+                        type: "color",
                         value: this.state.border,
                         setValue: (value) => {setState({border: value})},
-                        style: {
-                            display: "none",
-                        },
                     }),
                 ]),
-            ]);
+                e("label", {
+                    key: "backgroundPicker",
+                    className: "hexagon",
+                    style: {"--color": this.state.background,},
+                }, [
+                    e(TextInput, {
+                        type: "color",
+                        value: this.state.background,
+                        setValue: (value) => {setState({background: value})},
+                    })
+                ])
+            ]),
+        ]);
     }
 }
 
