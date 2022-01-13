@@ -306,23 +306,51 @@ select {
     margin-bottom: 1rem;
 }
 
-.modalContent {
+/* Modal stuff */
+
+#modals .background {
     display: flex;
-    flex-direction: column;
-    padding: 0 2rem 2rem 2rem;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0.3);
 }
 
-.modalContent input {
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
+#modals .modal {
+    background-color: #192734;
 }
 
-.modalContent label {
-    margin-top: 0.5rem;
-    margin-bottom: 0.25rem;
+#modals .close {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
 }
 
-.modalContent button {
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
+#modals .close button {
+    color: white;
+    border: 1px solid #422d78;
+    cursor: pointer;
+    border-radius: 0;
+    background-color: #5e42a6;
+    transition: background-color 100ms linear;
+    display: flex;
+    padding: 0.5em 1rem;
+}
+
+#modals .close button:hover {
+    background-color: #233549;
+}
+
+#modals .close button:active {
+    transform: translateY(2px);
+}
+
+#modals .close img {
+    width: 1rem;
+    filter: invert(100%);
 }

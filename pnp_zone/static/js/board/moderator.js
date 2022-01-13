@@ -4,7 +4,6 @@ import {LEFT_BUTTON} from "../lib/mouse.js";
 import DragTarget, {Drag} from "./drag.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
-import CheckBox from "./forms/checkbox.js";
 import ContextMenu from "./contextmenu.js";
 import Modal from "../modal.js";
 const e = React.createElement;

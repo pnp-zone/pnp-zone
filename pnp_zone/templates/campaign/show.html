@@ -43,13 +43,4 @@
 {% endblock %}
 
 {% block modals %}
-    <div class="modalContent">
-        <form method="POST" action="/campaign/show/{{ cid }}/joinBBB">
-            {% csrf_token %}
-            <h2>Join BBB</h2>
-            <label for="character_name">Name:</label>
-            <input id="character_name" name="name" required>
-            <button>Submit</button>
-        </form>
-    </div>
 {% endblock %}
