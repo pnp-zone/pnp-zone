@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/main.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "css/preloader.css" %}">
     <script type="text/javascript" src="{% static 'js/pnp_zone_preloader.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/modal.js' %}"></script>
 </head>
 <body>
 <!--
@@ -26,8 +27,17 @@
         {% endblock %}
     </div>
     <div id="modals">
-        {% block modals %}
-        {% endblock %}
+        <div class="background" style="display: none" onclick="hideModal();">
+            <div class="modal" onclick="event.stopPropagation();">
+                <div class="close">
+                    <button onclick="hideModal();">
+                        <img src="{% static 'img/close.svg' %}" alt="Hide">
+                    </button>
+                </div>
+                {% block modals %}
+                {% endblock %}
+            </div>
+        </div>
     </div>
 </body>
 </html>

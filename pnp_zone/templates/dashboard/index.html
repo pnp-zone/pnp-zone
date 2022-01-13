@@ -4,7 +4,7 @@
     <div class="dashboardContent">
         <h2>Your campaigns:</h2>
         <div class="campaignRow">
-        <button onclick="showModal(true);">Create Campaign</button>
+        <button onclick="showModal(0);">Create Campaign</button>
         {% for campaign in campaign_list %}
             <a class="campaignLink" href="/campaign/show/{{ campaign.id }}">
                 <div class="campaignItem">{{ campaign.name }}</div>
@@ -12,29 +12,14 @@
         {% endfor %}
         </div>
     </div>
-
-    <script>
-        function showModal(bool) {
-            document.querySelector("#modals > .background").style.display = bool ? "" : "none";
-        }
-    </script>
 {% endblock %}
 
 {% block modals %}
-    <div class="background" style="display: none" onclick="showModal(false);">
-        <div class="modal" onclick="event.stopPropagation();">
-            <div class="close">
-                <button onclick="showModal(false);">
-                    <img src="{% static 'img/close.svg' %}" alt="Hide">
-                </button>
-            </div>
-            <form method="POST" action="/campaign/create">
-                {% csrf_token %}
-                <h2>Create campaign</h2>
-                <label for="campaign_name">Name:</label>
-                <input id="campaign_name" name="name" required>
-                <button>Submit</button>
-            </form>
-        </div>
-    </div>
+    <form method="POST" action="/campaign/create">
+        {% csrf_token %}
+        <h2>Create campaign</h2>
+        <label for="campaign_name">Name:</label>
+        <input id="campaign_name" name="name" required>
+        <button>Submit</button>
+    </form>
 {% endblock %}

@@ -5,7 +5,7 @@ import DragTarget, {Drag} from "./drag.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
-import Modal from "../modal.js";
+import Modal from "./modal.js";
 const e = React.createElement;
 
 function TableRow(props) {
