@@ -35,7 +35,7 @@ function Main(props) {
             }, [
                 e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
             ]),
-            isModerator ? e(Moderator) : null,
+            isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {
                 open: openTab,
                 setOpen: setOpenTab,
@@ -68,11 +68,7 @@ function Main(props) {
                             width: 24,
                             height: 24,
                         }),
-                        e(Tiles, {
-                            board: boardView,
-                            editMode,
-                            setEditMode,
-                        })
+                        e(Tiles, {board: boardView})
                     ],
                     [
                         "Board",

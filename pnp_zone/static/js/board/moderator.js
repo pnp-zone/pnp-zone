@@ -144,18 +144,9 @@ export class Tiles extends React.PureComponent {
 
     render() {
         const setState = this.setState.bind(this);
-        const {editMode, setEditMode} = this.props;
         return e("div", {
             className: "moderator-child"
         }, [
-            e("div", { key: "image", className: "moderator-child", }, [
-                e("label", {forHtml: "move"}, "Move images"),
-                e(CheckBox, {
-                    id: "move", name: "move",
-                    value: editMode,
-                    setValue: setEditMode,
-                }),
-            ]),
             e("button", {
                 key: "paintMode",
                 className: this.state.mode === Modes.PAINT ? "active" : "",
@@ -226,6 +217,7 @@ export default class Moderator extends React.PureComponent {
     render() {
         const setState = this.setState.bind(this);
         const contextMenu = this.context;
+        const {editMode, setEditMode} = this.props;
         contextMenu.addDefaultItems("moderator", (event) => [
             e("button", {
                 onClick: () => {
@@ -245,6 +237,13 @@ export default class Moderator extends React.PureComponent {
                     contextMenu.close();
                 },
             }, `Add image here`),
+            e("button", {
+                className: editMode ? "active" : "",
+                onClick() {
+                    setEditMode(!editMode);
+                    contextMenu.close();
+                },
+            }, "Move images"),
         ]);
 
         return e(React.Fragment, {}, [
