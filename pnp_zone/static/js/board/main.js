@@ -35,6 +35,7 @@ function Main(props) {
             }, [
                 e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
             ]),
+            isModerator ? e(Moderator) : null,
             e(TabList, {
                 open: openTab,
                 setOpen: setOpenTab,
@@ -61,10 +62,6 @@ function Main(props) {
                     ],
                 ] : []),
                 ...(isModerator ? [
-                    ["Moderator", e(Moderator, {
-                        editMode,
-                        setEditMode,
-                    })],
                     [
                         e("img", {
                             src: "/static/img/paintbrush.svg",
@@ -73,6 +70,8 @@ function Main(props) {
                         }),
                         e(Tiles, {
                             board: boardView,
+                            editMode,
+                            setEditMode,
                         })
                     ],
                     [

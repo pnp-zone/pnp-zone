@@ -6,6 +6,7 @@ import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import CheckBox from "./forms/checkbox.js";
 import ContextMenu from "./contextmenu.js";
+import Modal from "../modal.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -143,9 +144,18 @@ export class Tiles extends React.PureComponent {
 
     render() {
         const setState = this.setState.bind(this);
+        const {editMode, setEditMode} = this.props;
         return e("div", {
             className: "moderator-child"
         }, [
+            e("div", { key: "image", className: "moderator-child", }, [
+                e("label", {forHtml: "move"}, "Move images"),
+                e(CheckBox, {
+                    id: "move", name: "move",
+                    value: editMode,
+                    setValue: setEditMode,
+                }),
+            ]),
             e("button", {
                 key: "paintMode",
                 className: this.state.mode === Modes.PAINT ? "active" : "",
@@ -202,9 +212,13 @@ export default class Moderator extends React.PureComponent {
                 x: 0,
                 y: 0,
                 color: "#FF0000",
+                _isModalOpen: false,
             },
             image: {
                 url: "",
+                x: 0,
+                y: 0,
+                _isModalOpen: false,
             },
         };
     }
@@ -212,127 +226,104 @@ export default class Moderator extends React.PureComponent {
     render() {
         const setState = this.setState.bind(this);
         const contextMenu = this.context;
-        const {editMode, setEditMode} = this.props;
         contextMenu.addDefaultItems("moderator", (event) => [
             e("button", {
                 onClick: () => {
-                    const {character} = this.state;
-                    socket.send({
-                        type: "character.new",
-                        ...character,
+                    setState((state) => ({character: {
+                        ...state.character, _isModalOpen: true,
                         x: event.nativeEvent.gridX, y: event.nativeEvent.gridY,
-                    });
+                    }}));
                     contextMenu.close();
                 },
             }, `Add character here`),
             e("button", {
                 onClick: () => {
-                    const {image} = this.state;
-
-                    // Load the image locally to figure out its width and height
-                    const img = new Image();
-                    img.onload = () => {
-                        socket.send({
-                            type: "image.new",
-                            ...image,
-                            width: img.width, height: img.height,
-                            x: event.nativeEvent.boardX, y: event.nativeEvent.boardY,
-                        });
-                        contextMenu.close();
-                    };
-                    img.src = image.url;
+                    setState((state) => ({image: {
+                        ...state.image, _isModalOpen: true,
+                        x: event.nativeEvent.boardX, y: event.nativeEvent.boardY,
+                    }}));
+                    contextMenu.close();
                 },
             }, `Add image here`),
         ]);
 
         return e(React.Fragment, {}, [
-            e("div", { key: "character", className: "moderator-child", }, [
-                e("h2", {}, "New character"),
-                e("table", {}, [
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "newName"}, "Name: "),
-                        e(TextInput, {
-                            id: "newName",
-                            value: this.state.character.name,
-                            setValue: (value) => {setState((state) => ({character: {...state.character, name: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "newX"}, "X: "),
-                        e(TextInput, {
-                            id: "newX",
-                            value: this.state.character.x,
-                            setValue: (value) => {setState((state) => ({character: {...state.character, x: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "newY"}, "Y: "),
-                        e(TextInput, {
-                            id: "newY",
-                            value: this.state.character.y,
-                            setValue: (value) => {setState((state) => ({character: {...state.character, y: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "newColor"}, "Color: "),
-                        e(TextInput, {
-                            id: "newColor",
-                            type: "color",
-                            value: this.state.character.color,
-                            setValue: (value) => {setState((state) => ({character: {...state.character, color: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e(React.Fragment),
-                        e("button", {
-                            onClick: () => {
-                                const {character} = this.state;
-                                socket.send({type: "character.new", ...character});
-                            },
-                        }, "New"),
-                    ]),
-                ])
-            ]),
-            e("div", { key: "image", className: "moderator-child", }, [
-                e("h2", {}, "Add Image"),
-                e("table", {}, [
-                    e(TableRow, {}, [
-                        e("label", {htmlFor: "bgUrl"}, "Url:"),
-                        e(TextInput, {
-                            id: "bgUrl",
-                            value: this.state.image.url,
-                            setValue: (value) => {setState((state) => ({image: {...state.image, url: value}}))},
-                        }),
-                    ]),
-                    e(TableRow, {}, [
-                        e(React.Fragment),
-                        e("button", {
-                            onClick: () => {
-                                const {image} = this.state;
-
-                                // Load the image locally to figure out its width and height
-                                const img = new Image();
-                                img.onload = () => {
-                                    socket.send({type: "image.new",
-                                        ...image,
-                                        width: img.width,
-                                        height: img.height,
-                                    });
-                                };
-                                img.src = image.url;
-                            },
-                        }, "Add"),
-                    ]),
-                    e(TableRow, {}, [
-                        e("label", {forHtml: "move"}, "Move images"),
-                        e(CheckBox, {
-                            id: "move", name: "move",
-                            value: editMode,
-                            setValue: setEditMode,
-                        }),
+            this.state.character._isModalOpen ? e(Modal, {
+                hideModal() {setState((state) => ({character: {...state.character, _isModalOpen: false}}));},
+            }, [
+                e("form", {
+                    onSubmit: (event) => {
+                        event.preventDefault();
+                        const {character} = this.state;
+                        socket.send({type: "character.new", ...character});
+                        setState((state) => ({character: {...state.character, _isModalOpen: false}}));
+                    }
+                }, [
+                    e("table", {}, [
+                        e(TableRow, {}, [
+                            e("label", {htmlFor: "newName"}, "Name: "),
+                            e(TextInput, {
+                                id: "newName",
+                                value: this.state.character.name,
+                                setValue: (value) => {setState((state) => ({character: {...state.character, name: value}}))},
+                                autoFocus: true,
+                            }),
+                        ]),
+                        e(TableRow, {}, [
+                            e("label", {htmlFor: "newColor"}, "Color: "),
+                            e(TextInput, {
+                                id: "newColor",
+                                type: "color",
+                                value: this.state.character.color,
+                                setValue: (value) => {setState((state) => ({character: {...state.character, color: value}}))},
+                            }),
+                        ]),
+                        e(TableRow, {}, [
+                            e(React.Fragment),
+                            e("button", {action: "submit"}, "Add"),
+                        ]),
                     ]),
                 ]),
-            ])
+            ]) : null,
+            this.state.image._isModalOpen ? e(Modal, {
+                hideModal() {setState((state) => ({image: {...state.image, _isModalOpen: false}}));},
+            }, [
+                e("form", {
+                    onSubmit: (event) => {
+                        event.preventDefault();
+                        const {image} = this.state;
+
+                        // Load the image locally to figure out its width and height
+                        const img = new Image();
+                        img.onload = () => {
+                            socket.send({type: "image.new",
+                                ...image,
+                                width: img.width,
+                                height: img.height,
+                            });
+                        };
+                        img.src = image.url;
+
+                        setState((state) => ({image: {...state.image, _isModalOpen: false}}));
+                    },
+                }, [
+                    e("table", {}, [
+                        e(TableRow, {}, [
+                            e("label", {htmlFor: "bgUrl"}, "Url:"),
+                            e(TextInput, {
+                                id: "bgUrl",
+                                value: this.state.image.url,
+                                setValue: (value) => {setState((state) => ({image: {...state.image, url: value}}))},
+                                autoFocus: true,
+                            }),
+                        ]),
+                        e(TableRow, {}, [
+                            e(React.Fragment),
+                            e("button", {action: "submit"}, "Add"),
+                        ]),
+                    ]),
+                ]),
+            ]) : null,
         ]);
     }
 }
