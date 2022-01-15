@@ -43,11 +43,10 @@ export default class Board extends React.Component {
         this.drag.register(LEFT_BUTTON, this);
         this.drag.register(MIDDLE_BUTTON, this);
 
-        /*document.addEventListener("DOMContentLoaded", () => {
-            new ResizeObserver(() => {
-                this.setState({}); // Force re-render
-            }).observe(boardView);
-        });*/
+        this.resizer = new ResizeObserver(() => {
+            this.setState({}); // Force re-render
+        });
+
         socket.registerEvent("error", ({message}) => { console.error(message); });
         socket.registerEvent("character", this.subStateSetter("characters"));
         socket.registerEvent("character.delete", this.subStateDeleter("characters"));
@@ -191,6 +190,15 @@ export default class Board extends React.Component {
         document.socket = socket;
         this.context.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
         this.context.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.parent !== this.props.parent) {
+            if (prevProps.parent)
+                this.resizer.unobserve(prevProps.parent);
+            if (this.props.parent)
+                this.resizer.observe(this.props.parent);
+        }
     }
 
     render() {

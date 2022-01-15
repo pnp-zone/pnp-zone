@@ -10,17 +10,11 @@ const e = React.createElement;
 function Main(props) {
     const {bbb, boards, isModerator} = props;
 
-    const [boardView, setBoardView] = React.useState(null);
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
     const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
 
-    const ref = React.useRef();
-    React.useEffect(() => {
-        if (boardView === null) {
-            setBoardView(ref.current);
-        }
-    });
+    const boardView = React.useRef();
 
     const bbbDomain = bbb !== null ? bbb.match(/https?:\/\/[^/]+/)[0] : null
 
@@ -31,9 +25,9 @@ function Main(props) {
             e("div", {
                 id: "board-view",
                 key: "board",
-                ref,
+                ref: boardView,
             }, [
-                e(Board, {parent: boardView}),
+                e(Board, {parent: boardView.current}),
             ]),
             isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {
@@ -68,7 +62,7 @@ function Main(props) {
                             width: 24,
                             height: 24,
                         }),
-                        e(Tiles, {board: boardView})
+                        e(Tiles, {board: boardView.current})
                     ],
                     [
                         "Board",

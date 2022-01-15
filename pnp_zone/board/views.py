@@ -4,7 +4,7 @@ import json
 from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 from django.http.response import Http404, HttpResponse, JsonResponse
@@ -59,7 +59,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             # "menu": menu.get(),  # deprecated
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
-            "initial_board": repr(json.dumps(BoardData.get_data(request, room=room.identifier))),
+            "initial_board": repr(json.dumps(BoardData.get_data(request, room=room))),
             "initial_data": repr(json.dumps({
                 "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
                 "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
@@ -72,12 +72,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
 class BoardData(LoginRequiredMixin, View):
 
     @staticmethod
-    def get_data(request, room: str):
-        try:
-            room = Room.objects.get(identifier=room)
-        except Room.DoesNotExist:
-            raise Http404
-
+    def get_data(request, room: Room):
         campaign: CampaignModel = room.campaignmodel_set.first()
         if not campaign.players.filter(user__username=request.user.username).exists() and \
                 not campaign.game_master.filter(user__username=request.user.username).exists():
@@ -103,4 +98,4 @@ class BoardData(LoginRequiredMixin, View):
         }
 
     def get(self, request, *args, room: str = None, **kwargs):
-        return JsonResponse(self.get_data(request, room))
+        return JsonResponse(self.get_data(request, get_object_or_404(Room, identifier=room)))
