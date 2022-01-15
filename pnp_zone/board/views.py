@@ -19,8 +19,10 @@ def bbb_join_link(account: AccountModel, campaign: CampaignModel):
     character = campaign.characters.filter(creator=account).first()
     if character:
         name = character.character_name
-    else:
+    elif account.display_name:
         name = account.display_name
+    else:
+        name = account.user.username
 
     bbb = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
     # TODO: INSECURE AS SHIT
@@ -29,8 +31,8 @@ def bbb_join_link(account: AccountModel, campaign: CampaignModel):
     meeting_id = hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-")
 
     try:
-        bbb.create_meeting(meeting_id, params={"attendeePW": attendee, "moderatorPW": moderator})
-    except Exception:
+        bbb.create_meeting(meeting_id, params={"name": campaign.name, "attendeePW": attendee, "moderatorPW": moderator})
+    except Exception as err:
         pass
 
     is_moderator = account in campaign.game_master.all() or account.user.is_superuser
