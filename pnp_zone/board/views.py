@@ -55,23 +55,10 @@ class BoardView(LoginRequiredMixin, TemplateView):
         if account not in campaign.players.all() and account not in campaign.game_master.all():
             return HttpResponse("You're not allowed in this room")
 
-        try:
-            session = UserSession.objects.get(room=room, user=request.user)
-        except UserSession.DoesNotExist:
-            session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
-
         return render(request, template_name=self.template_name, context={
-            "menu": menu.get(),
-            "room": room,
-            "session": session,
-            "characters": room.character_set.all(),
-            "tiles": room.tile_set.all(),
-            "images": room.image_set.all(),
-            "is_moderator": campaign.game_master.filter(user=request.user).exists() or request.user.is_superuser,
-            "boards": campaign.room.all(),
+            # "menu": menu.get(),  # deprecated
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
-            "bbb_join": bbb_join_link(account, campaign) if settings.BBB_INTEGRATION else "",
             "initial_data": json.dumps(BoardData.get_data(request, room=room.identifier)),
         })
 
@@ -100,6 +87,7 @@ class BoardData(LoginRequiredMixin, View):
             "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
             "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
                     if settings.BBB_INTEGRATION else None),
+            "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
             # Board specific
             "title": room.name,
             "background": room.defaultBackground,
@@ -108,7 +96,6 @@ class BoardData(LoginRequiredMixin, View):
             "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
             "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
             # User specific
-            "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
             "x": session.board_x,
             "y": session.board_y,
             "scale": session.board_scale,
