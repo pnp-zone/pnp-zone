@@ -61,7 +61,6 @@ class BoardView(LoginRequiredMixin, TemplateView):
             session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
 
         return render(request, template_name=self.template_name, context={
-            "title": room.name,
             "menu": menu.get(),
             "room": room,
             "session": session,
@@ -97,17 +96,22 @@ class BoardData(LoginRequiredMixin, View):
             session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
 
         return {
-            "success": True,
+            # Campaign specific
+            "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
+            "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
+                    if settings.BBB_INTEGRATION else None),
+            # Board specific
+            "title": room.name,
+            "background": room.defaultBackground,
+            "border": room.defaultBorder,
+            "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
+            "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
+            "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
+            # User specific
             "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
             "x": session.board_x,
             "y": session.board_y,
             "scale": session.board_scale,
-            "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
-            "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
-            "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
-            "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
-            "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
-                    if settings.BBB_INTEGRATION else None),
         }
 
     def get(self, request, *args, room: str = None, **kwargs):

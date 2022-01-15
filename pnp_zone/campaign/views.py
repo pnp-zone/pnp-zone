@@ -16,7 +16,7 @@ class CreateCampaignView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         campaign = CampaignModel.objects.create(
             name=request.POST["name"],
-            lobby=Room.objects.create(name="Lobby")
+            lobby=Room.objects.create(name="Lobby", identifier=uuid.uuid4())
         )
         campaign.game_master.add(AccountModel.objects.get(user__username=request.user))
         campaign.room.add(campaign.lobby)

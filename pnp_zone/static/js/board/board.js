@@ -1,4 +1,5 @@
 import React from "../react.js";
+import ReactDom from "../react-dom.js";
 
 import {Coord, Tile, PatchGrid} from "./grid.js";
 import {addMouseExtension, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
@@ -15,13 +16,18 @@ const e = React.createElement;
 const PATCH_SIZE = 16;
 const SCALE_SPEED = 1.1;
 
+const titleElement = document.querySelector("title");
+
 export default class Board extends React.Component {
     static contextType = DragTarget;
 
     constructor(props) {
         super(props);
-        const { x, y, scale, characters, tiles, images } = this.props;
+        const { title, x, y, scale, characters, tiles, images, background, border } = this.props;
         this.state = {
+            title,
+            background,
+            border,
             x,
             y,
             scale,
@@ -200,6 +206,8 @@ export default class Board extends React.Component {
                 onWheel: this.onWheel.bind(this),
                 onContextMenu: contextMenu.handler(() => []),
             }, [
+                ReactDom.createPortal(this.state.title, titleElement),
+                e("style", {}, `body {background-color: ${this.state.background};`),
                 e(Layer, {
                     id: "background-images",
                     key: "background-images",
@@ -211,6 +219,7 @@ export default class Board extends React.Component {
                     id: "grid",
                     key: "grid",
                     size: PATCH_SIZE,
+                    border: this.state.border,
                     ...this.rect,
                 }),
                 e(Layer, {

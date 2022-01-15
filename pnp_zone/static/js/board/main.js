@@ -8,7 +8,7 @@ import {TabList} from "./tabs.js";
 const e = React.createElement;
 
 function Main(props) {
-    const {x, y, scale, characters, tiles, images, bbb, boards, isModerator} = props;
+    const {x, y, scale, characters, tiles, images, bbb, boards, isModerator, title, background, border} = props;
 
     const [boardView, setBoardView] = React.useState(null);
     const [editMode, setEditMode] = React.useState(false);
@@ -33,7 +33,7 @@ function Main(props) {
                 key: "board",
                 ref,
             }, [
-                e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode}),
+                e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode, title, background, border}),
             ]),
             isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {

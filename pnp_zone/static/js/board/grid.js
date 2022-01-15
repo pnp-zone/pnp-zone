@@ -49,7 +49,7 @@ export function Tile(props) {
 }
 
 export function PatchGrid(props) {
-    const {size, left, right, top, bottom} = props;
+    const {size, border, left, right, top, bottom} = props;
 
     const patches = [];
     const start = Coord.fromPixel(left, top);
@@ -74,7 +74,8 @@ export function PatchGrid(props) {
     }, [
         e(PatchCss, {
             key: "css",
-            size: size,
+            size,
+            border,
         }),
         ...patches.map(([x, y]) => e(HexPatch, {key: `${x} | ${y}`, size, x, y})),
     ]);
@@ -92,9 +93,8 @@ function HexPatch(props) {
 }
 // React.memo wraps a component and only re-renders it when it has actually changed
 const PatchCss = React.memo(function PatchCss(props) {
-    const {size} = props;
+    const {size, border} = props;
     // Generate a svg for the patches
-    const border = "black";
     const borders = [];
     for (let ix = -1; ix < size+1; ix++) {
         for (let iy = -1; iy < size+1; iy++) {
