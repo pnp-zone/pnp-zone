@@ -59,7 +59,13 @@ class BoardView(LoginRequiredMixin, TemplateView):
             # "menu": menu.get(),  # deprecated
             "jitsi_domain": settings.JITSI_DOMAIN if settings.JITSI_INTEGRATION else None,
             "jitsi_room": settings.JITSI_PREFIX + room.identifier if settings.JITSI_INTEGRATION else None,
-            "initial_data": json.dumps(BoardData.get_data(request, room=room.identifier)),
+            "initial_board": repr(json.dumps(BoardData.get_data(request, room=room.identifier))),
+            "initial_data": repr(json.dumps({
+                "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
+                "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
+                        if settings.BBB_INTEGRATION else None),
+                "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
+            })),
         })
 
 
@@ -83,19 +89,14 @@ class BoardData(LoginRequiredMixin, View):
             session = UserSession.objects.create(room=room, user=request.user, board_x=0, board_y=0, board_scale=1)
 
         return {
-            # Campaign specific
-            "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
-            "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
-                    if settings.BBB_INTEGRATION else None),
-            "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
-            # Board specific
             "title": room.name,
             "background": room.defaultBackground,
             "border": room.defaultBorder,
             "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
             "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
             "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
-            # User specific
+
+            # User session
             "x": session.board_x,
             "y": session.board_y,
             "scale": session.board_scale,

@@ -3,12 +3,12 @@ import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
 import Moderator, {BoardSwitch, Tiles} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
-import DragTarget, {DragController} from "./drag.js";
+import {DragController} from "./drag.js";
 import {TabList} from "./tabs.js";
 const e = React.createElement;
 
 function Main(props) {
-    const {x, y, scale, characters, tiles, images, bbb, boards, isModerator, title, background, border} = props;
+    const {bbb, boards, isModerator} = props;
 
     const [boardView, setBoardView] = React.useState(null);
     const [editMode, setEditMode] = React.useState(false);
@@ -33,7 +33,7 @@ function Main(props) {
                 key: "board",
                 ref,
             }, [
-                e(Board, {parent: boardView, x, y, scale, characters, tiles, images, editMode, title, background, border}),
+                e(Board, {parent: boardView}),
             ]),
             isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {

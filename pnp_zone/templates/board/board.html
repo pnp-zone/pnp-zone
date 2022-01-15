@@ -13,7 +13,8 @@
 <div id="root"></div>
 
 <script>
-        document.initialData = JSON.parse({% autoescape off %}'{{ initial_data }}'{% endautoescape %});
+    document.initialData = JSON.parse({{ initial_data | safe }});
+    document.initialBoard = JSON.parse({{ initial_board | safe }});
 </script>
 <script src="{% static "js/board/main.js" %}" type="module"></script>
 <script>

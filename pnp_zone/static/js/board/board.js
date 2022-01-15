@@ -23,19 +23,21 @@ export default class Board extends React.Component {
 
     constructor(props) {
         super(props);
-        const { title, x, y, scale, characters, tiles, images, background, border } = this.props;
         this.state = {
-            title,
-            background,
-            border,
-            x,
-            y,
-            scale,
-            characters,
-            tiles,
-            images,
+            title: "Loading",
+            background: "white",
+            border: "black",
+            characters: {},
+            tiles: {},
+            images: {},
+            x: 0,
+            y: 0,
+            scale: 1,
+            ...document.initialBoard,
+
             cursors: {},
         };
+        delete document.initialBoard;
 
         this.drag = new Drag();
         this.drag.register(LEFT_BUTTON, this);
