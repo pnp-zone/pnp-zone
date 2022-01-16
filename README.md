@@ -10,8 +10,6 @@ To workaround this issue (requires access to the bbb server):
  ```bash
 sed -E '8i\                        proxy_cookie_path \/ "\/; secure; SameSite=none";' /etc/bigbluebutton/nginx/web.nginx
 ```
-    proxy_redirect     default;
-    proxy_cookie_path / "/; secure; SameSite=none";
 
 ### Arch
 
