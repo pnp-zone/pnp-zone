@@ -8,7 +8,7 @@ As of the "new" policies from Firefox, Chromium and Safari, Cookies with no `Sam
 
 To workaround this issue (requires access to the bbb server):
  ```bash
-sed -E '8i\                        proxy_cookie_path \/ "\/; secure; SameSite=none";' /etc/bigbluebutton/nginx/web.nginx
+sed -iE '8i\                        proxy_cookie_path \/ "\/; secure; SameSite=none";' /etc/bigbluebutton/nginx/web.nginx
 ```
 
 ### Arch
