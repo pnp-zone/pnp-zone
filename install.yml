@@ -27,6 +27,12 @@
         chdir: "{{home}}"
         requirements: "repo/requirements.txt"
         virtualenv: venv
+    - name: Move default settings
+      ansible.builtin.copy:
+        src: "{{home}}/repo/pnp_zone/pnp_zone/settings.py"
+        dest: /etc/pnp-zone/settings.py
+        remote_src: yes
+        force: no
     - name: Link settings
       ansible.builtin.file:
         src: /etc/pnp-zone/settings.py
@@ -61,6 +67,16 @@
         src: /lib/systemd/system/pnp-zone.service
         dest: /etc/systemd/system/multi-user.target.wants/pnp-zone.service
         state: link
+    - name: Change ownership of home
+      ansible.builtin.file:
+        owner: "{{user}}"
+        path: "{{home}}"
+        recurse: yes
+    - name: Change ownership of /var/www
+      ansible.builtin.file:
+        owner: www-data
+        path: /var/www
+        recurse: yes
     - name: Start socket
       ansible.builtin.systemd:
         name: pnp-zone.socket

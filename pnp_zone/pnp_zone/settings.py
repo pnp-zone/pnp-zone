@@ -146,6 +146,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     "static"
 ]
+STATIC_ROOT = '/var/www/static'
 
 # LDAP
 AUTHENTICATION_BACKENDS = [
