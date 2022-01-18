@@ -23,6 +23,7 @@ class ToDict(models.Model):
 class Room(models.Model):
     name = models.CharField(max_length=255)
     identifier = models.CharField(max_length=255, unique=True, default=uuid.uuid4, blank=True)
+    campaign = models.ForeignKey("campaign.CampaignModel", on_delete=models.CASCADE, related_name="rooms")
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
 

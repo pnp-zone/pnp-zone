@@ -1,17 +1,16 @@
 import hashlib
-import uuid
 
 from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import Http404, HttpResponseRedirect, HttpRequest
+from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
 
 from accounts.models import AccountModel
 from board.models import Room
-from campaign.models import CampaignModel
+from campaign.models import CampaignModel, CharacterModel
 
 
 class CreateCampaignView(LoginRequiredMixin, View):
@@ -19,10 +18,10 @@ class CreateCampaignView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
         campaign = CampaignModel.objects.create(
             name=request.POST["name"],
-            lobby=Room.objects.create(name="Lobby", identifier=uuid.uuid4())
         )
-        campaign.game_master.add(AccountModel.objects.get(user__username=request.user))
-        campaign.room.add(campaign.lobby)
+        campaign.lobby = Room.objects.create(name="Lobby", campaign=campaign)
+        campaign.save()
+        campaign.game_master.add(AccountModel.objects.get(user=request.user))
         return redirect(f"/campaign/show/{campaign.id}")
 
 
@@ -52,7 +51,7 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
             "added_gamemasters": campaign.game_master.all(),
             "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
             "not_added_gamemasters": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
-            "boards": campaign.room.all(),
+            "boards": campaign.rooms.all(),
             "lobby": campaign.lobby,
             "bbb": settings.BBB_INTEGRATION,
             "cid": campaign.id,
@@ -62,10 +61,10 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
 class CreateBoardView(LoginRequiredMixin, View):
 
     def post(self, request, cid="", *args, **kwargs):
-        campaign = get_object_or_404(CampaignModel, id=cid)
-
-        room = Room.objects.create(name=request.POST["name"])
-        campaign.room.add(room)
+        Room.objects.create(
+            name=request.POST["name"],
+            campaign=get_object_or_404(CampaignModel, id=cid)
+        )
         return redirect(request.META["HTTP_REFERER"])
 
 

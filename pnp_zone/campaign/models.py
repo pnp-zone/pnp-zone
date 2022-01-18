@@ -19,8 +19,7 @@ class CharacterModel(models.Model):
 
 class CampaignModel(models.Model):
     name = CharField(default="", max_length=255)
-    room = ManyToManyField(Room, blank=True)
-    lobby = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="+")
+    lobby = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="+", null=True, blank=True)
     players = ManyToManyField(AccountModel, blank=True, related_name="campaign_players")
     game_master = ManyToManyField(AccountModel, related_name="campaign_gm")
     characters = ManyToManyField(CharacterModel, blank=True)
