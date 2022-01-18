@@ -1,7 +1,5 @@
-import hashlib
 import json
 
-from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, get_object_or_404
@@ -11,32 +9,8 @@ from django.http.response import Http404, HttpResponse, JsonResponse
 
 from board.models import Room, UserSession
 from campaign.models import CampaignModel
-from pnp_zone import menu
+from campaign.views import JoinBBBView
 from accounts.models import AccountModel
-
-
-def bbb_join_link(account: AccountModel, campaign: CampaignModel):
-    character = campaign.characters.filter(creator=account).first()
-    if character:
-        name = character.character_name
-    elif account.display_name:
-        name = account.display_name
-    else:
-        name = account.user.username
-
-    bbb = BigBlueButton(settings.BBB_HOST, settings.BBB_SECRET)
-    # TODO: INSECURE AS SHIT
-    attendee = hashlib.md5((campaign.name + "mod").encode("utf-8")).hexdigest().replace("&", "-")
-    moderator = hashlib.md5((campaign.name + "att").encode("utf-8")).hexdigest().replace("&", "-")
-    meeting_id = hashlib.md5(campaign.name.encode("utf-8")).hexdigest().replace("&", "-")
-
-    try:
-        bbb.create_meeting(meeting_id, params={"name": campaign.name, "attendeePW": attendee, "moderatorPW": moderator})
-    except Exception as err:
-        pass
-
-    is_moderator = account in campaign.game_master.all() or account.user.is_superuser
-    return bbb.get_join_meeting_url(name, meeting_id, moderator if is_moderator else attendee)
 
 
 class BoardView(LoginRequiredMixin, TemplateView):
@@ -44,7 +18,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         room = kwargs["room"]
-        account = AccountModel.objects.get(user=request.user)
+        account = AccountModel.objects.select_related("user").get(user=request.user)
 
         try:
             room = Room.objects.get(identifier=room)
@@ -62,8 +36,7 @@ class BoardView(LoginRequiredMixin, TemplateView):
             "initial_board": repr(json.dumps(BoardData.get_data(request, room=room))),
             "initial_data": repr(json.dumps({
                 "boards": dict((b.identifier, b.name) for b in campaign.room.all()),
-                "bbb": (bbb_join_link(AccountModel.objects.get(user=request.user), campaign)
-                        if settings.BBB_INTEGRATION else None),
+                "bbb": (JoinBBBView.get_link(campaign, account) if settings.BBB_INTEGRATION else None),
                 "isModerator": request.user.is_superuser or campaign.game_master.filter(user=request.user).exists(),
             })),
         })

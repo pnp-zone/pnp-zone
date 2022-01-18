@@ -248,11 +248,6 @@ select {
     margin-bottom: 2rem;
 }
 
-.campaignLink {
-    text-decoration: none;
-    color: white;
-}
-
 .campaignItem {
     display: flex;
     justify-content: center;
@@ -264,7 +259,12 @@ select {
     height: 40%;
 }
 
-.campaignItem:hover {
+a.campaignItem, .campaignLink {
+    text-decoration: none;
+    color: white;
+}
+
+a.campaignItem:hover {
     background-color: #205067;
     cursor: pointer;
 }

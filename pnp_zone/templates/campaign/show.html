@@ -1,43 +1,57 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block body %}
+
+<div class="campaignRow">
+    <a class="campaignItem" href="{{ lobby.url }}">Enter board</a>
+    {% if bbb %}
+        <a class="campaignItem" href="/campaign/show/{{ cid }}/joinBBB">Just BBB</a>
+    {% endif %}
+</div>
+
 <h2>Players</h2>
 <div class="campaignRow">
     {% for player in added_players %}
         <div class="campaignItem">{{ player }}</div>
     {% endfor %}
 </div>
-<form method="post">
-    {% csrf_token %}
-    <label>
-        <select name="invite">
-            {% for player in not_added_players %}
-                <option>{{ player }}</option>
-            {% endfor %}
-        </select>
-    </label>
-    <button>Invite</button>
-</form>
 
-<div class="campaignRow">
-</div>
-<h2>Added Gamemasters</h2>
-{% for gm in added_gamemasters %}
-    {{ gm }}
-{% endfor %}
-<h2>Boards</h2>
-<div class="campaignRow">
-    <form method="POST" action="/campaign/show/{{ cid }}/createBoard">
+{% if is_moderator %}
+    <form method="post">
         {% csrf_token %}
-        <div class="createBoardBox">
-            <h2>Create Board</h2>
-            <label for="board_name">Name:</label>
-            <input id="board_name" name="name" required>
-            <button>Submit</button>
-        </div>
+        <label>
+            <select name="invite">
+                {% for player in not_added_players %}
+                    <option>{{ player }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button>Invite</button>
     </form>
-{% for board in boards %}
-    <div class="campaignItem" onclick="window.location = '/board/{{ board.identifier }}';">{{ board.name }}</div>
-{% endfor %}
+{% endif %}
+
+<h2>Gamemasters</h2>
+<div class="campaignRow">
+    {% for gm in added_gamemasters %}
+        <div class="campaignItem">{{ gm }}</div>
+    {% endfor %}
 </div>
+
+{% if is_moderator %}
+    <h2>Boards</h2>
+    <div class="campaignRow">
+        <form method="POST" action="/campaign/show/{{ cid }}/createBoard">
+            {% csrf_token %}
+            <div class="createBoardBox">
+                <h2>Create Board</h2>
+                <label for="board_name">Name:</label>
+                <input id="board_name" name="name" required>
+                <button>Submit</button>
+            </div>
+        </form>
+    {% for board in boards %}
+            <a class="campaignItem" href="{{ board.url }}">{{ board.name }}</a>
+    {% endfor %}
+    </div>
+{% endif %}
 {% endblock %}

@@ -24,10 +24,10 @@ export function BoardSwitch(props) {
                 margin: 0,
             },
         }, Object.entries(boards).map(([uuid, name]) =>
-            e("div", {
+            e("a", {
                 key: uuid,
                 className: "campaignItem" + (selected === uuid ? " campaignItem-hover" : ""),
-                onClick() { setSelected(selected === uuid ? null : uuid); },
+                onClick(event) { setSelected(selected === uuid ? null : uuid); event.preventDefault(); },
             }, name)
         )),
         e("hr"),

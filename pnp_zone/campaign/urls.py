@@ -8,3 +8,8 @@ urlpatterns = [
     path("show/<str:cid>/createBoard", CreateBoardView.as_view()),
     path("show/<str:cid>", ShowCampaignView.as_view()),
 ]
+
+if settings.BBB_INTEGRATION:
+    urlpatterns.append(
+        path("show/<str:cid>/joinBBB", JoinBBBView.as_view())
+    )
