@@ -64,10 +64,8 @@ class CreateBoardView(LoginRequiredMixin, View):
     def post(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
 
-        room = Room.objects.create(name=request.POST["name"], identifier=uuid.uuid4())
-        room.save()
+        room = Room.objects.create(name=request.POST["name"])
         campaign.room.add(room)
-        campaign.save()
         return redirect(request.META["HTTP_REFERER"])
 
 

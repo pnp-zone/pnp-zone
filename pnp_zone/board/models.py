@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -20,7 +22,7 @@ class ToDict(models.Model):
 
 class Room(models.Model):
     name = models.CharField(max_length=255)
-    identifier = models.CharField(max_length=255, unique=True)
+    identifier = models.CharField(max_length=255, unique=True, default=uuid.uuid4, blank=True)
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
 

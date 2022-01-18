@@ -17,15 +17,10 @@ class BoardView(LoginRequiredMixin, TemplateView):
     template_name = "board/board.html"
 
     def get(self, request, *args, **kwargs):
-        room = kwargs["room"]
+        room = get_object_or_404(Room, identifier=kwargs["room"])
         account = AccountModel.objects.select_related("user").get(user=request.user)
-
-        try:
-            room = Room.objects.get(identifier=room)
-        except Room.DoesNotExist:
-            raise Http404
-
         campaign: CampaignModel = room.campaignmodel_set.first()
+
         if account not in campaign.players.all() and account not in campaign.game_master.all():
             return HttpResponse("You're not allowed in this room")
 
