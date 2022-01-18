@@ -14,7 +14,7 @@ function Main(props) {
     const [activeDrag, setActiveDrag] = React.useState(false);
     const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
 
-    const boardView = React.useRef();
+    const [boardView, setBoardView] = React.useState(null);
 
     const bbbDomain = bbb !== null ? bbb.match(/https?:\/\/[^/]+/)[0] : null
 
@@ -25,9 +25,9 @@ function Main(props) {
             e("div", {
                 id: "board-view",
                 key: "board",
-                ref: boardView,
+                ref(elem) {setBoardView(elem);},
             }, [
-                e(Board, {parent: boardView.current}),
+                e(Board, {parent: boardView}),
             ]),
             isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {
@@ -62,7 +62,7 @@ function Main(props) {
                             width: 24,
                             height: 24,
                         }),
-                        e(Tiles, {board: boardView.current})
+                        e(Tiles, {board: boardView})
                     ],
                     [
                         "Board",
