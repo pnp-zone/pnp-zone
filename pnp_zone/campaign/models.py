@@ -1,3 +1,6 @@
+from typing import Union
+
+from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import CharField, OneToOneField, ManyToManyField
 
@@ -25,8 +28,10 @@ class CampaignModel(models.Model):
     def __str__(self):
         return self.name
 
-    def is_part_of(self, username):
-        if username in [x.user.username for x in self.game_master.all()] or\
-                username in [x.user.username for x in self.players.all()]:
-            return True
-        return False
+    def is_part_of(self, user: Union[User, AccountModel], include_admin: bool = True) -> bool:
+        if isinstance(user, User):
+            user = AccountModel.objects.get(user=user)
+
+        return user in self.game_master.all() \
+            or user in self.players.all() \
+            or (include_admin and user.user.is_superuser)
