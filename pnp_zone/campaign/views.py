@@ -30,19 +30,32 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
+        account = AccountModel.objects.select_related("user").get(user=request.user)
 
         if "invite" in request.POST:
             try:
-                account = AccountModel.objects.get(user__username=request.POST["invite"])  # TODO use id not name!
-                campaign.players.add(account)
+                campaign.players.add(
+                    AccountModel.objects.get(user__username=request.POST["invite"])  # TODO use id not name!
+                )
             except AccountModel.DoesNotExist:
                 pass
+
+        if "character_name" in request.POST:
+            character = campaign.characters.filter(creator=account).first()
+            if character is None:
+                campaign.characters.add(
+                    CharacterModel.objects.create(creator=account, character_name=request.POST["character_name"])
+                )
+            else:
+                character.character_name = request.POST["character_name"]
+                character.save()
 
         return HttpResponseRedirect(request.path)
 
     def get(self, request: HttpRequest, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
-        account = AccountModel.objects.get(user=request.user)
+        account = AccountModel.objects.select_related("user").get(user=request.user)
+        character = campaign.characters.filter(creator=account).first()
 
         return render(request, self.template_name, {
             "title": campaign.name,
@@ -54,6 +67,7 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
             "boards": campaign.rooms.all(),
             "lobby": campaign.lobby,
             "bbb": settings.BBB_INTEGRATION,
+            "character_name": character.character_name if character is not None else "",
             "cid": campaign.id,
         })
 
