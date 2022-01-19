@@ -26,7 +26,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.select_related("campaign").get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user.is_superuser or self.room.campaign.game_master.filter(account__user=self.user).exists()
+        self.is_moderator = self.user.is_superuser or self.room.campaign.game_master.filter(user=self.user).exists()
 
     @property
     def user(self):
