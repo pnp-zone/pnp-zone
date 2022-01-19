@@ -27,7 +27,7 @@ function Main(props) {
                 key: "board",
                 ref(elem) {setBoardView(elem);},
             }, [
-                e(Board, {parent: boardView}),
+                e(Board, {parent: boardView, editMode}),
             ]),
             isModerator ? e(Moderator, {editMode, setEditMode}) : null,
             e(TabList, {
