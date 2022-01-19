@@ -1,6 +1,5 @@
-import uuid
-
 from channels.db import database_sync_to_async
+from django.db.models import Q
 
 from board.models import Character, Tile, UserSession, Image
 
@@ -60,7 +59,6 @@ def new_character(room, user, data):
         raise EventError("This space is already occupied!")
     else:
         return Character.objects.create(
-            identifier=str(uuid.uuid4()),
             name=data["name"],
             x=data["x"],
             y=data["y"],
@@ -108,22 +106,22 @@ def delete_character(room, user, data):
 @moderators_only
 @database_sync_to_async
 def color_tile(room, user, data):
-    # Sort the incoming tiles by already colored or not and prepare the orm objects
-    tiles_ids = []
-    new_tiles = []
+    # Create Qs and Tiles from data
+    q = Q()
+    tiles = []
     for point in data["tiles"]:
-        try:
-            tiles_ids.append(Tile.objects.get(room=room, x=point[0], y=point[1]).id)
-        except Tile.DoesNotExist:
-            new_tiles.append(Tile(
-                room=room, x=point[0], y=point[1], background=data["background"], border=data["border"]
-            ))
-    tiles = Tile.objects.filter(id__in=tiles_ids)
+        q = q | Q(x=point[0], y=point[1])
+        tiles.append(
+            Tile(room=room, x=point[0], y=point[1], background=data["background"], border=data["border"])
+        )
 
-    # Set the new color
-    tiles.update(border=data["border"], background=data["background"])
-    Tile.objects.bulk_create(new_tiles)
+    # Update every existing tile
+    Tile.objects.filter(room=room).filter(q).update(border=data["border"], background=data["background"])
 
+    # Try creating every tile and ignore duplicates
+    Tile.objects.bulk_create(tiles, ignore_conflicts=True)
+
+    # Send change to everyone else
     data["type"] = "tiles"
     return None, data
 
@@ -132,14 +130,10 @@ def color_tile(room, user, data):
 @moderators_only
 @database_sync_to_async
 def erase_tile(room, user, data):
-    tiles_id = []
+    q = Q()
     for point in data["tiles"]:
-        try:
-            tiles_id.append(Tile.objects.get(room=room, x=point[0], y=point[1]).id)
-        except Tile.DoesNotExist:
-            pass
-    Tile.objects.filter(id__in=tiles_id).delete()
-
+        q = q | Q(x=point[0], y=point[1])
+    Tile.objects.filter(room=room).filter(q).delete()
     return None, data
 
 
@@ -152,7 +146,6 @@ def erase_tile(room, user, data):
 def new_image(room, user, data: dict):
     return Image.objects.create(
         room=room,
-        identifier=str(uuid.uuid4()),
         url=data["url"],
         x=data["x"] if "x" in data else 0,
         y=data["y"] if "y" in data else 0,

@@ -40,7 +40,7 @@ class Room(models.Model):
 
 class Character(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255, default="")
+    identifier = models.CharField(max_length=255, default=uuid.uuid4, blank=True)
     name = models.CharField(max_length=255, default="Unnamed")
     x = models.IntegerField()
     y = models.IntegerField()
@@ -61,8 +61,11 @@ class Tile(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     x = models.IntegerField()
     y = models.IntegerField()
-    background = models.CharField(max_length=255, default="none", blank=True)
+    background = models.CharField(max_length=255, default="white", blank=True)
     border = models.CharField(max_length=255, default="black", blank=True)
+
+    class Meta:
+        unique_together = ("room", "x", "y")
 
     def __str__(self):
         return f"{self.x} {self.y}"
@@ -84,12 +87,12 @@ class UserSession(models.Model):
 
 class Image(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255)
-    url = models.CharField(max_length=255)
+    identifier = models.CharField(max_length=255, default=uuid.uuid4, blank=True)
+    url = models.CharField(max_length=255, default="")
     x = models.IntegerField()
     y = models.IntegerField()
-    width = models.IntegerField()
-    height = models.IntegerField()
+    width = models.PositiveIntegerField()
+    height = models.PositiveIntegerField()
     layer = models.CharField(max_length=1, choices=(("T", "Top"), ("M", "Middle"), ("B", "Bottom")), default="B")
 
     class Meta:
@@ -98,6 +101,6 @@ class Image(ToDict):
     def __str__(self):
         return self.url
 
-    def _dict(self, as_tuple=None):
+    def _dict(self):
         return {"type": "image", "id": self.identifier, "url": self.url,
                 "x": self.x, "y": self.y, "width": self.width, "height": self.height, "layer": self.layer}
