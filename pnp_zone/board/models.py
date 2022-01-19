@@ -20,9 +20,13 @@ class ToDict(models.Model):
             return tuple(d for _ in range(as_tuple))
 
 
+def uuid4():
+    return str(uuid.uuid4())
+
+
 class Room(models.Model):
     name = models.CharField(max_length=255)
-    identifier = models.CharField(max_length=255, unique=True, default=uuid.uuid4, blank=True)
+    identifier = models.CharField(max_length=255, unique=True, default=uuid4, blank=True)
     campaign = models.ForeignKey("campaign.CampaignModel", on_delete=models.CASCADE, related_name="rooms")
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
@@ -40,7 +44,7 @@ class Room(models.Model):
 
 class Character(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255, default=uuid.uuid4, blank=True)
+    identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     name = models.CharField(max_length=255, default="Unnamed")
     x = models.IntegerField()
     y = models.IntegerField()
@@ -87,7 +91,7 @@ class UserSession(models.Model):
 
 class Image(ToDict):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    identifier = models.CharField(max_length=255, default=uuid.uuid4, blank=True)
+    identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     url = models.CharField(max_length=255, default="")
     x = models.IntegerField()
     y = models.IntegerField()
