@@ -25,21 +25,8 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         This method is called in `connect` after the scope attribute was set and should
         initialise all attributes which require a database lookup.
         """
-        self.room = Room.objects.get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user.is_superuser
-
-        for query in self.scope["query_string"].split(b"&"):
-            if not query:
-                continue
-
-            key, value = query.split(b"=")
-            if key == b"campaign":
-                try:
-                    campaign = CampaignModel.objects.get(id=int(value))
-                except CampaignModel.DoesNotExist:
-                    continue
-
-                self.is_moderator = self.is_moderator or campaign.game_master.filter(account__user=self.user).exists()
+        self.room = Room.objects.select_related("campaign").get(identifier=self.scope["url_route"]["kwargs"]["room"])
+        self.is_moderator = self.user.is_superuser or self.room.campaign.game_master.filter(account__user=self.user).exists()
 
     @property
     def user(self):
