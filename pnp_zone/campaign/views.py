@@ -76,13 +76,20 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
         })
 
 
-class CreateBoardView(LoginRequiredMixin, View):
+class ManageBoardView(LoginRequiredMixin, View):
 
     def post(self, request, cid="", *args, **kwargs):
-        Room.objects.create(
-            name=request.POST["name"],
-            campaign=get_object_or_404(CampaignModel, id=cid)
-        )
+        campaign = get_object_or_404(CampaignModel, id=cid)
+
+        action = request.POST["action"]
+        name = request.POST.get("name", None)
+        identifier = request.POST.get("identifier", None)
+
+        if action == "create":
+            Room.objects.create(name=name, campaign=campaign)
+        elif action == "delete":
+            Room.objects.filter(identifier=identifier).delete()
+
         return redirect(request.META["HTTP_REFERER"])
 
 
