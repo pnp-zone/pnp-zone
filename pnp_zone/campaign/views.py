@@ -55,6 +55,10 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
     def get(self, request: HttpRequest, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
         account = AccountModel.objects.select_related("user").get(user=request.user)
+        if not campaign.is_part_of(account):
+            return render(
+                request, template_name="error.html", context={"message": "You are not part of this campaign!"}
+            )
         character = campaign.characters.filter(creator=account).first()
 
         return render(request, self.template_name, {
