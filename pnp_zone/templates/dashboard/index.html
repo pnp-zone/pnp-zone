@@ -15,7 +15,7 @@
 {% endblock %}
 
 {% block modals %}
-    <form method="POST" action="/campaign/create">
+    <form class="margin" method="POST" action="/campaign/create">
         {% csrf_token %}
         <h2>Create campaign</h2>
         <label for="campaign_name">Name:</label>

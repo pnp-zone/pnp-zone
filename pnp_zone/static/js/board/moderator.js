@@ -250,6 +250,7 @@ export default class Moderator extends React.PureComponent {
                 hideModal() {setState((state) => ({character: {...state.character, _isModalOpen: false}}));},
             }, [
                 e("form", {
+                    className: "margin",
                     onSubmit: (event) => {
                         event.preventDefault();
                         const {character} = this.state;
@@ -287,6 +288,7 @@ export default class Moderator extends React.PureComponent {
                 hideModal() {setState((state) => ({image: {...state.image, _isModalOpen: false}}));},
             }, [
                 e("form", {
+                    className: "margin",
                     onSubmit: (event) => {
                         event.preventDefault();
                         const {image} = this.state;
