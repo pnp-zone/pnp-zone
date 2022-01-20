@@ -1,6 +1,15 @@
+:root {
+    --text-color: #ffffff;
+    --background-color: #15202b;
+    --highlighted-background-color: #233549;
+    --border-color: #422d78;
+    --highlighted-border-color: #5e42a6;
+    --modal-color: #192734;
+}
+
 body {
-    background: #15202b;
-    color: #ffffff;
+    color: var(--text-color);
+    background-color: var(--background-color);
     margin: 0;
     font-family: Helvetica, "Trebuchet MS", Verdana, sans-serif;
 
@@ -14,21 +23,21 @@ body {
 }
 
 button {
-    color: white;
-    background-color: #15202b;
+    color: var(--text-color);
+    background-color: var(--background-color);
     padding: 0.5em 1em 0.5em 1em;
-    border: 1px solid #422d78;
+    border: 1px solid var(--border-color);
     cursor: pointer;
     border-radius: 5px;
 }
 
 /* if a button is used as a checkbox, the active class should be set when the button is "checked" */
 button.active {
-    background-color: #233549;
+    background-color: var(--highlighted-background-color);
 }
 
 button:hover {
-    background-color: #233549;
+    background-color: var(--highlighted-background-color);
 }
 
 button:active {
@@ -36,15 +45,15 @@ button:active {
 }
 
 input {
-    background-color: #15202b;
+    color: var(--text-color);
+    background-color: var(--background-color);
     padding: 0.5em 1em 0.5em 1em;
-    color: white;
     border-radius: 5px;
-    border: 1px solid #422d78;
+    border: 1px solid var(--border-color);
 }
 
 input:active {
-    border: 1px solid #5e42a6;
+    border: 1px solid var(--highlighted-border-color);
 }
 
 input[type=color] {
@@ -52,11 +61,11 @@ input[type=color] {
 }
 
 select {
-    background-color: #15202b;
+    color: var(--text-color);
+    background-color: var(--background-color);
     padding: 0.5em 1em 0.5em 1em;
-    color: white;
     border-radius: 5px;
-    border: 1px solid #422d78;
+    border: 1px solid var(--border-color);
 }
 
 .content {
@@ -66,10 +75,10 @@ select {
     transition: margin-left 0.5s;
 }
 
-.sidebar {
-  /*background: #192734;*/
+/*.sidebar {
+  /*background: #192734;
     background-color: #192838;
-    color: #ffffff;
+    color: var(--text-color);
     position: fixed;
     width: 18%;
     height: 100vh;
@@ -124,7 +133,7 @@ select {
 }
 
 .nav ul li.active a {
-  color: white;
+  color: var(--text-color);
 }
 
 .nav ul li:not(.active)::after {
@@ -145,7 +154,7 @@ select {
   bottom: 0;
   background-image: -webkit-gradient(linear, left top, right top, from(#5e42a6), to(#8899ac));
   background-image: linear-gradient(to right, #5e42a6, #8899ac);
-}
+}*/
 
 .flex-horizontal {
     display: flex;
@@ -177,7 +186,7 @@ select {
     display: flex;
     flex-direction: column;
     margin-top: 20vh;
-    background-color: #192734;
+    background-color: var(--modal-color);
     padding: 3rem;
     box-shadow: 2px 2px 2px 2px #131313;
 }
@@ -225,7 +234,7 @@ select {
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
-.dashboardContent {
+/*.dashboardContent {
     margin-left: 3vw;
     display: flex;
     flex-direction: column;
@@ -243,7 +252,7 @@ select {
 
 .dashboardBox:hover {
     background-color: #205067;
-}
+}*/
 
 .campaignRow {
     display: flex;
@@ -258,17 +267,17 @@ select {
     align-items: center;
     margin: 1rem;
     padding: 1rem 3rem 1rem 3rem;
-    background-color: #233549;
+    background-color: var(--highlighted-background-color);
     transition: background-color 300ms;
     height: 40%;
 }
 
 a.campaignItem, .campaignLink {
     text-decoration: none;
-    color: white;
+    color: var(--text-color);
 }
 
-a.campaignItem:hover {
+a.campaignItem:hover, .campaignItem-hover {
     background-color: #205067;
     cursor: pointer;
 }
@@ -294,7 +303,7 @@ a.campaignItem:hover {
 }
 
 #modals .modal {
-    background-color: #192734;
+    background-color: var(--modal-color);
 }
 
 #modals .close {
@@ -305,7 +314,7 @@ a.campaignItem:hover {
 
 #modals .close button {
     color: white;
-    border: 1px solid #422d78;
+    border: 1px solid var(--border-color);
     cursor: pointer;
     border-radius: 0;
     background-color: #5e42a6;
@@ -315,7 +324,7 @@ a.campaignItem:hover {
 }
 
 #modals .close button:hover {
-    background-color: #233549;
+    background-color: var(--highlighted-background-color);
 }
 
 #modals .close button:active {

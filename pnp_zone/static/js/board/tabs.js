@@ -49,10 +49,9 @@ export function TabList(props) {
     }, [
         e("div", {
             key: "pages",
-            className: "flex-vertical",
+            className: "flex-vertical moderator",
             style: {
                 height: "100vh",
-                backgroundColor: "#16232d",
                 width,
                 overflow: "hidden",
             },
@@ -62,10 +61,10 @@ export function TabList(props) {
             }, content),
         )),
         e("div", {
+            className: "moderator",
             style: {
                 width: "0.5em",
                 height: "100vh",
-                backgroundColor: "#16232d",
                 cursor: "ew-resize",
             },
             onMouseDown: resize.onMouseDown,

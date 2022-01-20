@@ -29,8 +29,8 @@
     border-radius: 50%;
     display: inline-block;
 }
-#moderator {
-    background: #16232d;
+.moderator {
+    background-color: var(--background-color);
 }
 .moderator-child {
     padding: 1vw;
@@ -55,18 +55,18 @@
 }
 
 #context-menu {
-    color: #ffffff;
+    color: var(--text-color);
     z-index: 999;
     position: absolute;
 }
 #context-menu div {
-    background: #192734;
-    border: 1px solid #422d78;
+    background: var(--modal-color);
+    border: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
 }
 #context-menu hr {
-    color: #422d78;
+    color: var(--border-color);
     margin: 0;
 }
 #context-menu button {
@@ -175,14 +175,14 @@
 /* Tabs */
 .tab {
     cursor: pointer;
-    background-color: #15202b;
+    background-color: var(--background-color);
     padding: 0.5em 1em 0.5em 1em;
     border-radius: 0 10px 10px 0;
     margin-right: 1vw;
     transition: margin-right 300ms, padding-left 300ms;
 }
 .tab:hover {
-    background-color: #233549;
+    background-color: var(--highlighted-background-color);
 }
 .active-tab {
     margin-right: 0;
@@ -191,11 +191,6 @@
 
 iframe {
     border: none;
-}
-
-.campaignItem-hover {
-    background-color: #205067;
-    cursor: pointer;
 }
 
 .hexagon {
