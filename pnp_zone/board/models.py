@@ -30,6 +30,7 @@ class Room(models.Model):
     campaign = models.ForeignKey("campaign.CampaignModel", on_delete=models.CASCADE, related_name="rooms")
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
+    last_modified = models.DateTimeField(auto_now=True)
 
     def get_absolute_url(self):
         return "/board/" + self.identifier

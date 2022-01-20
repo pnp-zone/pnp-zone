@@ -58,6 +58,7 @@ def new_character(room, user, data):
     if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
         raise EventError("This space is already occupied!")
     else:
+        room.save()  # Update last modified
         return Character.objects.create(
             name=data["name"],
             x=data["x"],
@@ -81,6 +82,7 @@ def move_character(room, user, data):
     character.x = data["x"]
     character.y = data["y"]
     character.save()
+    room.save()  # Update last modified
 
     return character.to_dict(as_tuple=2)
 
@@ -95,6 +97,7 @@ def delete_character(room, user, data):
         raise EventError(f"Unknown character")
 
     character.delete()
+    room.save()  # Update last modified
 
     return data, data
 
@@ -121,6 +124,9 @@ def color_tile(room, user, data):
     # Try creating every tile and ignore duplicates
     Tile.objects.bulk_create(tiles, ignore_conflicts=True)
 
+    # Update last modified
+    room.save()
+
     # Send change to everyone else
     data["type"] = "tiles"
     return None, data
@@ -134,6 +140,7 @@ def erase_tile(room, user, data):
     for point in data["tiles"]:
         q = q | Q(x=point[0], y=point[1])
     Tile.objects.filter(room=room).filter(q).delete()
+    room.save()  # Update last modified
     return None, data
 
 
@@ -144,6 +151,7 @@ def erase_tile(room, user, data):
 @moderators_only
 @database_sync_to_async
 def new_image(room, user, data: dict):
+    room.save()  # Update last modified
     return Image.objects.create(
         room=room,
         url=data["url"],
@@ -157,7 +165,7 @@ def new_image(room, user, data: dict):
 @register("image.change_layer")
 @moderators_only
 @database_sync_to_async
-def new_image(room, user, data: dict):
+def change_image_layer(room, user, data: dict):
     try:
         image = Image.objects.get(room=room, identifier=data["id"])
     except Image.DoesNotExist:
@@ -165,6 +173,7 @@ def new_image(room, user, data: dict):
 
     image.layer = data["layer"]
     image.save()
+    room.save()  # Update last modified
 
     return image.to_dict(as_tuple=2)
 
@@ -183,6 +192,7 @@ def move_image(room, user, data):
     image.width = data["width"]
     image.height = data["height"]
     image.save()
+    room.save()  # Update last modified
 
     return None, image.to_dict()
 
@@ -197,5 +207,6 @@ def delete_image(room, user, data):
         raise EventError("Unknown image")
 
     image.delete()
+    room.save()  # Update last modified
 
     return data, data

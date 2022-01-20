@@ -13,8 +13,8 @@ clickable_url.__name__ = "url"
 
 @admin.register(models.Room)
 class RoomAdmin(admin.ModelAdmin):
-    readonly_fields = ("identifier",)
-    list_display = ("__str__", clickable_url)
+    readonly_fields = ("identifier", "last_modified")
+    list_display = ("__str__", clickable_url, "last_modified")
 
 
 @admin.register(models.Image)
