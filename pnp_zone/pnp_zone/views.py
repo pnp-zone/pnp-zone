@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.exceptions import PermissionDenied
+from django.http import Http404
+from django.shortcuts import render
 
 from accounts.models import AccountModel
 
@@ -22,3 +25,15 @@ class Login(LoginView):
 
 class Logout(LogoutView):
     pass
+
+
+def permission_denied(request, exception: PermissionDenied):
+    if exception.args and isinstance(exception.args[0], str):
+        message = exception.args[0]
+    else:
+        message = "Permission Denied"
+    return render(request, template_name="error.html", context={"message": message})
+
+
+def page_not_found(request, exception: Http404):
+    return render(request, template_name="error.html", context={"message": "Page not found"})

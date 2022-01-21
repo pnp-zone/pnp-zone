@@ -2,7 +2,7 @@ from typing import Union
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import CharField, OneToOneField, ManyToManyField
+from django.db.models import CharField, OneToOneField, ManyToManyField, Q, QuerySet
 
 from accounts.models import AccountModel
 from board.models import Room
@@ -27,10 +27,27 @@ class CampaignModel(models.Model):
     def __str__(self):
         return self.name
 
-    def is_part_of(self, user: Union[User, AccountModel], include_admin: bool = True) -> bool:
-        if isinstance(user, User):
-            user = AccountModel.objects.get(user=user)
+    @property
+    def moderators(self) -> QuerySet[AccountModel]:
+        """
+        Return a queryset of this campaign's gamemasters combined with all admins.
 
-        return user in self.game_master.all() \
-            or user in self.players.all() \
-            or (include_admin and user.user.is_superuser)
+        :return: Queryset of moderator accounts
+        :rtype: QuerySet[AccountModel]
+        """
+        gm = Q(campaign_gm=self)
+        admin = Q(user__is_superuser=True)
+        return AccountModel.objects.filter(gm | admin)
+
+    @property
+    def members(self) -> QuerySet[AccountModel]:
+        """
+        Return a queryset of all accounts who should have access to this campaign.
+
+        :return: Queryset of accounts with access
+        :rtype: QuerySet[AccountModel]
+        """
+        gm = Q(campaign_gm=self)
+        player = Q(campaign_players=self)
+        admin = Q(user__is_superuser=True)
+        return AccountModel.objects.filter(gm | player | admin)

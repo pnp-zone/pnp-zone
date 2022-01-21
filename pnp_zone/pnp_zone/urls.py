@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from pnp_zone.views import Login, Logout
+from pnp_zone.views import Login, Logout, permission_denied, page_not_found
 import dashboard.urls
 import board.urls
 import campaign.urls
@@ -36,3 +36,6 @@ if settings.DEBUG:
     urlpatterns.extend(
         staticfiles_urlpatterns()
     )
+
+handler403 = permission_denied
+handler404 = page_not_found

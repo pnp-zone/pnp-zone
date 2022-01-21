@@ -3,6 +3,7 @@ import hashlib
 from bigbluebutton_api_python import BigBlueButton
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, HttpRequest
 from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
@@ -16,9 +17,7 @@ from campaign.models import CampaignModel, CharacterModel
 class CreateCampaignView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
-        campaign = CampaignModel.objects.create(
-            name=request.POST["name"],
-        )
+        campaign = CampaignModel.objects.create(name=request.POST["name"])
         campaign.lobby = Room.objects.create(name="Lobby", campaign=campaign)
         campaign.save()
         campaign.game_master.add(AccountModel.objects.get(user=request.user))
@@ -29,11 +28,11 @@ class DeleteCampaignView(LoginRequiredMixin, View):
 
     def post(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
-        if request.user.is_superuser or campaign.game_master.filter(user=request.user).exists():
+        if campaign.moderators.filter(user=request.user).exists():
             campaign.delete()
             return redirect("/")
         else:
-            return render(request, template_name="error.html", context={"message": "You are not allowed to delete this campaign!"})
+            raise PermissionDenied("You are not allowed to delete this campaign!")
 
 
 class ShowCampaignView(LoginRequiredMixin, TemplateView):
@@ -41,7 +40,10 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
-        account = AccountModel.objects.select_related("user").get(user=request.user)
+        try:
+            account = campaign.members.select_related("user").get(user=request.user)
+        except AccountModel.DoesNotExist:
+            raise PermissionDenied("You are not part of this campaign!")
 
         if "invite" in request.POST:
             try:
@@ -65,16 +67,15 @@ class ShowCampaignView(LoginRequiredMixin, TemplateView):
 
     def get(self, request: HttpRequest, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
-        account = AccountModel.objects.select_related("user").get(user=request.user)
-        if not campaign.is_part_of(account):
-            return render(
-                request, template_name="error.html", context={"message": "You are not part of this campaign!"}
-            )
+        try:
+            account = campaign.members.select_related("user").get(user=request.user)
+        except AccountModel.DoesNotExist:
+            raise PermissionDenied("You are not part of this campaign!")
         character = campaign.characters.filter(creator=account).first()
 
         return render(request, self.template_name, {
             "title": campaign.name,
-            "is_moderator": account in campaign.game_master.all() or request.user.is_superuser,
+            "is_moderator": account in campaign.moderators,
             "added_players": campaign.players.all(),
             "added_gamemasters": campaign.game_master.all(),
             "not_added_players": AccountModel.objects.exclude(user__username__in=[x.user.username for x in campaign.players.all()]),
@@ -91,6 +92,8 @@ class ManageBoardView(LoginRequiredMixin, View):
 
     def post(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
+        if not campaign.moderators.filter(user=request.user).exists():
+            raise PermissionDenied("You are not allowed to modify this campaign's boards")
 
         action = request.POST["action"]
         name = request.POST.get("name", None)
@@ -108,7 +111,10 @@ class JoinBBBView(LoginRequiredMixin, View):
 
     def get(self, request, cid="", *args, **kwargs):
         campaign = get_object_or_404(CampaignModel, id=cid)
-        account = AccountModel.objects.select_related("user").get(user=request.user)
+        try:
+            account = campaign.members.select_related("user").get(user=request.user)
+        except AccountModel.DoesNotExist:
+            raise PermissionDenied("You are not part of this campaign!")
         return HttpResponseRedirect(self.get_link(campaign, account))
 
     @staticmethod
@@ -132,5 +138,4 @@ class JoinBBBView(LoginRequiredMixin, View):
         except Exception as err:
             pass
 
-        is_moderator = account in campaign.game_master.all() or account.user.is_superuser
-        return bbb.get_join_meeting_url(name, meeting_id, moderator if is_moderator else attendee)
+        return bbb.get_join_meeting_url(name, meeting_id, moderator if account in campaign.moderators else attendee)

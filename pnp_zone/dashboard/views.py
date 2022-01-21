@@ -16,5 +16,5 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             {
                 # "menu": menu.get("/"),
                 "title": "here be dragons",
-                "campaign_list": [x for x in campaigns if x.is_part_of(request.user)],
+                "campaign_list": [x for x in campaigns if x.members.filter(user=request.user).exists()],
             })

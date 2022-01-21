@@ -2,6 +2,7 @@ import json
 
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, get_object_or_404
 from django.views import View
 from django.views.generic import TemplateView
@@ -17,11 +18,11 @@ class BoardView(LoginRequiredMixin, TemplateView):
 
     def get(self, request, *args, **kwargs):
         room = get_object_or_404(Room, identifier=kwargs["room"])
-        account = AccountModel.objects.select_related("user").get(user=request.user)
         campaign = room.campaign
-
-        if not campaign.is_part_of(account):
-            return HttpResponse("You're not allowed in this room")
+        try:
+            account = campaign.members.select_related("user").get(user=request.user)
+        except AccountModel.DoesNotExist:
+            raise PermissionDenied("You are not part of this campaign!")
 
         return render(request, template_name=self.template_name, context={
             # "menu": menu.get(),  # deprecated
@@ -41,7 +42,7 @@ class BoardData(LoginRequiredMixin, View):
     @staticmethod
     def get_data(request, room: Room):
         campaign = room.campaign
-        if not campaign.is_part_of(request.user):
+        if not campaign.members.filter(user=request.user).exists():
             return JsonResponse({"success": False})
 
         try:

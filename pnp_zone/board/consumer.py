@@ -17,7 +17,6 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     # but in `connect` via `database_lookups` to wait for the scope attribute
     room: Room
     is_moderator: bool
-    campaign: Optional[CampaignModel] = None
 
     @database_sync_to_async
     def database_lookups(self):
@@ -26,7 +25,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.select_related("campaign").get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.user.is_superuser or self.room.campaign.game_master.filter(user=self.user).exists()
+        self.is_moderator = self.room.campaign.moderators.filter(user=self.user).exists()
 
     @property
     def user(self):
