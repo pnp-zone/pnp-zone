@@ -1,25 +1,34 @@
+from dataclasses import dataclass
+from typing import Any, Callable, Awaitable, Dict
+
 from channels.db import database_sync_to_async
 from django.db.models import Q
 
-from board.models import Character, Tile, UserSession, Image
+from accounts.models import AccountModel
+from board.models import Character, Tile, UserSession, Image, Room
 
-event_handlers = {}
+
+@dataclass
+class Response:
+    sender: Any = None
+    room: Any = None
+    campaign: Any = None
+
+
+EventHandler = Callable[[Room, AccountModel, Dict], Awaitable[Response]]
+event_handlers: Dict[str, EventHandler] = {}
 
 
 def register(event_type: str):
-    def inner_register(function):
-        event_handlers[event_type] = function
-        return function
+    def inner_register(event_handler: EventHandler) -> EventHandler:
+        event_handlers[event_type] = event_handler
+        return event_handler
     return inner_register
 
 
-def moderators_only(func):
+def _moderators_only(func):
     func.moderators_only = True
     return func
-
-
-async def process_event(room, user, data):
-    return None, data
 
 
 class EventError(RuntimeError):
@@ -28,49 +37,54 @@ class EventError(RuntimeError):
 
 @register("session")
 @database_sync_to_async
-def process_update_session(room, user, data):
-    session, _ = UserSession.objects.get_or_create(room=room, user=user)
+def _process_session(room: Room, account: AccountModel, data: Dict):
+    session, _ = UserSession.objects.get_or_create(room=room, user=account.user)
     session.board_x = data["x"]
     session.board_y = data["y"]
     session.board_scale = data["scale"]
     session.save()
-    return None, None
+    return Response()
 
 
 @register("cursor")
-async def process_cursor(room, user, data):
-    return None, dict(data, name=user.get_username())
+async def _process_cursor(room: Room, account: AccountModel, data: Dict):
+    if account.display_name:
+        name = account.display_name
+    else:
+        name = account.user.get_username()
+    return Response(room=dict(data, name=name))
 
 
 @register("switch")
-@moderators_only
-async def process_switch(room, user, data):
-    return data, data
+@_moderators_only
+async def _process_switch(room: Room, account: AccountModel, data: Dict):
+    return Response(sender=data, campaign=data)
 
 
 # --------- #
 # Character #
 # --------- #
 @register("character.new")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def new_character(room, user, data):
+def _process_new_character(room: Room, account: AccountModel, data: Dict):
     if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
         raise EventError("This space is already occupied!")
     else:
         room.save()  # Update last modified
-        return Character.objects.create(
+        character = Character.objects.create(
             name=data["name"],
             x=data["x"],
             y=data["y"],
             color=data["color"],
             room=room
-        ).to_dict(as_tuple=2)
+        )
+        return Response(sender=character.to_dict(), room=character.to_dict())
 
 
 @register("character.move")
 @database_sync_to_async
-def move_character(room, user, data):
+def _process_move_character(room: Room, account: AccountModel, data: Dict):
     if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
         raise EventError("This space is already occupied!")
 
@@ -84,13 +98,13 @@ def move_character(room, user, data):
     character.save()
     room.save()  # Update last modified
 
-    return character.to_dict(as_tuple=2)
+    return Response(sender=character.to_dict(), room=character.to_dict())
 
 
 @register("character.delete")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def delete_character(room, user, data):
+def _process_delete_character(room: Room, account: AccountModel, data: Dict):
     try:
         character = Character.objects.get(identifier=data["id"], room=room)
     except Character.DoesNotExist:
@@ -99,16 +113,16 @@ def delete_character(room, user, data):
     character.delete()
     room.save()  # Update last modified
 
-    return data, data
+    return Response(sender=data, room=data)
 
 
 # ---- #
 # Tile #
 # ---- #
 @register("tiles.color")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def color_tile(room, user, data):
+def _process_color_tile(room: Room, account: AccountModel, data: Dict):
     # Create Qs and Tiles from data
     q = Q()
     tiles = []
@@ -128,44 +142,44 @@ def color_tile(room, user, data):
     room.save()
 
     # Send change to everyone else
-    data["type"] = "tiles"
-    return None, data
+    return Response(room=dict(data, type="tiles"))
 
 
 @register("tiles.delete")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def erase_tile(room, user, data):
+def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
     q = Q()
     for point in data["tiles"]:
         q = q | Q(x=point[0], y=point[1])
     Tile.objects.filter(room=room).filter(q).delete()
     room.save()  # Update last modified
-    return None, data
+    return Response(room=data)
 
 
 # ----- #
 # Image #
 # ----- #
 @register("image.new")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def new_image(room, user, data: dict):
+def _process_new_image(room: Room, account: AccountModel, data: Dict):
     room.save()  # Update last modified
-    return Image.objects.create(
+    image = Image.objects.create(
         room=room,
         url=data["url"],
         x=data["x"] if "x" in data else 0,
         y=data["y"] if "y" in data else 0,
         width=data["width"] if "width" in data else -1,
         height=data["height"] if "height" in data else -1,
-    ).to_dict(as_tuple=2)
+    )
+    return Response(sender=image.to_dict(), room=image.to_dict())
 
 
 @register("image.change_layer")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def change_image_layer(room, user, data: dict):
+def _process_change_image_layer(room: Room, account: AccountModel, data: Dict):
     try:
         image = Image.objects.get(room=room, identifier=data["id"])
     except Image.DoesNotExist:
@@ -175,13 +189,13 @@ def change_image_layer(room, user, data: dict):
     image.save()
     room.save()  # Update last modified
 
-    return image.to_dict(as_tuple=2)
+    return Response(sender=image.to_dict(), room=image.to_dict())
 
 
 @register("image.move")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def move_image(room, user, data):
+def _process_move_image(room: Room, account: AccountModel, data: Dict):
     try:
         image = Image.objects.get(room=room, identifier=data["id"])
     except Image.DoesNotExist:
@@ -194,13 +208,13 @@ def move_image(room, user, data):
     image.save()
     room.save()  # Update last modified
 
-    return None, image.to_dict()
+    return Response(room=image.to_dict())
 
 
 @register("image.delete")
-@moderators_only
+@_moderators_only
 @database_sync_to_async
-def delete_image(room, user, data):
+def _process_delete_image(room: Room, account: AccountModel, data: Dict):
     try:
         image = Image.objects.get(room=room, identifier=data["id"])
     except Image.DoesNotExist:
@@ -209,4 +223,4 @@ def delete_image(room, user, data):
     image.delete()
     room.save()  # Update last modified
 
-    return data, data
+    return Response(sender=data, room=data)

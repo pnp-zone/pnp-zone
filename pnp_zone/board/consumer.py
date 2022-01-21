@@ -1,12 +1,11 @@
-from typing import Optional
-
 from channels.exceptions import InvalidChannelLayerError
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
+from django.core.exceptions import PermissionDenied
 
-from board.events import event_handlers, EventError
+from accounts.models import AccountModel
+from board.events import event_handlers, EventError, Response
 from board.models import Room
-from campaign.models import CampaignModel
 
 
 class BoardConsumer(AsyncJsonWebsocketConsumer):
@@ -16,6 +15,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
     # attributes are not initialized in `__init__`,
     # but in `connect` via `database_lookups` to wait for the scope attribute
     room: Room
+    account: AccountModel
     is_moderator: bool
 
     @database_sync_to_async
@@ -25,11 +25,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
         initialise all attributes which require a database lookup.
         """
         self.room = Room.objects.select_related("campaign").get(identifier=self.scope["url_route"]["kwargs"]["room"])
-        self.is_moderator = self.room.campaign.moderators.filter(user=self.user).exists()
-
-    @property
-    def user(self):
-        return self.scope["user"]
+        try:
+            self.account = self.room.campaign.members.select_related("user").get(user=self.scope["user"])
+        except AccountModel.DoesNotExist:
+            raise PermissionDenied()
+        self.is_moderator = self.account in self.room.campaign.moderators
 
     async def connect(self):
         await super().connect()
@@ -37,11 +37,13 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
         try:
             await self.channel_layer.group_add(self.room.identifier, self.channel_name)
+            await self.channel_layer.group_add(str(self.room.campaign_id), self.channel_name)
         except AttributeError:
             raise InvalidChannelLayerError(
                 "BACKEND is unconfigured or doesn't support groups"
             )
         self.groups.append(self.room.identifier)
+        self.groups.append(str(self.room.campaign_id))
 
     async def receive_json(self, event, **kwargs):
         try:
@@ -57,24 +59,35 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
             # Run the event handler
             try:
-                response_sender, response_others = await handler(self.room, self.user, event)
+                response: Response = await handler(self.room, self.account, event)
             except KeyError as err:
                 raise EventError(f"Missing attribute {err} for event '{event['type']}'")
 
             # Respond to sender
-            if response_sender:
-                await self.send_json(response_sender)
+            if response.sender:
+                await self.send_json(response.sender)
 
-            # Respond to / notify all users
-            if response_others:
+            # Respond to / notify all users in the same room
+            if response.room:
                 await self.channel_layer.group_send(
                     self.room.identifier,
-                    {"type": "board.event", "event": response_others, "consumer": self.channel_name}
+                    {"type": "board.event", "event": response.room, "consumer": self.channel_name}
+                )
+
+            # Respond to / notify all users in the same campaign
+            if response.campaign:
+                await self.channel_layer.group_send(
+                    str(self.room.campaign_id),
+                    {"type": "board.event", "event": response.campaign, "consumer": self.channel_name}
                 )
 
         except EventError as err:
             await self.send_json({"type": "error", "message": str(err)})
 
     async def board_event(self, message):
+        if message["consumer"] != self.channel_name:
+            await self.send_json(message["event"])
+
+    async def campaign_event(self, message):
         if message["consumer"] != self.channel_name:
             await self.send_json(message["event"])

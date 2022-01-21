@@ -4,22 +4,6 @@ from django.db import models
 from django.contrib.auth.models import User
 
 
-class ToDict(models.Model):
-
-    class Meta:
-        abstract = True
-
-    def _dict(self):
-        raise NotImplemented
-
-    def to_dict(self, as_tuple=None):
-        d = self._dict()
-        if as_tuple is None:
-            return d
-        else:
-            return tuple(d for _ in range(as_tuple))
-
-
 def uuid4():
     return str(uuid.uuid4())
 
@@ -43,7 +27,7 @@ class Room(models.Model):
         return self.name
 
 
-class Character(ToDict):
+class Character(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     name = models.CharField(max_length=255, default="Unnamed")
@@ -57,7 +41,7 @@ class Character(ToDict):
     def __str__(self):
         return self.name
 
-    def _dict(self):
+    def to_dict(self):
         return {"type": "character", "id": self.identifier, "name": self.name,
                 "x": self.x, "y": self.y, "color": self.color}
 
@@ -90,7 +74,7 @@ class UserSession(models.Model):
         return f"{self.user} in {self.room}"
 
 
-class Image(ToDict):
+class Image(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     url = models.CharField(max_length=255, default="")
@@ -106,6 +90,6 @@ class Image(ToDict):
     def __str__(self):
         return self.url
 
-    def _dict(self):
+    def to_dict(self):
         return {"type": "image", "id": self.identifier, "url": self.url,
                 "x": self.x, "y": self.y, "width": self.width, "height": self.height, "layer": self.layer}
