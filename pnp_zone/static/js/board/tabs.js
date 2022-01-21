@@ -39,43 +39,32 @@ export function TabList(props) {
     }, [setWidth]);
 
     return e("div", {
-        className: "flex-horizontal",
+        className: "flex-horizontal side-menu",
         style: {
-            position: "fixed",
+            "--width": width,
             left: open === -1 ? `calc(-${width} - 0.5em)` : "0",
-            transition: "left 0.5s",
         },
         ...leftProps,
     }, [
         e("div", {
             key: "pages",
-            className: "flex-vertical moderator",
-            style: {
-                height: "100vh",
-                width,
-                overflow: "hidden",
-            },
+            className: "flex-vertical pages",
         }, children.map(
             ([tab, content], index) => e(Page, {
                 isOpen: open === index
             }, content),
         )),
         e("div", {
-            className: "moderator",
-            style: {
-                width: "0.5em",
-                height: "100vh",
-                cursor: "ew-resize",
-            },
+            className: "edge",
             onMouseDown: resize.onMouseDown,
-        }, []),
+        }),
         e("div", {
             key: "tabs",
-            className: "flex-vertical",
+            className: "flex-vertical tabs",
         }, children.map(
             ([tab, content], index) => e(Tab, {
                 isOpen: open === index,
-                open: function () { setOpen(open === index ? -1 : index); },
+                open() { setOpen(open === index ? -1 : index); },
             }, tab)
         )),
     ]);

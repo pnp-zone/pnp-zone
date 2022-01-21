@@ -66,6 +66,8 @@ export class DragController extends React.Component {
 
 let dragged_for_button = {};
 document.addEventListener("mousemove", (event) => {
+    // While holding a mouse button, the browser will fire events even if the cursor is outside the browser window.
+    // Because these events happen outside the rendered html, the target is always the toplevel document object.
     const pressed_buttons = buttons(event);
     for (let button in dragged_for_button) {
         if (pressed_buttons[button] && dragged_for_button[button]) {
