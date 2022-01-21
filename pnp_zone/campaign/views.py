@@ -25,6 +25,17 @@ class CreateCampaignView(LoginRequiredMixin, View):
         return redirect(f"/campaign/show/{campaign.id}")
 
 
+class DeleteCampaignView(LoginRequiredMixin, View):
+
+    def post(self, request, cid="", *args, **kwargs):
+        campaign = get_object_or_404(CampaignModel, id=cid)
+        if request.user.is_superuser or campaign.game_master.filter(user=request.user).exists():
+            campaign.delete()
+            return redirect("/")
+        else:
+            return render(request, template_name="error.html", context={"message": "You are not allowed to delete this campaign!"})
+
+
 class ShowCampaignView(LoginRequiredMixin, TemplateView):
     template_name = "campaign/show.html"
 

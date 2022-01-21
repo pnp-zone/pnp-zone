@@ -74,17 +74,26 @@
                 {% endfor %}
                 </tbody>
                 <tfoot>
-                    <form method="POST" action="/campaign/show/{{ cid }}/boards">
-                        {% csrf_token %}
-                        <input type="hidden" name="action" value="create">
-                        <tr>
+                    <tr>
+                        <form method="POST" action="/campaign/show/{{ cid }}/boards">
+                            {% csrf_token %}
                             <td><input name="name"></td>
-                            <td><td>
+                            <td><input type="hidden" name="action" value="create"></td>
                             <td><button type="submit">New board</button></td>
-                        </tr>
-                    </form>
+                        </form>
+                    </tr>
                 </tfoot>
             </table>
+            <button onclick="showModal(0);">Delete this campaign</button>
         {% endif %}
     </div>
+{% endblock %}
+
+{% block modals %}
+    <form method="POST" action="/campaign/show/{{ cid }}/delete">
+        {% csrf_token %}
+        <h2>Your about to delete your campaign!</h2>
+        <button type="submit">I know</button>
+        <button type="button" onclick="hideModal();">I changed my mind</button>
+    </form>
 {% endblock %}
