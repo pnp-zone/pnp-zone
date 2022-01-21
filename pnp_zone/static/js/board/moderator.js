@@ -297,7 +297,9 @@ export default class Moderator extends React.PureComponent {
                         const img = new Image();
                         img.onload = () => {
                             socket.send({type: "image.new",
-                                ...image,
+                                url: image.url,
+                                x: image.x - img.width/2,
+                                y: image.y - img.height/2,
                                 width: img.width,
                                 height: img.height,
                             });
