@@ -37,7 +37,7 @@ class CampaignModel(models.Model):
         """
         gm = Q(campaign_gm=self)
         admin = Q(user__is_superuser=True)
-        return AccountModel.objects.filter(gm | admin)
+        return AccountModel.objects.filter(gm | admin).distinct()
 
     @property
     def members(self) -> QuerySet[AccountModel]:
@@ -50,4 +50,4 @@ class CampaignModel(models.Model):
         gm = Q(campaign_gm=self)
         player = Q(campaign_players=self)
         admin = Q(user__is_superuser=True)
-        return AccountModel.objects.filter(gm | player | admin)
+        return AccountModel.objects.filter(gm | player | admin).distinct()
