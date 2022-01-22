@@ -11,6 +11,10 @@ class HSV {
         this.alpha = alpha;
     }
 
+    get hsv() {
+        return new HSV(this.hue, this.saturation, this.value, this.alpha);
+    }
+
     get hsl() {
         const lightness = this.value * (1 - this.saturation / 2);
         let saturation = (this.value - lightness) / Math.min(lightness, 1 - lightness);
@@ -38,18 +42,21 @@ class HSL {
         return new HSV(this.hue, saturation, value, this.alpha);
     }
 
+    get hsl() {
+        return new HSL(this.hue, this.saturation, this.lightness, this.alpha);
+    }
+
     get css() {
         return `hsla(${this.hue}, ${this.saturation * 100}%, ${this.lightness * 100}%, ${this.alpha})`;
     }
-    
-    set css(value) {
-        const match = value.match(/hsla\((\d+(?:\.\d+)?), (\d+(?:\.\d+)?)%, (\d+(?:\.\d+)?)%, ([01](?:\.\d+)?)\)/);
-        if (match) {
-            const [_, h, s, l, a] = match;
-            this.hue = parseFloat(h);
-            this.saturation = parseFloat(s) / 100;
-            this.lightness = parseFloat(l) / 100;
-            this.alpha = parseFloat(a);
+}
+
+class Color {
+    static fromCSS(css) {
+        const hsl = css.match(/hsla?\((\d+(?:\.\d+)?), (\d+(?:\.\d+)?)%, (\d+(?:\.\d+)?)%, ([01](?:\.\d+)?)\)/);
+        if (hsl) {
+            const [_, h, s, l, a] = hsl;
+            return new HSL(parseFloat(h), parseFloat(s) / 100, parseFloat(l) / 100, parseFloat(a))
         }
     }
 }
@@ -122,7 +129,7 @@ export class ColorPicker extends React.PureComponent {
     }
 
     render() {
-        this.external.css = this.props.value;
+        this.external = Color.fromCSS(this.props.value).hsl;
         this.internal = this.external.hsv;
         const {hue, saturation, value, alpha} = this.internal;
         const {setHue, setSaturation, setValue, setAlpha} = this;
