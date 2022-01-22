@@ -297,4 +297,16 @@ iframe {
 .color-picker div.preview {
     height: 1.5em;
     margin: 0.5em;
+    background-image:
+            repeating-linear-gradient(45deg, gray 25%, transparent 25%, transparent 75%, gray 75%, gray),
+            repeating-linear-gradient(45deg, gray 25%, lightgray 25%, lightgray 75%, gray 75%, gray);
+    background-position: 0 0, 0.5em 0.5em;
+    background-size: 1em 1em;
+}
+.color-picker div.preview::after {
+    content: "";
+    display: inherit;
+    width: inherit;
+    height: inherit;
+    background-color: inherit;
 }
