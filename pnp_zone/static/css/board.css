@@ -234,3 +234,67 @@ iframe {
 .colorPicker > .hexagon:first-child {--width: inherit;}
 .colorPicker > .hexagon:last-child {--width: var(--inner-width);}
 .colorPicker input[type="color"] { display: none; }
+
+.color-picker {
+    display: inline-flex;
+    --slider-border: 1px;
+    --slider-inner: 1px;
+    --hue: 0;
+    --saturation: 0%;
+    --lightness: 0%;
+}
+.color-picker .slider {
+    position: absolute;
+    width: 0;
+    height: 0;
+    top: 0;
+    left: 0;
+    background-color: black;
+    border: var(--slider-border) solid white;
+    --ratio: 0;
+}
+.color-picker .slider.vertical {
+    width: calc(100% - 2 * var(--slider-border));
+    top: calc(100% * var(--ratio) - var(--slider-border) - var(--slider-inner) / 2);
+    height: var(--slider-inner);
+}
+.color-picker .slider.horizontal {
+    height: calc(100% - 2 * var(--slider-border));
+    left: calc(100% * var(--ratio) - var(--slider-border) - var(--slider-inner) / 2);
+    width: var(--slider-inner);
+}
+.color-picker .plot {
+    position: relative;
+    margin: 0.5em;
+    height: 10em;
+    overflow: hidden;
+}
+.color-picker .plot.sv {
+    width: 10em;
+    background:
+      linear-gradient(to bottom, transparent, rgb(0, 0, 0)),
+      linear-gradient(to left, hsl(var(--hue), 100%, 50%), rgb(255, 255, 255));
+}
+.color-picker .plot.hue {
+    width: 1em;
+    background: linear-gradient(to bottom, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+}
+.color-picker .plot.alpha {
+    width: 1em;
+    background-image:
+            repeating-linear-gradient(45deg, gray 25%, transparent 25%, transparent 75%, gray 75%, gray),
+            repeating-linear-gradient(45deg, gray 25%, lightgray 25%, lightgray 75%, gray 75%, gray);
+    background-position: 0 0, 0.5em 0.5em;
+    background-size: 1em 1em;
+}
+.color-picker .plot.alpha::after {
+    content: "";
+    display: inherit;
+    width: inherit;
+    height: inherit;
+    background: linear-gradient(to bottom, hsl(var(--hue), var(--saturation), var(--lightness)), transparent);
+}
+.color-picker div.preview {
+    height: 1.5em;
+    margin: 0.5em;
+}

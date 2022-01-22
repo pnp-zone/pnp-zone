@@ -6,6 +6,7 @@ import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
 import Modal from "./modal.js";
+import {ColorPicker} from "./forms/colorpicker.js";
 const e = React.createElement;
 
 function TableRow(props) {
@@ -187,6 +188,7 @@ export class Tiles extends React.PureComponent {
                     })
                 ])
             ]),
+            e(ColorPicker),
         ]);
     }
 }
