@@ -41,6 +41,17 @@ class HSL {
     get css() {
         return `hsla(${this.hue}, ${this.saturation * 100}%, ${this.lightness * 100}%, ${this.alpha})`;
     }
+    
+    set css(value) {
+        const match = value.match(/hsla\((\d+(?:\.\d+)?), (\d+(?:\.\d+)?)%, (\d+(?:\.\d+)?)%, ([01](?:\.\d+)?)\)/);
+        if (match) {
+            const [_, h, s, l, a] = match;
+            this.hue = parseFloat(h);
+            this.saturation = parseFloat(s) / 100;
+            this.lightness = parseFloat(l) / 100;
+            this.alpha = parseFloat(a);
+        }
+    }
 }
 
 function clamp(min, value, max) {
@@ -92,45 +103,73 @@ function SliderPlot(props) {
     ]);
 }
 
-export function ColorPicker(props) {
-    const [hue, setHue] = React.useState(0);
-    const [saturation, setSaturation] = React.useState(0);
-    const [value, setValue] = React.useState(0);
-    const [alpha, setAlpha] = React.useState(1);
-    const hsl = new HSV(hue, saturation, value, alpha).hsl
+export class ColorPicker extends React.PureComponent {
 
-    return e("div", {
-        className: "color-picker flex-vertical"
-    }, [
-        e("div", {
-            key: "picker",
-            className: "flex-horizontal",
-            style: {"--hue": hsl.hue, "--saturation": `${hsl.saturation*100}%`, "--lightness": `${hsl.lightness*100}%`},
+    constructor(props) {
+        super(props);
+
+        this.external = new HSL();
+        this.internal = new HSV();
+
+        function set(key, value) {
+            this.internal[key] = value;
+            this.props.setValue(this.internal.css);
+        }
+        this.setHue = set.bind(this, "hue");
+        this.setSaturation = set.bind(this, "saturation");
+        this.setValue = set.bind(this, "value");
+        this.setAlpha = set.bind(this, "alpha");
+    }
+
+    render() {
+        this.external.css = this.props.value;
+        this.internal = this.external.hsv;
+        const {hue, saturation, value, alpha} = this.internal;
+        const {setHue, setSaturation, setValue, setAlpha} = this;
+
+        return e("div", {
+            className: "color-picker flex-vertical"
         }, [
-            e(SliderPlot, {
-                className: "plot sv",
-                ratioX: saturation,
-                setRatioX: setSaturation,
-                ratioY: 1 - value,
-                setRatioY(y) {setValue(1 - y)},
-            }),
-            e(SliderPlot, {
-                className: "plot hue",
-                ratioY: hue / 360,
-                setRatioY(ratio) {setHue(ratio*360)},
-            }),
-            e(SliderPlot, {
-                className: "plot alpha",
-                ratioY: 1 - alpha,
-                setRatioY(ratio) {setAlpha(1 - ratio)},
-            }),
-        ]),
-        e("div", {
-            key: "preview",
-            className: "preview",
-            style: {
-                backgroundColor: hsl.css,
-            },
-        })
-    ]);
+            e("div", {
+                key: "picker",
+                className: "flex-horizontal",
+                style: {
+                    "--hue": hue,
+                    "--saturation": `${this.external.saturation * 100}%`,
+                    "--lightness": `${this.external.lightness * 100}%`
+                },
+            }, [
+                e(SliderPlot, {
+                    className: "plot sv",
+                    ratioX: saturation,
+                    setRatioX: setSaturation,
+                    ratioY: 1 - value,
+                    setRatioY(y) {
+                        setValue(1 - y)
+                    },
+                }),
+                e(SliderPlot, {
+                    className: "plot hue",
+                    ratioY: hue / 360,
+                    setRatioY(ratio) {
+                        setHue(ratio * 360)
+                    },
+                }),
+                e(SliderPlot, {
+                    className: "plot alpha",
+                    ratioY: 1 - alpha,
+                    setRatioY(ratio) {
+                        setAlpha(1 - ratio)
+                    },
+                }),
+            ]),
+            e("div", {
+                key: "preview",
+                className: "preview",
+                style: {
+                    backgroundColor: this.props.value,
+                },
+            })
+        ]);
+    }
 }

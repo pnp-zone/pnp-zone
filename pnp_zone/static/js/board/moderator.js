@@ -66,9 +66,10 @@ export class Tiles extends React.PureComponent {
     constructor(props) {
         super(props);
         this.state = {
-            background: "#FFFFFF",
-            border: "#000000",
+            background: "hsla(0, 0%, 100%, 1)",
+            border: "hsla(0, 0%, 0%, 1)",
             mode: Modes.NONE,
+            colorPicker: "background",
         };
 
         this.toSend = [];
@@ -165,30 +166,29 @@ export class Tiles extends React.PureComponent {
                 key: "colorPicker",
                 className: "colorPicker",
             }, [
-                e("label", {
-                    key: "borderPicker",
+                e("div", {
+                    key: "borderPreview",
                     className: "hexagon",
                     style: {"--color": this.state.border,},
-                }, [
-                    e(TextInput, {
-                        type: "color",
-                        value: this.state.border,
-                        setValue: (value) => {setState({border: value})},
-                    }),
-                ]),
-                e("label", {
-                    key: "backgroundPicker",
+                    onClick() {
+                        setState({colorPicker: "border"});
+                    },
+                }),
+                e("div", {
+                    key: "backgroundPreview",
                     className: "hexagon",
                     style: {"--color": this.state.background,},
-                }, [
-                    e(TextInput, {
-                        type: "color",
-                        value: this.state.background,
-                        setValue: (value) => {setState({background: value})},
-                    })
-                ])
+                    onClick() {
+                        setState({colorPicker: "background"});
+                    },
+                })
             ]),
-            e(ColorPicker),
+            e(ColorPicker, {
+                value: this.state[this.state.colorPicker],
+                setValue(value) {
+                    setState((state) => ({[state.colorPicker]: value}));
+                }
+            }),
         ]);
     }
 }
@@ -203,7 +203,7 @@ export default class Moderator extends React.PureComponent {
                 name: "",
                 x: 0,
                 y: 0,
-                color: "#FF0000",
+                color: "hsla(0, 100%, 50%, 1)",
                 _isModalOpen: false,
             },
             image: {
@@ -270,14 +270,13 @@ export default class Moderator extends React.PureComponent {
                                 autoFocus: true,
                             }),
                         ]),
-                        e(TableRow, {}, [
-                            e("label", {htmlFor: "newColor"}, "Color: "),
-                            e(TextInput, {
-                                id: "newColor",
-                                type: "color",
-                                value: this.state.character.color,
-                                setValue: (value) => {setState((state) => ({character: {...state.character, color: value}}))},
-                            }),
+                        e("tr", {}, [
+                            e("td", {colSpan: 2}, [
+                                e(ColorPicker, {
+                                    value: this.state.character.color,
+                                    setValue: (value) => {setState((state) => ({character: {...state.character, color: value}}))},
+                                }),
+                            ]),
                         ]),
                         e(TableRow, {}, [
                             e(React.Fragment),
