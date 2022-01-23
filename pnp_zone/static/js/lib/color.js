@@ -1,8 +1,29 @@
+/* Useful rounding */
 function round(x, decimals = 0) {
     x *= 10**decimals;
     x = Math.round(x);
     x /= 10**decimals;
     return x;
+}
+
+/* Common code for converting hsv/hsl into rgb */
+function hc2rgb(hue, chroma) {
+    hue = hue / 60;
+    const intermediate = chroma * (1 - Math.abs(hue % 2 - 1))
+    let rgb;
+    if (0 <= hue && hue < 1)
+        rgb = [chroma, intermediate, 0];
+    else if (1 <= hue && hue < 2)
+        rgb = [intermediate, chroma, 0];
+    else if (2 <= hue && hue < 3)
+        rgb = [0, chroma, intermediate];
+    else if (3 <= hue && hue < 4)
+        rgb = [0, intermediate, chroma];
+    else if (4 <= hue && hue < 5)
+        rgb = [intermediate, 0, chroma];
+    else if (5 <= hue && hue < 6)
+        rgb = [chroma, 0, intermediate];
+    return rgb;
 }
 
 export class HSV {
@@ -22,6 +43,16 @@ export class HSV {
         let saturation = (this.value - lightness) / Math.min(lightness, 1 - lightness);
         if (!Number.isFinite(saturation)) saturation = 0;
         return new HSL(this.hue, saturation, lightness, this.alpha);
+    }
+
+    get rgb() {
+        const chroma = this.value * this.saturation;
+        const rgb = hc2rgb(this.hue, chroma);
+        for (let i in rgb) {
+            rgb[i] += this.value - chroma;
+            rgb[i] *= 255;
+        }
+        return new RGB(...rgb, this.alpha);
     }
 
     get css() {
@@ -46,6 +77,16 @@ export class HSL {
 
     get hsl() {
         return new HSL(this.hue, this.saturation, this.lightness, this.alpha);
+    }
+
+    get rgb() {
+        const chroma = (1 - Math.abs(2 * this.lightness - 1)) * this.saturation;
+        const rgb = hc2rgb(this.hue, chroma);
+        for (let i in rgb) {
+            rgb[i] += this.lightness - chroma/2;
+            rgb[i] *= 255;
+        }
+        return new RGB(...rgb, this.alpha);
     }
 
     get css() {
@@ -108,6 +149,7 @@ export class RGB {
     }
 }
 
+/* parseFloat with support for percentages */
 function parseNumber(string) {
     const match = string.trim().match(/(\d*(?:\.\d+)?)(%?)/);
     if (match) {
