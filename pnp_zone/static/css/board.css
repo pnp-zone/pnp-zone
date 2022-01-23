@@ -200,14 +200,29 @@ iframe {
 .hexagon {
     --width: 100px;
     --height: calc(var(--width) * 2 / var(--sqrt3));
-    --color: black;
-	background-color: var(--color);
+    --color: white;
+    --border-width: calc(var(--width) / 50);
+    --border-color: black;
+	background-color: var(--border-color);
 	width: var(--width);
     height: var(--height);
     position: absolute;
     left: calc(50% - 0.5 * var(--width));
     top: calc(50% - 0.5 * var(--height));
     clip-path: polygon(0% 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%);
+}
+.hexagon::after {
+    --inner-width: calc(var(--width) - 2*var(--border-width));
+    --inner-height: calc(var(--inner-width) * 2 / var(--sqrt3));
+    content: "";
+    display: block;
+    background-color: var(--color);
+    width: var(--inner-width);
+    height: var(--inner-height);
+    position: inherit;
+    left: calc(50% - 0.5 * var(--inner-width));
+    top: calc(50% - 0.5 * var(--inner-height));
+    clip-path: inherit;
 }
 
 .colorPicker {
@@ -218,9 +233,15 @@ iframe {
     margin: 5px;
     position: relative;
 }
-.colorPicker > .hexagon:first-child {--width: inherit;}
-.colorPicker > .hexagon:last-child {--width: var(--inner-width);}
-.colorPicker input[type="color"] { display: none; }
+.colorPicker > .hexagon {
+    --border-width: 0;
+}
+.colorPicker > .hexagon:first-child {
+    --width: inherit;
+}
+.colorPicker > .hexagon:last-child {
+    --width: var(--inner-width);
+}
 
 .color-picker {
     display: inline-flex;

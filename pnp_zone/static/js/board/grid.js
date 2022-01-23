@@ -10,12 +10,6 @@ export const TILE_HEIGHT = Math.floor(TILE_HEXAGON.height);
 export const ROW_HEIGHT = Math.floor(TILE_HEXAGON.height - TILE_HEXAGON.b);
 export const BORDER_WIDTH = Math.ceil(TILE_WIDTH / 50);
 
-const OUTER_TILE = {
-    "--width": TILE_WIDTH + "px",
-};
-const INNER_TILE = {
-    "--width": (TILE_WIDTH - 2*BORDER_WIDTH) + "px",
-};
 export function Tile(props) {
     const {x, y, border, background} = props;
     const position = Coord.fromIndex(x, y);
@@ -28,19 +22,12 @@ export function Tile(props) {
         },
     }, [
         e("div", {
-            name: "border",
-            className: "hexagon",
-            style: {
-                "--color": border,
-                ...OUTER_TILE,
-            },
-        }),
-        e("div", {
             name: "background",
             className: "hexagon",
             style: {
                 "--color": background,
-                ...INNER_TILE,
+                "--border-color": border,
+                "--width": TILE_WIDTH + "px",
             },
         }),
     ]);

@@ -13,17 +13,11 @@ const CSS = {
 };
 
 const HEXAGON_WIDTH = 80;
-const BORDER_WIDTH = 2;
+const BORDER_WIDTH = 3;
 
 export default class Character extends React.Component {
 
     static contextType = ContextMenu;
-    static OUTER_HEXAGON = {
-        "--width": HEXAGON_WIDTH + "px",
-    }
-    static INNER_HEXAGON = {
-        "--width": (HEXAGON_WIDTH - 2*BORDER_WIDTH) + "px",
-    }
 
     constructor(props) {
         super(props);
@@ -117,19 +111,13 @@ export default class Character extends React.Component {
             onMouseUp: this.onMouseUp,
         }, [
             e("div", {
-                key: "border",
-                className: "hexagon",
-                style: {
-                    ...this.constructor.OUTER_HEXAGON,
-                    "--color": "black",
-                },
-            }),
-            e("div", {
                 key: "background",
                 className: "hexagon",
                 style: {
-                    ...this.constructor.INNER_HEXAGON,
                     "--color": this.props.color,
+                    "--border-color": "black",
+                    "--width": HEXAGON_WIDTH + "px",
+                    "--border-width": BORDER_WIDTH + "px",
                 },
             }),
             e("p", {key: "name"}, this.props.name),
