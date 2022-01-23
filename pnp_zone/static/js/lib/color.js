@@ -1,3 +1,10 @@
+function round(x, decimals = 0) {
+    x *= 10**decimals;
+    x = Math.round(x);
+    x /= 10**decimals;
+    return x;
+}
+
 export class HSV {
     constructor(hue, saturation, value, alpha = 1) {
         this.hue = hue;
@@ -42,7 +49,7 @@ export class HSL {
     }
 
     get css() {
-        return `hsla(${this.hue}, ${this.saturation * 100}%, ${this.lightness * 100}%, ${this.alpha})`;
+        return `hsla(${round(this.hue)}, ${round(this.saturation * 100, 2)}%, ${round(this.lightness * 100, 2)}%, ${round(this.alpha, 3)})`;
     }
 }
 
@@ -55,18 +62,23 @@ export class RGB {
     }
 
     commonConversion() {
-        const min = Math.min(this.red, this.green, this.blue);
-        const max = Math.max(this.red, this.green, this.blue);
+        const r = this.red / 255;
+        const g = this.green / 255;
+        const b = this.blue / 255;
+        const min = Math.min(r, g, b);
+        const max = Math.max(r, g, b);
         const chroma = max - min;
         let hue;
         if (chroma === 0)
             hue = 0;
-        else if (max === this.red)
-            hue = 60 * (0 + (this.green - this.blue) / chroma);
-        else if (max === this.green)
-            hue = 60 * (2 + (this.blue - this.red) / chroma);
-        else if (max === this.blue)
-            hue = 60 * (4 + (this.red - this.green) / chroma);
+        else if (max === r)
+            hue = 60 * (0 + (g - b) / chroma);
+        else if (max === g)
+            hue = 60 * (2 + (b - r) / chroma);
+        else if (max === b)
+            hue = 60 * (4 + (r - g) / chroma);
+        if (hue < 0)
+            hue += 360;
         return {hue, chroma, value: max};
     }
 
@@ -92,7 +104,7 @@ export class RGB {
     }
 
     get css() {
-        return `rgba(${this.red}, ${this.green}, ${this.blue}, ${this.alpha})`;
+        return `rgba(${round(this.red)}, ${round(this.green)}, ${round(this.blue)}, ${round(this.alpha, 3)})`;
     }
 }
 

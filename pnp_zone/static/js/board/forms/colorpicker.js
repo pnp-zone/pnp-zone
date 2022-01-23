@@ -2,6 +2,7 @@ import React from "../../react.js";
 import {LEFT_BUTTON} from "../../lib/mouse.js";
 import {Drag} from "../drag.js";
 import Color, {HSL, HSV} from "../../lib/color.js";
+import TextInput from "./textinput.js";
 const e = React.createElement;
 
 function clamp(min, value, max) {
@@ -75,7 +76,7 @@ export class ColorPicker extends React.PureComponent {
         this.external = Color.fromCSS(this.props.value).hsl;
         this.internal = this.external.hsv;
         const {hue, saturation, value, alpha} = this.internal;
-        const {setHue, setSaturation, setValue, setAlpha} = this;
+        const {setHue, setSaturation, setValue, setAlpha, props} = this;
 
         return e("div", {
             className: "color-picker flex-vertical"
@@ -112,6 +113,15 @@ export class ColorPicker extends React.PureComponent {
                         setAlpha(1 - ratio)
                     },
                 }),
+                e("div", {className: "flex-vertical"}, [
+                    e(LazyInput, {
+                        value: props.value,
+                        setValue(css) {
+                            const color = Color.fromCSS(css);
+                            if (color) props.setValue(color.hsl.css);
+                        },
+                    }),
+                ]),
             ]),
             e("div", {
                 key: "preview",
@@ -122,4 +132,20 @@ export class ColorPicker extends React.PureComponent {
             })
         ]);
     }
+}
+
+function LazyInput(props) {
+    const {value, setValue} = props;
+    const [v, setV] = React.useState(value);
+    React.useEffect(() => {
+        setV(value);
+    }, [value]);
+    return e("form", {
+        onSubmit(event) {
+            event.preventDefault();
+            setValue(v);
+        },
+    }, [
+        e(TextInput, {value: v, setValue: setV}),
+    ]);
 }
