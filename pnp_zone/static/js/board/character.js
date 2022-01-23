@@ -20,11 +20,9 @@ export default class Character extends React.Component {
     static contextType = ContextMenu;
     static OUTER_HEXAGON = {
         "--width": HEXAGON_WIDTH + "px",
-        "--height": Math.floor(HEXAGON_WIDTH / Math.sqrt(3)) + "px",
     }
     static INNER_HEXAGON = {
         "--width": (HEXAGON_WIDTH - 2*BORDER_WIDTH) + "px",
-        "--height": Math.floor((HEXAGON_WIDTH - 2*BORDER_WIDTH) / Math.sqrt(3)) + "px",
     }
 
     constructor(props) {

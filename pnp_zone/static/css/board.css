@@ -198,29 +198,16 @@ iframe {
 }
 
 .hexagon {
-	--width: 100px;
-    --height: calc(var(--width) / var(--sqrt3));
+    --width: 100px;
+    --height: calc(var(--width) * 2 / var(--sqrt3));
     --color: black;
-}
-.hexagon, .hexagon::before, .hexagon::after {
 	background-color: var(--color);
 	width: var(--width);
     height: var(--height);
     position: absolute;
-}
-.hexagon {
     left: calc(50% - 0.5 * var(--width));
     top: calc(50% - 0.5 * var(--height));
-}
-.hexagon::before, .hexagon::after {
-	content: "";
-	display: block;
-}
-.hexagon::before {
-	transform: rotate(120deg);
-}
-.hexagon::after {
-	transform: rotate(-120deg);
+    clip-path: polygon(0% 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%);
 }
 
 .colorPicker {

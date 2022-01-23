@@ -12,11 +12,9 @@ export const BORDER_WIDTH = Math.ceil(TILE_WIDTH / 50);
 
 const OUTER_TILE = {
     "--width": TILE_WIDTH + "px",
-    "--height": Math.floor(TILE_WIDTH / Math.sqrt(3)) + "px",
 };
 const INNER_TILE = {
     "--width": (TILE_WIDTH - 2*BORDER_WIDTH) + "px",
-    "--height": Math.floor((TILE_WIDTH - 2*BORDER_WIDTH) / Math.sqrt(3)) + "px",
 };
 export function Tile(props) {
     const {x, y, border, background} = props;
