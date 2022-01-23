@@ -254,6 +254,9 @@ iframe {
     --hue: 0;
     --saturation: 0%;
     --lightness: 0%;
+    --red: 0;
+    --green: 0;
+    --blue: 0;
 }
 .color-picker .slider {
     position: absolute;
@@ -278,21 +281,26 @@ iframe {
 .color-picker .plot {
     position: relative;
     margin: 0.5em;
-    height: 10em;
+    width: 1em;
+    height: 1em;
     overflow: hidden;
 }
-.color-picker .plot.sv {
+.color-picker .plot.vertical {
+    height: 10em;
+}
+.color-picker .plot.horizontal {
     width: 10em;
+}
+.color-picker .plot.sv {
     background:
       linear-gradient(to bottom, transparent, rgb(0, 0, 0)),
       linear-gradient(to left, hsl(var(--hue), 100%, 50%), rgb(255, 255, 255));
 }
-.color-picker .plot.hue {
-    width: 1em;
-    background: linear-gradient(to bottom, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
-}
+.color-picker .plot.hue {background: linear-gradient(to bottom, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);}
+.color-picker .plot.red {background: linear-gradient(to right, rgb(0, var(--green), var(--blue)), rgb(255, var(--green), var(--blue)));}
+.color-picker .plot.green {background: linear-gradient(to right, rgb(var(--red), 0, var(--blue)), rgb(var(--red), 255, var(--blue)));}
+.color-picker .plot.blue {background: linear-gradient(to right, rgb(var(--red), var(--green), 0), rgb(var(--red), var(--green), 255));}
 .color-picker .plot.alpha {
-    width: 1em;
     background-image:
             repeating-linear-gradient(45deg, gray 25%, transparent 25%, transparent 75%, gray 75%, gray),
             repeating-linear-gradient(45deg, gray 25%, lightgray 25%, lightgray 75%, gray 75%, gray);

@@ -1,7 +1,7 @@
 import React from "../../react.js";
 import {LEFT_BUTTON} from "../../lib/mouse.js";
 import {Drag} from "../drag.js";
-import Color, {HSL, HSV} from "../../lib/color.js";
+import Color, {HSL, HSV, RGB} from "../../lib/color.js";
 import TextInput from "./textinput.js";
 const e = React.createElement;
 
@@ -39,7 +39,9 @@ function SliderPlot(props) {
     }
 
     return e("div", {
-        className,
+        className: className
+            + (ratioX !== undefined ? " horizontal" : "")
+            + (ratioY !== undefined ? " vertical" : ""),
         ref,
         onMouseDown: drag.onMouseDown,
     }, [
@@ -59,24 +61,36 @@ export class ColorPicker extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.external = new HSL();
-        this.internal = new HSV();
+        this.hsl = new HSL();
+        this.hsv = new HSV();
+        this.rgb = new RGB();
 
-        function set(key, value) {
-            this.internal[key] = value;
-            this.props.setValue(this.internal.css);
+        function setHSV(key, value) {
+            this.hsv[key] = value;
+            this.props.setValue(this.hsv.css);
         }
-        this.setHue = set.bind(this, "hue");
-        this.setSaturation = set.bind(this, "saturation");
-        this.setValue = set.bind(this, "value");
-        this.setAlpha = set.bind(this, "alpha");
+        this.setHue = setHSV.bind(this, "hue");
+        this.setSaturation = setHSV.bind(this, "saturation");
+        this.setValue = setHSV.bind(this, "value");
+        this.setAlpha = setHSV.bind(this, "alpha");
+
+        function setRGB(key, value) {
+            this.rgb[key] = value;
+            this.props.setValue(this.rgb.css);
+        }
+        this.setRed = setRGB.bind(this, "red");
+        this.setGreen = setRGB.bind(this, "green");
+        this.setBlue = setRGB.bind(this, "blue");
     }
 
     render() {
-        this.external = Color.fromCSS(this.props.value).hsl;
-        this.internal = this.external.hsv;
-        const {hue, saturation, value, alpha} = this.internal;
-        const {setHue, setSaturation, setValue, setAlpha, props} = this;
+        const currentColor = Color.fromCSS(this.props.value);
+        this.hsl = currentColor.hsl;
+        this.hsv = this.hsl.hsv;
+        this.rgb = currentColor.rgb;
+        const {hue, saturation, value, alpha} = this.hsv;
+        const {setHue, setSaturation, setValue, setAlpha,
+               props, setRed, setGreen, setBlue} = this;
 
         return e("div", {
             className: "color-picker flex-vertical"
@@ -85,9 +99,12 @@ export class ColorPicker extends React.PureComponent {
                 key: "picker",
                 className: "flex-horizontal",
                 style: {
-                    "--hue": hue,
-                    "--saturation": `${this.external.saturation * 100}%`,
-                    "--lightness": `${this.external.lightness * 100}%`
+                    "--hue": this.hsl.hue,
+                    "--saturation": `${this.hsl.saturation * 100}%`,
+                    "--lightness": `${this.hsl.lightness * 100}%`,
+                    "--red": this.rgb.red,
+                    "--green": this.rgb.green,
+                    "--blue": this.rgb.blue,
                 },
             }, [
                 e(SliderPlot, {
@@ -95,25 +112,34 @@ export class ColorPicker extends React.PureComponent {
                     ratioX: saturation,
                     setRatioX: setSaturation,
                     ratioY: 1 - value,
-                    setRatioY(y) {
-                        setValue(1 - y)
-                    },
+                    setRatioY(y) {setValue(1 - y);},
                 }),
                 e(SliderPlot, {
                     className: "plot hue",
                     ratioY: hue / 360,
-                    setRatioY(ratio) {
-                        setHue(ratio * 360)
-                    },
+                    setRatioY(ratio) {setHue(ratio * 360);},
                 }),
                 e(SliderPlot, {
                     className: "plot alpha",
                     ratioY: 1 - alpha,
-                    setRatioY(ratio) {
-                        setAlpha(1 - ratio)
-                    },
+                    setRatioY(ratio) {setAlpha(1 - ratio);},
                 }),
                 e("div", {className: "flex-vertical"}, [
+                    e(SliderPlot, {
+                        className: "plot red",
+                        ratioX: this.rgb.red / 255,
+                        setRatioX(ratio) {setRed(ratio * 255);},
+                    }),
+                    e(SliderPlot, {
+                        className: "plot green",
+                        ratioX: this.rgb.green / 255,
+                        setRatioX(ratio) {setGreen(ratio * 255);},
+                    }),
+                    e(SliderPlot, {
+                        className: "plot blue",
+                        ratioX: this.rgb.blue / 255,
+                        setRatioX(ratio) {setBlue(ratio * 255);},
+                    }),
                     e(LazyInput, {
                         value: props.value,
                         setValue(css) {
