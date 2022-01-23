@@ -8,13 +8,6 @@ import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;
 
-const CSS = {
-    CHARACTER: "character noselect",
-};
-
-const HEXAGON_WIDTH = 80;
-const BORDER_WIDTH = 3;
-
 export default class Character extends React.Component {
 
     static contextType = ContextMenu;
@@ -99,7 +92,7 @@ export default class Character extends React.Component {
         }
 
         return e("div", {
-            className: CSS.CHARACTER,
+            className: "character noselect",
             style: {
                 left: x + "px",
                 top: y + "px",
@@ -116,8 +109,6 @@ export default class Character extends React.Component {
                 style: {
                     "--color": this.props.color,
                     "--border-color": "black",
-                    "--width": HEXAGON_WIDTH + "px",
-                    "--border-width": BORDER_WIDTH + "px",
                 },
             }),
             e("p", {key: "name"}, this.props.name),

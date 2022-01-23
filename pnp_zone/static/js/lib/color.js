@@ -96,12 +96,73 @@ export class RGB {
     }
 }
 
+function parseNumber(string) {
+    const match = string.trim().match(/(\d*(?:\.\d+)?)(%?)/);
+    if (match) {
+        const [_, number, percent] = match;
+        return parseFloat(number) / (percent ? 100 : 1);
+    } else
+        return NaN;
+}
+
 export default class Color {
+
+    static colorConverter = null;
+
     static fromCSS(css) {
-        const hsl = css.match(/hsla?\((\d+(?:\.\d+)?), (\d+(?:\.\d+)?)%, (\d+(?:\.\d+)?)%, ([01](?:\.\d+)?)\)/);
-        if (hsl) {
-            const [_, h, s, l, a] = hsl;
-            return new HSL(parseFloat(h), parseFloat(s) / 100, parseFloat(l) / 100, parseFloat(a))
+        const functionLike = css.match(/^(\w+)\(([^)]+)\)$/);
+        if (functionLike) {
+            const [_, func, argString] = functionLike;
+
+            const args = argString.split(",").map(parseNumber);
+            if (args.filter(isNaN).length > 0 || args.length < 3 || args.length > 4) return;
+
+            switch (func) {
+                case "hsl":
+                case "hsla":
+                    return new HSL(...args);
+                case "rgb":
+                case "rgba":
+                    return new RGB(...args);
+                case "hsv":
+                case "hsva":
+                    return new HSV(...args);
+            }
+        }
+
+        const hexLike = css.match(/^#?([0-9A-Fa-f]+)$/);
+        if (hexLike) {
+            const [_, digitString] = hexLike;
+
+            let nDigit;
+            if (digitString.length === 3 || digitString.length === 4) nDigit = 1;
+            else if (digitString.length === 6 || digitString.length === 8) nDigit = 2;
+            else return;
+
+            const args = [];
+            for (let i = 0; i < digitString.length; i += nDigit)
+                args.push(parseInt(digitString.substr(i, nDigit), 16) * (nDigit === 1 ? 16 : 1));
+            if (args.length === 4)
+                args[3] /= 255;
+
+            return new RGB(...args);
+        }
+
+        // Slow and dirty
+        const nameLike = css.match(/^(\w+)$/);
+        if (nameLike) {
+            const [_, name] = nameLike;
+            if (Color.colorConverter === null) {
+                Color.colorConverter = document.createElement("div");
+                Color.colorConverter.id = "color-converter";
+                Color.colorConverter.style.display = "none";
+                document.body.append(Color.colorConverter);
+            }
+            Color.colorConverter.style.color = "rgba(0, 0, 0, 0)";
+            Color.colorConverter.style.color = name;
+            const newCss = window.getComputedStyle(Color.colorConverter).color;
+            if (newCss === "rgba(0, 0, 0, 0)" && name !== "transparent") return;
+            else return Color.fromCSS(newCss);
         }
     }
 }

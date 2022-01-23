@@ -83,6 +83,9 @@
     margin: 0;
     text-shadow: 2px 0 0 #000, -2px 0 0 #000, 0 2px 0 #000, 0 -2px 0 #000, 1px 1px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
 }
+.character > .hexagon {
+    transform: scale(0.8);
+}
 
 .hitbox {
     --frameWidth: max(0.01vw, 1px);
@@ -234,7 +237,8 @@ iframe {
     position: relative;
 }
 .colorPicker > .hexagon {
-    --border-width: 0;
+    --border-width: 0px;
+    --border-color: transparent;
 }
 .colorPicker > .hexagon:first-child {
     --width: inherit;

@@ -27,7 +27,6 @@ export function Tile(props) {
             style: {
                 "--color": background,
                 "--border-color": border,
-                "--width": TILE_WIDTH + "px",
             },
         }),
     ]);
