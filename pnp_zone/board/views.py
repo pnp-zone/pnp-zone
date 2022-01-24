@@ -54,9 +54,33 @@ class BoardData(LoginRequiredMixin, View):
             "title": room.name,
             "background": room.defaultBackground,
             "border": room.defaultBorder,
-            "characters": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
-            "tiles": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
-            "images": dict((i.identifier, i.to_dict()) for i in room.image_set.all()),
+            "layers": {
+                "background-images": {
+                    "level": -1,
+                    "type": "image",
+                    "children": dict((i.identifier, i.to_dict()) for i in room.image_set.filter(layer="B")),
+                },
+                "tiles": {
+                    "level": 0,
+                    "type": "tile",
+                    "children": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
+                },
+                "foreground-images": {
+                    "level": 1,
+                    "type": "image",
+                    "children": dict((i.identifier, i.to_dict()) for i in room.image_set.filter(layer="F")),
+                },
+                "characters": {
+                    "level": 2,
+                    "type": "character",
+                    "children": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
+                },
+                "cursors": {
+                    "level": 100,
+                    "type": "cursor",
+                    "children": {},
+                }
+            },
 
             # User session
             "x": session.board_x,

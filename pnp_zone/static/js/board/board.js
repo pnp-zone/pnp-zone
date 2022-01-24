@@ -1,14 +1,11 @@
 import React from "../react.js";
 import ReactDom from "../react-dom.js";
 
-import {Coord, Tile, PatchGrid} from "./grid.js";
+import {Coord, PatchGrid} from "./grid.js";
 import {addMouseExtension, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
 import DragTarget, {Drag} from "./drag.js";
 import socket from "../socket.js";
-import Character from "./character.js";
-import {Cursor} from "./cursors.js";
-import Layer from "./layer.js";
-import Hitbox from "./resizing.js";
+import Layer, {LayerStack} from "./layer.js";
 import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;
@@ -27,15 +24,11 @@ export default class Board extends React.Component {
             title: "Loading",
             background: "white",
             border: "black",
-            characters: {},
-            tiles: {},
-            images: {},
+            layers: {},
             x: 0,
             y: 0,
             scale: 1,
             ...document.initialBoard,
-
-            cursors: {},
         };
         delete document.initialBoard;
 
@@ -48,25 +41,25 @@ export default class Board extends React.Component {
         });
 
         socket.registerEvent("error", ({message}) => { console.error(message); });
-        socket.registerEvent("character", this.subStateSetter("characters"));
-        socket.registerEvent("character.delete", this.subStateDeleter("characters"));
-        socket.registerEvent("image", this.subStateSetter("images"));
-        socket.registerEvent("image.delete", this.subStateDeleter("images"));
+        socket.registerEvent("character", this.layerSetter("characters"));
+        socket.registerEvent("character.delete", this.layerDeleter("characters"));
+        socket.registerEvent("image", this.layerSetter("images"));
+        socket.registerEvent("image.delete", this.layerDeleter("images"));
         socket.registerEvent("tiles", ({tiles, background, border}) => {
             for (let i = 0; i < tiles.length; i++) {
                 const [x, y] = tiles[i];
-                this.state.tiles[`${x} | ${y}`] = {x, y, border, background};
+                this.state.layers.tiles.children[`${x} | ${y}`] = {x, y, border, background};
             }
             this.setState({});
         });
         socket.registerEvent("tiles.delete", ({tiles}) => {
             for (let i = 0; i < tiles.length; i++) {
                 const [x, y] = tiles[i];
-                delete this.state.tiles[`${x} | ${y}`];
+                delete this.state.layers.tiles.children[`${x} | ${y}`];
             }
             this.setState({});
         });
-        socket.registerEvent("cursor", this.subStateSetter("cursors"));
+        socket.registerEvent("cursor", this.layerSetter("cursors"));
         socket.registerEvent("switch", ({url}) => {this.loadFromUrl(url);});
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
@@ -106,10 +99,6 @@ export default class Board extends React.Component {
                     return coord.yIndex;
                 }});
         });
-
-        // TODO
-        // Expose load method for debugging
-        document.loadBoard = this.loadFromUrl.bind(this);
     }
 
     loadFromUrl(url) {
@@ -135,24 +124,39 @@ export default class Board extends React.Component {
         xhr.send();
     }
 
-    subStateSetter(subState, keyFromObj = ({id}) => id) {
+    layerSetter(layer, keyFromObj = ({id}) => id) {
         return function (obj) {
+            const key = keyFromObj(obj);
             this.setState((state) => ({
-                [subState]: {
-                    ...state[subState],
-                    [keyFromObj(obj)]: {
-                        ...state[subState][keyFromObj(obj)],
-                        ...obj
-                    }
-                }
+                layers: {
+                    ...state.layers,
+                    [layer]: {
+                        ...state.layers[layer],
+                        children: {
+                            ...state.layers[layer].children,
+                            [key]: {
+                                ...state.layers[layer].children[key],
+                                ...obj,
+                            }
+                        },
+                    },
+                },
             }));
         }.bind(this);
     }
-    subStateDeleter(subState, keyFromObj = ({id}) => id) {
+    layerDeleter(layer, keyFromObj = ({id}) => id) {
         return function (obj) {
             this.setState((state) => {
-                const {[keyFromObj(obj)]: toBeRemoved, ...toKeep} = state[subState];
-                return {[subState]: toKeep};
+                const {[keyFromObj(obj)]: toBeRemoved, ...toKeep} = state.layers[layer].children;
+                return {
+                    layers: {
+                        ...state.layers,
+                        [layer]: {
+                            ...state.layers[layer],
+                            children: toKeep,
+                        },
+                    },
+                };
             });
         }.bind(this);
     }
@@ -178,7 +182,7 @@ export default class Board extends React.Component {
         }
 
         const factor = newScale / this.state.scale;
-        this.setState((state, props) => ({
+        this.setState((state) => ({
             scale: newScale,
             x: state.x + (event.clientX - rect.x - state.x) - factor*(event.clientX - rect.x - state.x),
             y: state.y + (event.clientY - rect.y - state.y) - factor*(event.clientY - rect.y - state.y),
@@ -202,8 +206,6 @@ export default class Board extends React.Component {
     }
 
     render() {
-        const {editMode} = this.props;
-
         return e(ContextMenu.Consumer, {},
             (contextMenu) => e("div", {
                 style: {
@@ -218,39 +220,18 @@ export default class Board extends React.Component {
             }, [
                 ReactDom.createPortal(this.state.title, titleElement),
                 e("style", {}, `body {background-color: ${this.state.background};`),
-                e(Layer, {
-                    id: "background-images",
-                    key: "background-images",
-                    childrenData: this.state.images,
-                    childrenComponent: Image,
-                    filter: ({layer}) => (layer === "B"),
-                }),
-                e(PatchGrid, {
-                    id: "grid",
-                    key: "grid",
-                    size: PATCH_SIZE,
-                    border: this.state.border,
-                    ...this.rect,
-                }),
-                e(Layer, {
-                    id: "tiles",
-                    key: "tiles",
-                    childrenData: this.state.tiles,
-                    childrenComponent: Tile,
-                }),
-                e(Layer, {
-                    id: "foreground-images",
-                    key: "foreground-images",
-                    childrenData: this.state.images,
-                    childrenComponent: Image,
-                    filter: ({layer}) => (layer !== "B"),
-                }),
-                e(Layer, {
-                    id: "characters",
-                    key: "characters",
-                    childrenData: this.state.characters,
-                    childrenComponent: Character,
-                }),
+                e(LayerStack, {
+                    layers: this.state.layers
+                }, [
+                    e(PatchGrid, {
+                        id: "grid",
+                        key: "grid",
+                        size: PATCH_SIZE,
+                        border: this.state.border,
+                        ...this.rect,
+                    }),
+                ]),
+                /*
                 ...(editMode ? [
                     e(Layer, {
                         id: "background-hitboxes",
@@ -273,12 +254,7 @@ export default class Board extends React.Component {
                         }
                     }),
                 ]: []),
-                e(Layer, {
-                    id: "cursors",
-                    key: "cursors",
-                    childrenData: this.state.cursors,
-                    childrenComponent: Cursor,
-                }),
+                */
             ])
         );
     }
@@ -309,49 +285,4 @@ export default class Board extends React.Component {
     dragEnd(event) {
         document.body.style.cursor = "default";
     }
-}
-
-function ImageHitbox(props) {
-    const {id, x, y, width, height, setImage, layer} = props;
-    const contextMenu = React.useContext(ContextMenu);
-
-    return e(Hitbox, {
-        rect: {x, y, width, height},
-        setRect: (rect) => setImage({id, ...rect}),
-        dragEnd() {
-            socket.send({
-                type: "image.move",
-                id, x, y, width, height,
-            });
-        },
-        onContextMenu: contextMenu.handler(() => {
-            return [
-                e("button", {
-                    onClick: () => {
-                        socket.send({type: "image.change_layer", id, layer: layer === "B" ? "T" : "B"});
-                        contextMenu.close();
-                    },
-                }, layer === "B" ? "Move to foreground" : "Move to background"),
-                e("button", {
-                    onClick: () => {
-                        socket.send({type: "image.delete", id,});
-                        contextMenu.close();
-                    },
-                }, "Delete image"),
-            ];
-        }),
-    });
-}
-
-function Image({url, x, y, width, height}) {
-    return e("img", {
-        src: url,
-        style: {
-            position: "absolute",
-            left: `${x}px`,
-            top: `${y}px`,
-            width: `${width}px`,
-            height: `${height}px`,
-        },
-    });
 }
