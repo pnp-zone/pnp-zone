@@ -8,7 +8,7 @@ from django.views import View
 from django.views.generic import TemplateView
 from django.http.response import HttpResponse, JsonResponse
 
-from board.models import Room, UserSession
+from board.models import Room, UserSession, TileLayer, CharacterLayer, ImageLayer
 from campaign.views import JoinBBBView
 from accounts.models import AccountModel
 
@@ -54,34 +54,16 @@ class BoardData(LoginRequiredMixin, View):
             "title": room.name,
             "background": room.defaultBackground,
             "border": room.defaultBorder,
-            "layers": {
-                "background-images": {
-                    "level": -1,
-                    "type": "image",
-                    "children": dict((i.identifier, i.to_dict()) for i in room.image_set.filter(layer="B")),
-                },
-                "tiles": {
-                    "level": 0,
-                    "type": "tile",
-                    "children": dict((f"{t.x} | {t.y}", {"x": t.x, "y": t.y, "border": t.border, "background": t.background}) for t in room.tile_set.all()),
-                },
-                "foreground-images": {
-                    "level": 1,
-                    "type": "image",
-                    "children": dict((i.identifier, i.to_dict()) for i in room.image_set.filter(layer="F")),
-                },
-                "characters": {
-                    "level": 2,
-                    "type": "character",
-                    "children": dict((c.identifier, c.to_dict()) for c in room.character_set.all()),
-                },
-                "cursors": {
+            "layers": dict(
+                ((layer.identifier, layer.to_dict())
+                 for LayerModel in (TileLayer, ImageLayer, CharacterLayer)
+                 for layer in LayerModel.objects.filter(room=room)),
+                cursors={
                     "level": 100,
                     "type": "cursor",
                     "children": {},
                 }
-            },
-
+            ),
             # User session
             "x": session.board_x,
             "y": session.board_y,

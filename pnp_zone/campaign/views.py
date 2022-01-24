@@ -18,7 +18,7 @@ class CreateCampaignView(LoginRequiredMixin, View):
 
     def post(self, request, *args, **kwargs):
         campaign = CampaignModel.objects.create(name=request.POST["name"])
-        campaign.lobby = Room.objects.create(name="Lobby", campaign=campaign)
+        campaign.lobby = Room.create_with_layers(name="Lobby", campaign=campaign)
         campaign.save()
         campaign.game_master.add(AccountModel.objects.get(user=request.user))
         return redirect(f"/campaign/show/{campaign.id}")
@@ -100,7 +100,7 @@ class ManageBoardView(LoginRequiredMixin, View):
         identifier = request.POST.get("identifier", None)
 
         if action == "create":
-            Room.objects.create(name=name, campaign=campaign)
+            Room.create_with_layers(name=name, campaign=campaign)
         elif action == "delete":
             Room.objects.filter(identifier=identifier).delete()
 

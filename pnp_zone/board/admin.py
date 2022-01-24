@@ -15,13 +15,3 @@ clickable_url.__name__ = "url"
 class RoomAdmin(admin.ModelAdmin):
     readonly_fields = ("identifier", "last_modified")
     list_display = ("__str__", clickable_url, "last_modified")
-
-
-@admin.register(models.Image)
-class ImageAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(models.Tile)
-class TileAdmin(admin.ModelAdmin):
-    list_display = ("room", "x", "y", "border", "background")

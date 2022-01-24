@@ -43,8 +43,8 @@ export default class Board extends React.Component {
         socket.registerEvent("error", ({message}) => { console.error(message); });
         socket.registerEvent("character", this.layerSetter("characters"));
         socket.registerEvent("character.delete", this.layerDeleter("characters"));
-        socket.registerEvent("image", this.layerSetter("images"));
-        socket.registerEvent("image.delete", this.layerDeleter("images"));
+        socket.registerEvent("image", this.layerSetter("background-images"));
+        socket.registerEvent("image.delete", this.layerDeleter("background-images"));
         socket.registerEvent("tiles", ({tiles, background, border}) => {
             for (let i = 0; i < tiles.length; i++) {
                 const [x, y] = tiles[i];

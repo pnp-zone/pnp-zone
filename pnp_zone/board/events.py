@@ -5,7 +5,7 @@ from channels.db import database_sync_to_async
 from django.db.models import Q
 
 from accounts.models import AccountModel
-from board.models import Character, Tile, UserSession, Image, Room
+from board.models import Character, Tile, UserSession, Image, Room, CharacterLayer, TileLayer, ImageLayer
 
 
 @dataclass
@@ -68,7 +68,8 @@ async def _process_switch(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_new_character(room: Room, account: AccountModel, data: Dict):
-    if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
+    layer = CharacterLayer.objects.filter(room=room).first()
+    if layer.children.filter(x=data["x"], y=data["y"]).exists():
         raise EventError("This space is already occupied!")
     else:
         room.save()  # Update last modified
@@ -77,7 +78,7 @@ def _process_new_character(room: Room, account: AccountModel, data: Dict):
             x=data["x"],
             y=data["y"],
             color=data["color"],
-            room=room
+            layer=layer
         )
         return Response(sender=character.to_dict(), room=character.to_dict())
 
@@ -85,11 +86,12 @@ def _process_new_character(room: Room, account: AccountModel, data: Dict):
 @register("character.move")
 @database_sync_to_async
 def _process_move_character(room: Room, account: AccountModel, data: Dict):
-    if room.character_set.filter(x=data["x"], y=data["y"]).count() > 0:
+    layer = CharacterLayer.objects.filter(room=room).first()
+    if layer.children.filter(x=data["x"], y=data["y"]).exists():
         raise EventError("This space is already occupied!")
 
     try:
-        character = Character.objects.get(room=room, identifier=data["id"])
+        character = Character.objects.get(layer=layer, identifier=data["id"])
     except Character.DoesNotExist:
         raise EventError(f"Unknown character")
 
@@ -105,8 +107,9 @@ def _process_move_character(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_character(room: Room, account: AccountModel, data: Dict):
+    layer = CharacterLayer.objects.filter(room=room).first()
     try:
-        character = Character.objects.get(identifier=data["id"], room=room)
+        character = Character.objects.get(identifier=data["id"], layer=layer)
     except Character.DoesNotExist:
         raise EventError(f"Unknown character")
 
@@ -123,17 +126,18 @@ def _process_delete_character(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_color_tile(room: Room, account: AccountModel, data: Dict):
+    layer = TileLayer.objects.filter(room=room).first()
     # Create Qs and Tiles from data
     q = Q()
     tiles = []
     for point in data["tiles"]:
         q = q | Q(x=point[0], y=point[1])
         tiles.append(
-            Tile(room=room, x=point[0], y=point[1], background=data["background"], border=data["border"])
+            Tile(layer=layer, x=point[0], y=point[1], background=data["background"], border=data["border"])
         )
 
     # Update every existing tile
-    Tile.objects.filter(room=room).filter(q).update(border=data["border"], background=data["background"])
+    Tile.objects.filter(layer=layer).filter(q).update(border=data["border"], background=data["background"])
 
     # Try creating every tile and ignore duplicates
     Tile.objects.bulk_create(tiles, ignore_conflicts=True)
@@ -149,10 +153,11 @@ def _process_color_tile(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
+    layer = TileLayer.objects.filter(room=room).first()
     q = Q()
     for point in data["tiles"]:
         q = q | Q(x=point[0], y=point[1])
-    Tile.objects.filter(room=room).filter(q).delete()
+    Tile.objects.filter(layer=layer).filter(q).delete()
     room.save()  # Update last modified
     return Response(room=data)
 
@@ -164,9 +169,10 @@ def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_new_image(room: Room, account: AccountModel, data: Dict):
+    layer = ImageLayer.objects.filter(room=room).first()
     room.save()  # Update last modified
     image = Image.objects.create(
-        room=room,
+        layer=layer,
         url=data["url"],
         x=data["x"] if "x" in data else 0,
         y=data["y"] if "y" in data else 0,
@@ -180,24 +186,16 @@ def _process_new_image(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_change_image_layer(room: Room, account: AccountModel, data: Dict):
-    try:
-        image = Image.objects.get(room=room, identifier=data["id"])
-    except Image.DoesNotExist:
-        raise EventError("Unknown image")
-
-    image.layer = data["layer"]
-    image.save()
-    room.save()  # Update last modified
-
-    return Response(sender=image.to_dict(), room=image.to_dict())
+    raise EventError("Deprecated")
 
 
 @register("image.move")
 @_moderators_only
 @database_sync_to_async
 def _process_move_image(room: Room, account: AccountModel, data: Dict):
+    layer = ImageLayer.objects.filter(room=room).first()
     try:
-        image = Image.objects.get(room=room, identifier=data["id"])
+        image = Image.objects.get(layer=layer, identifier=data["id"])
     except Image.DoesNotExist:
         raise EventError("Unknown image")
 
@@ -215,8 +213,9 @@ def _process_move_image(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_image(room: Room, account: AccountModel, data: Dict):
+    layer = ImageLayer.objects.filter(room=room).first()
     try:
-        image = Image.objects.get(room=room, identifier=data["id"])
+        image = Image.objects.get(layer=layer, identifier=data["id"])
     except Image.DoesNotExist:
         raise EventError("Unknown image")
 
