@@ -109,9 +109,9 @@ export class Tiles extends React.PureComponent {
             // Directly write tile to board
             if (this.state.mode === Modes.PAINT) {
                 const {background, border} = this.state;
-                socket.sendLocally({type: "tiles", tiles: [[x, y]], background, border,});
+                socket.sendLocally({type: "layer.set", layer: "tiles", key: `${x} ${y}`, object: {x, y, background, border}});
             } else if (this.state.mode === Modes.ERASE) {
-                socket.sendLocally({type: "tiles.delete", tiles: [[x, y]],});
+                socket.sendLocally({type: "layer.delete", layer: "tiles", key: `${x} ${y}`});
             }
         }
     }

@@ -70,7 +70,7 @@ class Character(models.Model):
         return self.name
 
     def to_dict(self):
-        return {"type": "character", "id": self.identifier, "name": self.name,
+        return {"id": self.identifier, "name": self.name,
                 "x": self.x, "y": self.y, "color": self.color}
 
 
@@ -133,5 +133,5 @@ class Image(models.Model):
         return self.url
 
     def to_dict(self):
-        return {"type": "image", "id": self.identifier, "url": self.url,
+        return {"id": self.identifier, "url": self.url,
                 "x": self.x, "y": self.y, "width": self.width, "height": self.height}

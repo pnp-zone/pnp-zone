@@ -4,18 +4,8 @@
 
 .board-element {
     position: absolute;
-    z-index: inherit;
     top: 0;
     left: 0;
-}
-#background {
-    z-index: -50;
-}
-#grid {
-    z-index: 0;
-}
-#cursors {
-    z-index: 100;
 }
 .cursor p {
     position: absolute;
@@ -62,7 +52,6 @@
 }
 
 .character {
-    z-index: 50;
     transition-property: left, top;
     transition-duration: 1s;
     position: absolute;

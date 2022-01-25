@@ -41,25 +41,8 @@ export default class Board extends React.Component {
         });
 
         socket.registerEvent("error", ({message}) => { console.error(message); });
-        socket.registerEvent("character", this.layerSetter("characters"));
-        socket.registerEvent("character.delete", this.layerDeleter("characters"));
-        socket.registerEvent("image", this.layerSetter("background-images"));
-        socket.registerEvent("image.delete", this.layerDeleter("background-images"));
-        socket.registerEvent("tiles", ({tiles, background, border}) => {
-            for (let i = 0; i < tiles.length; i++) {
-                const [x, y] = tiles[i];
-                this.state.layers.tiles.children[`${x} | ${y}`] = {x, y, border, background};
-            }
-            this.setState({});
-        });
-        socket.registerEvent("tiles.delete", ({tiles}) => {
-            for (let i = 0; i < tiles.length; i++) {
-                const [x, y] = tiles[i];
-                delete this.state.layers.tiles.children[`${x} | ${y}`];
-            }
-            this.setState({});
-        });
-        socket.registerEvent("cursor", this.layerSetter("cursors"));
+        socket.registerEvent("layer.set", this.layerSetter.bind(this));
+        socket.registerEvent("layer.delete", this.layerDeleter.bind(this));
         socket.registerEvent("switch", ({url}) => {this.loadFromUrl(url);});
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
@@ -124,41 +107,45 @@ export default class Board extends React.Component {
         xhr.send();
     }
 
-    layerSetter(layer, keyFromObj = ({id}) => id) {
-        return function (obj) {
-            const key = keyFromObj(obj);
-            this.setState((state) => ({
+    layerSetter({layer, key, object, objects}) {
+        if (key === undefined && object !== undefined) key = object.id;
+        this.setState((state) => ({
+            layers: {
+                ...state.layers,
+                [layer]: {
+                    ...state.layers[layer],
+                    children: {
+                        ...state.layers[layer].children,
+                        ...(object !== undefined ? {
+                            [key]: {
+                                ...state.layers[layer].children[key],
+                                ...object,
+                            }
+                        } : undefined),
+                        ...objects
+                    },
+                },
+            },
+        }));
+    }
+    layerDeleter({layer, key, object, objects}) {
+        if (key === undefined && object !== undefined) key = object.id;
+        this.setState((state) => {
+            const {...children} = state.layers[layer].children;
+            delete children[key];
+            for (let key in objects) {
+                delete children[key];
+            }
+            return {
                 layers: {
                     ...state.layers,
                     [layer]: {
                         ...state.layers[layer],
-                        children: {
-                            ...state.layers[layer].children,
-                            [key]: {
-                                ...state.layers[layer].children[key],
-                                ...obj,
-                            }
-                        },
+                        children,
                     },
                 },
-            }));
-        }.bind(this);
-    }
-    layerDeleter(layer, keyFromObj = ({id}) => id) {
-        return function (obj) {
-            this.setState((state) => {
-                const {[keyFromObj(obj)]: toBeRemoved, ...toKeep} = state.layers[layer].children;
-                return {
-                    layers: {
-                        ...state.layers,
-                        [layer]: {
-                            ...state.layers[layer],
-                            children: toKeep,
-                        },
-                    },
-                };
-            });
-        }.bind(this);
+            };
+        });
     }
 
     onWheel(event) {

@@ -52,7 +52,9 @@ async def _process_cursor(room: Room, account: AccountModel, data: Dict):
         name = account.display_name
     else:
         name = account.user.get_username()
-    return Response(room=dict(data, name=name))
+    response = {"type": "layer.set", "layer": "cursors", "key": name,
+                "object": {"x": data["x"], "y": data["y"], "name": name}}
+    return Response(room=response)
 
 
 @register("switch")
@@ -80,7 +82,8 @@ def _process_new_character(room: Room, account: AccountModel, data: Dict):
             color=data["color"],
             layer=layer
         )
-        return Response(sender=character.to_dict(), room=character.to_dict())
+        response = {"type": "layer.set", "layer": layer.identifier, "object": character.to_dict()}
+        return Response(sender=response, room=response)
 
 
 @register("character.move")
@@ -100,7 +103,8 @@ def _process_move_character(room: Room, account: AccountModel, data: Dict):
     character.save()
     room.save()  # Update last modified
 
-    return Response(sender=character.to_dict(), room=character.to_dict())
+    response = {"type": "layer.set", "layer": layer.identifier, "object": character.to_dict()}
+    return Response(sender=response, room=response)
 
 
 @register("character.delete")
@@ -116,7 +120,8 @@ def _process_delete_character(room: Room, account: AccountModel, data: Dict):
     character.delete()
     room.save()  # Update last modified
 
-    return Response(sender=data, room=data)
+    response = {"type": "layer.delete", "layer": layer.identifier, "object": character.to_dict()}
+    return Response(sender=response, room=response)
 
 
 # ---- #
@@ -146,7 +151,9 @@ def _process_color_tile(room: Room, account: AccountModel, data: Dict):
     room.save()
 
     # Send change to everyone else
-    return Response(room=dict(data, type="tiles"))
+    response = {"type": "layer.set", "layer": layer.identifier,
+                "objects": dict((tile.identifier, tile.to_dict()) for tile in tiles)}
+    return Response(room=response)
 
 
 @register("tiles.delete")
@@ -159,7 +166,9 @@ def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
         q = q | Q(x=point[0], y=point[1])
     Tile.objects.filter(layer=layer).filter(q).delete()
     room.save()  # Update last modified
-    return Response(room=data)
+    response = {"type": "layer.delete", "layer": layer.identifier,
+                "objects": dict((Tile(x=point[0], y=point[1]).identifier, None) for point in data["tiles"])}
+    return Response(room=response)
 
 
 # ----- #
@@ -179,7 +188,8 @@ def _process_new_image(room: Room, account: AccountModel, data: Dict):
         width=data["width"] if "width" in data else -1,
         height=data["height"] if "height" in data else -1,
     )
-    return Response(sender=image.to_dict(), room=image.to_dict())
+    response = {"type": "layer.set", "layer": layer.identifier, "object": image.to_dict()}
+    return Response(sender=response, room=response)
 
 
 @register("image.change_layer")
@@ -206,7 +216,8 @@ def _process_move_image(room: Room, account: AccountModel, data: Dict):
     image.save()
     room.save()  # Update last modified
 
-    return Response(room=image.to_dict())
+    response = {"type": "layer.set", "layer": layer.identifier, "object": image.to_dict()}
+    return Response(room=response)
 
 
 @register("image.delete")
@@ -222,4 +233,5 @@ def _process_delete_image(room: Room, account: AccountModel, data: Dict):
     image.delete()
     room.save()  # Update last modified
 
+    response = {"type": "layer.delete", "layer": layer.identifier, "object": image.to_dict()}
     return Response(sender=data, room=data)
