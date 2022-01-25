@@ -147,6 +147,19 @@ export class RGB {
     get css() {
         return `rgba(${round(this.red)}, ${round(this.green)}, ${round(this.blue)}, ${round(this.alpha, 3)})`;
     }
+
+    get hex() {
+        function paddedHex(number) {
+            let hex = round(number).toString(16);
+            if (hex.length === 1) hex = "0" + hex;
+            return  hex;
+        }
+
+        let output = ("#" + [this.red, this.green, this.blue].map(paddedHex)).replaceAll(",", "");
+        if (this.alpha < 1) output += paddedHex(this.alpha * 255);
+
+        return output;
+    }
 }
 
 /* parseFloat with support for percentages */

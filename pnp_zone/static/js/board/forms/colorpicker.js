@@ -141,7 +141,7 @@ export class ColorPicker extends React.PureComponent {
                         setRatioX(ratio) {setBlue(ratio * 255);},
                     }),
                     e(LazyInput, {
-                        value: props.value,
+                        value: this.rgb.hex,
                         setValue(css) {
                             const color = Color.fromCSS(css);
                             if (color) props.setValue(color.hsl.css);
