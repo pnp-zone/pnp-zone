@@ -1,7 +1,7 @@
 import React from "../react.js";
 import socket from "../socket.js";
 import {LEFT_BUTTON} from "../lib/mouse.js";
-import DragTarget, {Drag} from "./drag.js";
+import {Drag, GlobalDrag} from "./drag.js";
 import {Coord, Line} from "./grid.js";
 import TextInput from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
@@ -61,7 +61,6 @@ const Modes = {
 };
 
 export class Tiles extends React.PureComponent {
-    static contextType = DragTarget;
 
     constructor(props) {
         super(props);
@@ -134,10 +133,10 @@ export class Tiles extends React.PureComponent {
     componentDidUpdate(prevProps, prevState) {
         if (this.state.mode !== prevState.mode) {
             if (this.state.mode === Modes.NONE) {
-                this.context.removeHandler(this.drag.onMouseDown);
+                GlobalDrag.removeHandler(this.drag.onMouseDown);
                 document.body.style.cursor = "";
             } else {
-                this.context.addHandler(this.drag.onMouseDown);
+                GlobalDrag.addHandler(this.drag.onMouseDown);
                 document.body.style.cursor = "crosshair";
             }
         }

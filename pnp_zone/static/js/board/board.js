@@ -3,7 +3,7 @@ import ReactDom from "../react-dom.js";
 
 import {Coord, PatchGrid} from "./grid.js";
 import {addMouseExtension, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
-import DragTarget, {Drag} from "./drag.js";
+import {Drag, GlobalDrag} from "./drag.js";
 import socket from "../socket.js";
 import Layer, {LayerStack} from "./layer.js";
 import ContextMenu from "./contextmenu.js";
@@ -17,7 +17,7 @@ const SCALE_SPEED = 1.1;
 const titleElement = document.querySelector("title");
 
 export default class Board extends React.Component {
-    static contextType = DragTarget;
+    static contextType = ContextMenu;
 
     constructor(props) {
         super(props);
@@ -50,8 +50,10 @@ export default class Board extends React.Component {
         }.bind(this);
         this.drag.register(LEFT_BUTTON, this.drag);
         this.drag.register(MIDDLE_BUTTON, this.drag);
+        GlobalDrag.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
+        GlobalDrag.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
 
-        this.resizer = new ResizeObserver(function () {this.setState({});});
+        this.resizer = new ResizeObserver(function(){this.setState({});}.bind(this));
 
         socket.registerEvent("error", ({message}) => { console.error(message); });
         socket.registerEvent("layer.set", this.layerSetter.bind(this));
@@ -104,8 +106,6 @@ export default class Board extends React.Component {
     componentDidMount() {
         socket.open();
         document.socket = socket;
-        this.context.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
-        this.context.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
     }
 
     layerSetter({layer, key, object, objects}) {
@@ -183,46 +183,44 @@ export default class Board extends React.Component {
     }
 
     render() {
-        return e(ContextMenu.Consumer, {},
-            (contextMenu) => e("div", {
-                style: {
-                    position: "absolute",
-                    left: `${this.state.x}px`,
-                    top: `${this.state.y}px`,
-                    transform: `scale(${this.state.scale})`,
-                },
-                onMouseDown: this.context.onMouseDown,
-                onWheel: this.onWheel.bind(this),
-                onContextMenu: contextMenu.handler(() => []),
+        return e("div", {
+            style: {
+                position: "absolute",
+                left: `${this.state.x}px`,
+                top: `${this.state.y}px`,
+                transform: `scale(${this.state.scale})`,
+            },
+            onMouseDown: GlobalDrag.onMouseDown,
+            onWheel: this.onWheel.bind(this),
+            onContextMenu: this.context.handler(() => []),
+        }, [
+            ReactDom.createPortal(this.state.title, titleElement),
+            e("style", {}, `body {background-color: ${this.state.background};`),
+            e(LayerStack, {
+                layers: this.state.layers
             }, [
-                ReactDom.createPortal(this.state.title, titleElement),
-                e("style", {}, `body {background-color: ${this.state.background};`),
-                e(LayerStack, {
-                    layers: this.state.layers
-                }, [
-                    e(PatchGrid, {
-                        id: "grid",
-                        key: "grid",
-                        size: PATCH_SIZE,
-                        border: this.state.border,
-                        ...this.rect,
-                    }),
-                ]),
-                ...(this.props.editMode ? [
-                    e(Layer, {
-                        id: "background-hitboxes",
-                        key: "background-hitboxes",
-                        childrenData: this.state.layers["background-images"].children,
-                        childrenComponent: ImageHitbox,
-                        commonProps: {
-                            setImage: (object) => {
-                                this.layerSetter({layer: "background-images", object});
-                            }
+                e(PatchGrid, {
+                    id: "grid",
+                    key: "grid",
+                    size: PATCH_SIZE,
+                    border: this.state.border,
+                    ...this.rect,
+                }),
+            ]),
+            ...(this.props.editMode ? [
+                e(Layer, {
+                    id: "background-hitboxes",
+                    key: "background-hitboxes",
+                    childrenData: this.state.layers["background-images"].children,
+                    childrenComponent: ImageHitbox,
+                    commonProps: {
+                        setImage: (object) => {
+                            this.layerSetter({layer: "background-images", object});
                         }
-                    }),
-                ] : []),
-            ])
-        );
+                    }
+                }),
+            ] : []),
+        ]);
     }
 
     get rect() {

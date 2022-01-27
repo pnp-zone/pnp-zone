@@ -1,45 +1,24 @@
 import {buttons, LEFT_BUTTON, MIDDLE_BUTTON, RIGHT_BUTTON} from "../lib/mouse.js";
-import React from "../react.js";
-const e = React.createElement;
 
-const DragTarget = React.createContext();
-export default DragTarget;
-
-export class DragController extends React.Component {
-
-    constructor(props) {
-        super(props);
-        this.state = {
-            [LEFT_BUTTON]: [],
-            [MIDDLE_BUTTON]: [],
-            [RIGHT_BUTTON]: [],
+export const GlobalDrag = {
+    handlers: {
+        [LEFT_BUTTON]: [],
+        [MIDDLE_BUTTON]: [],
+        [RIGHT_BUTTON]: [],
+    },
+    addHandler(handler, button=LEFT_BUTTON) {
+        GlobalDrag.handlers[button] = [handler, ...GlobalDrag.handlers[button]];
+    },
+    removeHandler(handler, button=LEFT_BUTTON) {
+        GlobalDrag.handlers[button] = GlobalDrag.handlers[button].filter(item => item !== handler);
+    },
+    onMouseDown(event) {
+        const handlers = GlobalDrag.handlers[event.button];
+        if (handlers.length > 0) {
+            handlers[0](event);
         }
-    }
-
-    render() {
-        const {children} = this.props;
-        const addHandler = function (handler, button=LEFT_BUTTON) {
-            this.setState((state) => ({[button]: [handler, ...state[button]]}));
-        }.bind(this);
-        const removeHandler = function (handler, button=LEFT_BUTTON) {
-            this.setState((state) => ({[button]: state[button].filter((item) => item !== handler)}));
-        }.bind(this);
-        const onMouseDown = function (event) {
-            const handlers = this.state[event.button];
-            if (handlers.length > 0) {
-                handlers[0](event);
-            }
-        }.bind(this);
-
-        return e(DragTarget.Provider, {
-            value: {
-                addHandler,
-                removeHandler,
-                onMouseDown,
-            },
-        }, ...children);
-    }
-}
+    },
+};
 
 /*
  * Dragging API
