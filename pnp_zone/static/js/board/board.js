@@ -7,6 +7,7 @@ import DragTarget, {Drag} from "./drag.js";
 import socket from "../socket.js";
 import Layer, {LayerStack} from "./layer.js";
 import ContextMenu from "./contextmenu.js";
+import {ImageHitbox} from "./image.js";
 
 const e = React.createElement;
 
@@ -218,30 +219,19 @@ export default class Board extends React.Component {
                         ...this.rect,
                     }),
                 ]),
-                /*
-                ...(editMode ? [
+                ...(this.props.editMode ? [
                     e(Layer, {
                         id: "background-hitboxes",
                         key: "background-hitboxes",
-                        childrenData: this.state.images,
+                        childrenData: this.state.layers["background-images"].children,
                         childrenComponent: ImageHitbox,
-                        filter: ({layer}) => (layer === "B"),
                         commonProps: {
-                            setImage: this.subStateSetter("images"),
+                            setImage: (object) => {
+                                this.layerSetter({layer: "background-images", object});
+                            }
                         }
                     }),
-                    e(Layer, {
-                        id: "foreground-hitboxes",
-                        key: "foreground-hitboxes",
-                        childrenData: this.state.images,
-                        childrenComponent: ImageHitbox,
-                        filter: ({layer}) => (layer !== "B"),
-                        commonProps: {
-                            setImage: this.subStateSetter("images"),
-                        }
-                    }),
-                ]: []),
-                */
+                ] : []),
             ])
         );
     }

@@ -234,4 +234,4 @@ def _process_delete_image(room: Room, account: AccountModel, data: Dict):
     room.save()  # Update last modified
 
     response = {"type": "layer.delete", "layer": layer.identifier, "object": image.to_dict()}
-    return Response(sender=data, room=data)
+    return Response(sender=response, room=response)

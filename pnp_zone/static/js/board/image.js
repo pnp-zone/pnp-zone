@@ -19,12 +19,12 @@ export function ImageHitbox(props) {
         },
         onContextMenu: contextMenu.handler(() => {
             return [
-                e("button", {
+                /*e("button", {
                     onClick: () => {
                         socket.send({type: "image.change_layer", id, layer: layer === "B" ? "T" : "B"});
                         contextMenu.close();
                     },
-                }, layer === "B" ? "Move to foreground" : "Move to background"),
+                }, layer === "B" ? "Move to foreground" : "Move to background"),*/
                 e("button", {
                     onClick: () => {
                         socket.send({type: "image.delete", id,});
