@@ -60,7 +60,7 @@ export class ContextMenuController extends React.Component {
         };
     }
 
-    componentWillUpdate(prevProps) {
+    UNSAFE_componentWillUpdate(prevProps) {
         if (prevProps.containerId !== this.props.containerId) {
             this.container = document.getElementById(this.props.containerId);
         }

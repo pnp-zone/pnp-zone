@@ -5,9 +5,8 @@ import {Coord, PatchGrid} from "./grid.js";
 import {addMouseExtension, LEFT_BUTTON, MIDDLE_BUTTON} from "../lib/mouse.js";
 import {Drag, GlobalDrag} from "./drag.js";
 import socket from "../socket.js";
-import Layer, {LayerStack} from "./layer.js";
+import {LayerStack} from "./layer.js";
 import ContextMenu from "./contextmenu.js";
-import {ImageHitbox} from "./image.js";
 
 const e = React.createElement;
 
@@ -64,6 +63,7 @@ export default class Board extends React.Component {
                 .then(result => {
                     socket.getEndpoint = function () {return url.replace("http", "ws");};
                     socket.socket.close();
+                    this.layers = {}
                     this.setState(result);
                 });
         });
@@ -101,6 +101,15 @@ export default class Board extends React.Component {
                     return coord.yIndex;
                 }});
         });
+
+        this.layers = {}
+        this.setLayerRef = function (layer, elem) {
+            if (this.layers[layer] === undefined) {
+                elem.setData(this.state.layers[layer].children);
+                delete this.state.layers[layer].children;
+            }
+            this.layers[layer] = elem;
+        }.bind(this);
     }
 
     componentDidMount() {
@@ -110,42 +119,26 @@ export default class Board extends React.Component {
 
     layerSetter({layer, key, object, objects}) {
         if (key === undefined && object !== undefined) key = object.id;
-        this.setState((state) => ({
-            layers: {
-                ...state.layers,
-                [layer]: {
-                    ...state.layers[layer],
-                    children: {
-                        ...state.layers[layer].children,
-                        ...(object !== undefined ? {
-                            [key]: {
-                                ...state.layers[layer].children[key],
-                                ...object,
-                            }
-                        } : undefined),
-                        ...objects
-                    },
-                },
-            },
+        this.layers[layer].setData((state) => ({
+            ...state,
+            ...(object !== undefined ? {
+                [key]: {
+                    ...state[key],
+                    ...object,
+                }
+            } : undefined),
+            ...objects
         }));
     }
     layerDeleter({layer, key, object, objects}) {
         if (key === undefined && object !== undefined) key = object.id;
-        this.setState((state) => {
-            const {...children} = state.layers[layer].children;
+        this.layers[layer].setData((state) => {
+            const {...children} = state;
             delete children[key];
             for (let key in objects) {
                 delete children[key];
             }
-            return {
-                layers: {
-                    ...state.layers,
-                    [layer]: {
-                        ...state.layers[layer],
-                        children,
-                    },
-                },
-            };
+            return children;
         });
     }
 
@@ -197,7 +190,10 @@ export default class Board extends React.Component {
             ReactDom.createPortal(this.state.title, titleElement),
             e("style", {}, `body {background-color: ${this.state.background};`),
             e(LayerStack, {
-                layers: this.state.layers
+                layers: this.state.layers,
+                setLayerRef: this.setLayerRef,
+                rerender: function () {}, // this function is a new one each board render
+                                          // and therefore always triggers a layerstack render
             }, [
                 e(PatchGrid, {
                     id: "grid",
@@ -207,7 +203,7 @@ export default class Board extends React.Component {
                     ...this.rect,
                 }),
             ]),
-            ...(this.props.editMode ? [
+            /*...(this.props.editMode ? [
                 e(Layer, {
                     id: "background-hitboxes",
                     key: "background-hitboxes",
@@ -219,7 +215,7 @@ export default class Board extends React.Component {
                         }
                     }
                 }),
-            ] : []),
+            ] : []),*/
         ]);
     }
 

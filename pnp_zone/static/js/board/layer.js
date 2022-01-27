@@ -3,8 +3,8 @@ import Character from "./character.js";
 import Image from "./image.js";
 import {Tile} from "./grid.js";
 import {Cursor} from "./cursors.js";
-const e = React.createElement;
 
+const e = React.createElement;
 
 export class LayerStack extends React.Component {
 
@@ -27,19 +27,22 @@ export class LayerStack extends React.Component {
         return level === 0;
     }
 
-    static createElem([uuid, {children, type}]) {
+    createElem([uuid, {type}]) {
+        const {setLayerRef} = this.props;
         return e(Layer, {
             key: uuid,
-            childrenData: children,
-            childrenComponent: LayerStack.layerTypes[type],
-            commonProps: undefined,
+            ref(elem) {
+                if (elem)
+                    setLayerRef(uuid, elem);
+            },
+            component: LayerStack.layerTypes[type],
         });
     }
 
     render() {
         const layers = Object.entries(this.props.layers).sort(LayerStack.layerSort);
         const level0 = layers.findIndex(LayerStack.level0);
-        const elems = layers.map(LayerStack.createElem);
+        const elems = layers.map(this.createElem.bind(this));
         if (this.props.children.length > 0)
             elems.splice(level0, 0, this.props.children[0]);
 
@@ -48,36 +51,43 @@ export class LayerStack extends React.Component {
 }
 LayerStack.defaultProps = {
     children: [null],
+    setLayerRef(layer, ref) {},
     layers: {
         "uuid-1": {
             level: 1,
-            children: {},
             type: null,
         },
         "uuid-2": {
             level: -1,
-            children: {},
             type: null,
         },
         "uuid-3": {
             level: 0,
-            children: {},
             type: null,
         },
     }
 };
 
-export default class Layer extends React.Component {
+class Layer extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            data: {},
+        };
+        this.setData = function (update) {
+            if (typeof update=== "function")
+                this.setState((state) => ({data: update(state.data)}));
+            else
+                this.setState({data: update});
+        }.bind(this);
+    }
     render() {
-        const {childrenData, childrenComponent, id, commonProps, filter} = this.props;
-
-        return e("div", {id},
-            Object.entries(childrenData)
-                .filter(([_, child]) => !filter || filter(child))
-                .map(([key, child]) => e(childrenComponent, {key: key, ...commonProps, ...child}))
+        const {component, commonProps} = this.props;
+        return e("div", {},
+            Object.entries(this.state.data).map(([key, child]) => e(component, {key: key, ...commonProps, ...child}))
         );
     }
 }
 Layer.defaultProps = {
-    childrenData: {},
-}
+    component: "div",
+};
