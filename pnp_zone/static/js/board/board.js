@@ -34,17 +34,37 @@ export default class Board extends React.Component {
         delete document.initialBoard;
 
         this.drag = new Drag();
-        this.drag.register(LEFT_BUTTON, this);
-        this.drag.register(MIDDLE_BUTTON, this);
+        this.drag.dragStart = function (event) {
+            document.body.style.cursor = "move";
+            this._mouseStart = {x: event.pageX, y: event.pageY};
+            this._boardStart = {x: this.state.x, y: this.state.y};
+        }.bind(this);
+        this.drag.dragMove = function (event) {
+            this.setState({
+                x: event.pageX - this._mouseStart.x + this._boardStart.x,
+                y: event.pageY - this._mouseStart.y + this._boardStart.y,
+            });
+        }.bind(this);
+        this.drag.dragEnd = function (event) {
+            document.body.style.cursor = "default";
+        }.bind(this);
+        this.drag.register(LEFT_BUTTON, this.drag);
+        this.drag.register(MIDDLE_BUTTON, this.drag);
 
-        this.resizer = new ResizeObserver(() => {
-            this.setState({}); // Force re-render
-        });
+        this.resizer = new ResizeObserver(function () {this.setState({});});
 
         socket.registerEvent("error", ({message}) => { console.error(message); });
         socket.registerEvent("layer.set", this.layerSetter.bind(this));
         socket.registerEvent("layer.delete", this.layerDeleter.bind(this));
-        socket.registerEvent("switch", ({url}) => {this.loadFromUrl(url);});
+        socket.registerEvent("switch", ({url}) => {
+            fetch(`${url}/data`, {method: "GET"})
+                .then(response => response.json())
+                .then(result => {
+                    socket.getEndpoint = function () {return url.replace("http", "ws");};
+                    socket.socket.close();
+                    this.setState(result);
+                });
+        });
         window.addEventListener("beforeunload", (event) => {
             const {x, y, scale} = this.state;
             socket.send({
@@ -55,10 +75,6 @@ export default class Board extends React.Component {
         addMouseExtension((event) => {
             //const boardViewRect = this.props.parent.getBoundingClientRect();
             const boardViewRect = {x: 0, y: 0};
-
-            // is the cursor over the board?
-            //const overBoard = (boardViewRect.left < event.clientX && event.clientX < boardViewRect.right)
-            //    && boardViewRect.top < event.clientY && event.clientY < boardViewRect.bottom;
 
             // get the cursor coordinates in the board
             // (taking position and scale into consideration)
@@ -85,27 +101,11 @@ export default class Board extends React.Component {
         });
     }
 
-    loadFromUrl(url) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", `${url}/data`);
-
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    const result = JSON.parse(xhr.responseText);
-                    console.log("Changing board...");
-                    socket.getEndpoint = function () {
-                        return url.replace("http", "ws");
-                    }
-                    socket.socket.close();
-                    this.setState(result);
-                } else {
-                    console.error("Failed to load url:", url);
-                }
-            }
-        }.bind(this);
-
-        xhr.send();
+    componentDidMount() {
+        socket.open();
+        document.socket = socket;
+        this.context.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
+        this.context.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
     }
 
     layerSetter({layer, key, object, objects}) {
@@ -153,13 +153,9 @@ export default class Board extends React.Component {
         const rect = this.props.parent.getBoundingClientRect();
         let newScale;
 
-        // down
-        if (event.deltaY > 0) {
+        if (event.deltaY > 0) { // down
             newScale = this.state.scale / SCALE_SPEED;
-        }
-
-        // up
-        else {
+        } else {                // up
             newScale = this.state.scale * SCALE_SPEED;
         }
 
@@ -175,13 +171,6 @@ export default class Board extends React.Component {
             x: state.x + (event.clientX - rect.x - state.x) - factor*(event.clientX - rect.x - state.x),
             y: state.y + (event.clientY - rect.y - state.y) - factor*(event.clientY - rect.y - state.y),
         }));
-    }
-
-    componentDidMount() {
-        socket.open();
-        document.socket = socket;
-        this.context.addHandler(this.drag.onMouseDown, LEFT_BUTTON);
-        this.context.addHandler(this.drag.onMouseDown, MIDDLE_BUTTON);
     }
 
     componentDidUpdate(prevProps) {
@@ -244,22 +233,5 @@ export default class Board extends React.Component {
             right: Math.ceil((parent.offsetWidth-this.state.x)/this.state.scale),
             bottom: Math.ceil((parent.offsetHeight-this.state.y)/this.state.scale),
         };
-    }
-
-    dragStart(event) {
-        document.body.style.cursor = "move";
-        this._mouseStart = {x: event.pageX, y: event.pageY};
-        this._boardStart = {x: this.state.x, y: this.state.y};
-    }
-
-    dragMove(event) {
-        this.setState({
-            x: event.pageX - this._mouseStart.x + this._boardStart.x,
-            y: event.pageY - this._mouseStart.y + this._boardStart.y,
-        });
-    }
-
-    dragEnd(event) {
-        document.body.style.cursor = "default";
     }
 }
