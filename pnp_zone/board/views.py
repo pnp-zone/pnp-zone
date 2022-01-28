@@ -61,6 +61,7 @@ class BoardData(LoginRequiredMixin, View):
                 cursors={
                     "level": 100,
                     "type": "cursor",
+                    "name": "Cursors",
                     "children": {},
                 }
             ),

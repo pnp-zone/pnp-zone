@@ -54,6 +54,47 @@ export function BoardSwitch(props) {
     ]);
 }
 
+function layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
+    return levelB - levelA;
+}
+
+const layerTypes = {
+    tile(props) {
+        return e("img", {
+            src: "/static/img/tiles.svg",
+        });
+    },
+    character(props) {
+        return e("img", {
+            src: "/static/img/character.svg",
+        });
+    },
+    image(props) {
+        return e("img", {
+            src: "/static/img/image.svg",
+        });
+    },
+    cursor(props) {
+        return e("img", {
+            src: "/static/img/cursor.svg",
+        });
+    },
+};
+
+export function LayerList(props) {
+    const {layers} = props;
+    return e("div", {},
+        Object.entries(layers)
+            .sort(layerSort)
+            .map(([uuid, {type, name}]) => e("div", {
+                className: "campaignItem",
+            }, [
+                e(layerTypes[type]),
+                name,
+            ]))
+    );
+}
+
 const Modes = {
     PAINT: "paint",
     ERASE: "erase",

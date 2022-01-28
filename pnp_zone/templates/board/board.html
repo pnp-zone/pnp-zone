@@ -24,7 +24,7 @@
     };
 </script>
 
-{% if jitsi_domain %}
+<!--{% if jitsi_domain %}
     <script src='https://{{ jitsi_domain }}/external_api.js'></script>
     <script>
         const domain = '{{ jitsi_domain }}';
@@ -36,5 +36,5 @@
         };
         const api = new JitsiMeetExternalAPI(domain, options);
     </script>
-{% endif %}
+{% endif %}-->
 {% endblock %}

@@ -184,6 +184,10 @@
     margin-right: 0;
     padding-left: 2vw;
 }
+.tab .icon {
+    width: 24px;
+    height: 24px;
+}
 
 iframe {
     border: none;

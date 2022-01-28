@@ -19,10 +19,10 @@ class Room(models.Model):
     @staticmethod
     def create_with_layers(**kwargs):
         room = Room.objects.create(**kwargs)
-        ImageLayer.objects.create(room=room, level=-1, identifier="background-images")
-        TileLayer.objects.create(room=room, level=0, identifier="tiles")
-        ImageLayer.objects.create(room=room, level=1, identifier="foreground-images")
-        CharacterLayer.objects.create(room=room, level=2, identifier="characters")
+        ImageLayer.objects.create(room=room, level=-1, identifier="background-images", name="Background Images")
+        TileLayer.objects.create(room=room, level=0, identifier="tiles", name="Colored Tiles")
+        ImageLayer.objects.create(room=room, level=1, identifier="foreground-images", name="Foreground Images")
+        CharacterLayer.objects.create(room=room, level=2, identifier="characters", name="Character Tokens")
         return room
 
     def get_absolute_url(self):
@@ -41,13 +41,14 @@ class Layer(models.Model):
     children = NotImplemented  # Be sure to make the ForeignKey relation name be children
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
+    name = models.CharField(max_length=255, default="Unnamed layer", blank=True)
     level = models.IntegerField()
 
     class Meta:
         unique_together = ("room", "level"), ("room", "identifier")
 
     def to_dict(self):
-        return {"type": self.component_type, "level": self.level,
+        return {"type": self.component_type, "level": self.level, "name": self.name,
                 "children": dict((child.identifier, child.to_dict()) for child in self.children.all())}
 
 

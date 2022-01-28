@@ -1,7 +1,7 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import Moderator, {BoardSwitch, Tiles} from "./moderator.js";
+import Moderator, {BoardSwitch, LayerList, Tiles} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
 import {TabList} from "./tabs.js";
 const e = React.createElement;
@@ -37,11 +37,7 @@ function Main(props) {
         }, [
             ...(bbb !== null ? [
                 [
-                    e("img", {
-                        src: `${bbbDomain}/favicon.ico`,
-                        width: 24,
-                        height: 24,
-                    }),
+                    e("img", {src: `${bbbDomain}/favicon.ico`, className: "icon"}),
                     e("iframe", {
                         allow: `microphone ${bbbDomain}; camera ${bbbDomain}`,
                         allowFullScreen: true,
@@ -56,25 +52,19 @@ function Main(props) {
             ] : []),
             ...(isModerator ? [
                 [
-                    e("img", {
-                        src: "/static/img/paintbrush.svg",
-                        width: 24,
-                        height: 24,
-                    }),
+                    e("img", {src: "/static/img/paintbrush.svg", className: "icon"}),
                     e(Tiles, {})
                 ],
                 [
                     "Board",
-                    e(BoardSwitch, {
-                        boards,
-                    }),
+                    e(BoardSwitch, {boards}),
+                ],
+                [
+                    "Layers",
+                    e(LayerList, {layers: board.layers}),
                 ],
             ] : []),
         ]),
-        e("div", {
-            id: "jitsi",
-            key: "jitsi"
-        }),
     ]);
 }
 
