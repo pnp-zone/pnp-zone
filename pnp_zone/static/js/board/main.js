@@ -13,20 +13,12 @@ function Main(props) {
     const [activeDrag, setActiveDrag] = React.useState(false);
     const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
 
-    const [boardView, setBoardView] = React.useState(null);
-
     const bbbDomain = bbb !== null ? bbb.match(/https?:\/\/[^/]+/)[0] : null
 
     return e(ContextMenuController, {
         containerId: "context-menu",
     }, [
-        e("div", {
-            id: "board-view",
-            key: "board",
-            ref(elem) {setBoardView(elem);},
-        }, [
-            e(Board, {parent: boardView, editMode}),
-        ]),
+        e(Board, {editMode}),
         isModerator ? e(Moderator, {editMode, setEditMode}) : null,
         e(TabList, {
             open: openTab,
@@ -60,7 +52,7 @@ function Main(props) {
                         width: 24,
                         height: 24,
                     }),
-                    e(Tiles, {board: boardView})
+                    e(Tiles, {})
                 ],
                 [
                     "Board",

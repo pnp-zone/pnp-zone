@@ -21,6 +21,7 @@ export default class Board extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            _boardView: null,
             title: "Loading",
             background: "white",
             border: "black",
@@ -75,7 +76,7 @@ export default class Board extends React.Component {
             });
         });
         addMouseExtension((event) => {
-            //const boardViewRect = this.props.parent.getBoundingClientRect();
+            //const boardViewRect = this.state._boardView.getBoundingClientRect();
             const boardViewRect = {x: 0, y: 0};
 
             // get the cursor coordinates in the board
@@ -143,7 +144,7 @@ export default class Board extends React.Component {
     }
 
     onWheel(event) {
-        const rect = this.props.parent.getBoundingClientRect();
+        const rect = this.state._boardView.getBoundingClientRect();
         let newScale;
 
         if (event.deltaY > 0) { // down
@@ -166,61 +167,69 @@ export default class Board extends React.Component {
         }));
     }
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.parent !== this.props.parent) {
-            if (prevProps.parent)
+    componentDidUpdate(prevProps, prevState) {
+        if (prevState.parent !== this.state._boardView) {
+            if (prevState.parent)
                 this.resizer.unobserve(prevProps.parent);
-            if (this.props.parent)
-                this.resizer.observe(this.props.parent);
+            if (this.state._boardView)
+                this.resizer.observe(this.state._boardView);
         }
     }
 
     render() {
         return e("div", {
-            style: {
-                position: "absolute",
-                left: `${this.state.x}px`,
-                top: `${this.state.y}px`,
-                transform: `scale(${this.state.scale})`,
-            },
-            onMouseDown: GlobalDrag.onMouseDown,
-            onWheel: this.onWheel.bind(this),
-            onContextMenu: this.context.handler(() => []),
+            id: "board-view",
+            ref: function (elem) {
+                if (!this.state._boardView)
+                    this.setState({_boardView: elem});
+            }.bind(this),
         }, [
-            ReactDom.createPortal(this.state.title, titleElement),
-            e("style", {}, `body {background-color: ${this.state.background};`),
-            e(LayerStack, {
-                layers: this.state.layers,
-                setLayerRef: this.setLayerRef,
-                rerender: function () {}, // this function is a new one each board render
-                                          // and therefore always triggers a layerstack render
+            e("div", {
+                style: {
+                    position: "absolute",
+                    left: `${this.state.x}px`,
+                    top: `${this.state.y}px`,
+                    transform: `scale(${this.state.scale})`,
+                },
+                onMouseDown: GlobalDrag.onMouseDown,
+                onWheel: this.onWheel.bind(this),
+                onContextMenu: this.context.handler(() => []),
             }, [
-                e(PatchGrid, {
-                    id: "grid",
-                    key: "grid",
-                    size: PATCH_SIZE,
-                    border: this.state.border,
-                    ...this.rect,
-                }),
-            ]),
-            /*...(this.props.editMode ? [
-                e(Layer, {
-                    id: "background-hitboxes",
-                    key: "background-hitboxes",
-                    childrenData: this.state.layers["background-images"].children,
-                    childrenComponent: ImageHitbox,
-                    commonProps: {
-                        setImage: (object) => {
-                            this.layerSetter({layer: "background-images", object});
+                ReactDom.createPortal(this.state.title, titleElement),
+                e("style", {}, `body {background-color: ${this.state.background};`),
+                e(LayerStack, {
+                    layers: this.state.layers,
+                    setLayerRef: this.setLayerRef,
+                    rerender: function () {}, // this function is a new one each board render
+                                              // and therefore always triggers a layerstack render
+                }, [
+                    e(PatchGrid, {
+                        id: "grid",
+                        key: "grid",
+                        size: PATCH_SIZE,
+                        border: this.state.border,
+                        ...this.rect,
+                    }),
+                ]),
+                /*...(this.props.editMode ? [
+                    e(Layer, {
+                        id: "background-hitboxes",
+                        key: "background-hitboxes",
+                        childrenData: this.state.layers["background-images"].children,
+                        childrenComponent: ImageHitbox,
+                        commonProps: {
+                            setImage: (object) => {
+                                this.layerSetter({layer: "background-images", object});
+                            }
                         }
-                    }
-                }),
-            ] : []),*/
+                    }),
+                ] : []),*/
+            ]),
         ]);
     }
 
     get rect() {
-        const parent = (this.props.parent || {offsetWidth: 0, offsetHeight: 0});
+        const parent = (this.state._boardView || {offsetWidth: 0, offsetHeight: 0});
         return {
             left: Math.floor((-this.state.x)/this.state.scale),
             top: Math.floor((-this.state.y)/this.state.scale),
