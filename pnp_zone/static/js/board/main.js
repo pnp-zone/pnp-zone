@@ -9,6 +9,7 @@ const e = React.createElement;
 function Main(props) {
     const {bbb, boards, isModerator} = props;
 
+    const [board, setBoard] = React.useState(document.initialBoard);
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
     const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
@@ -18,7 +19,15 @@ function Main(props) {
     return e(ContextMenuController, {
         containerId: "context-menu",
     }, [
-        e(Board, {editMode}),
+        e(Board, {
+            editMode,
+            ...board,
+            setBoard(value) {
+                if (typeof value === "function")
+                    value = value(board);
+                setBoard({...board, ...value});
+            }
+        }),
         isModerator ? e(Moderator, {editMode, setEditMode}) : null,
         e(TabList, {
             open: openTab,
