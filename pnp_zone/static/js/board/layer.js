@@ -1,13 +1,15 @@
 import React from "../react.js";
 import Character from "./character.js";
-import Image from "./image.js";
+import Image, {ImageHitbox} from "./image.js";
 import {Tile} from "./grid.js";
 import {Cursor} from "./cursors.js";
+import ContextMenu from "./contextmenu.js";
 
 const e = React.createElement;
 
 export class LayerStack extends React.Component {
 
+    static contextType = ContextMenu;
     static layerTypes = {
         "tile": Tile,
         "character": Character,
@@ -17,6 +19,9 @@ export class LayerStack extends React.Component {
 
     constructor(props) {
         super(props);
+        this.state = {
+            moveImages: false,
+        };
     }
 
     static layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
@@ -29,17 +34,42 @@ export class LayerStack extends React.Component {
 
     createElem([uuid, {type}]) {
         const {setLayerRef} = this.props;
-        return e(Layer, {
-            key: uuid,
-            ref(elem) {
-                if (elem)
-                    setLayerRef(uuid, elem);
-            },
-            component: LayerStack.layerTypes[type],
-        });
+        if (type === "image")
+            return e(ImageLayer, {
+                key: uuid,
+                ref(elem) {
+                    if (elem)
+                        setLayerRef(uuid, elem);
+                },
+                component: LayerStack.layerTypes[type],
+                // moveImages: this.state.moveImages && this.props.selectedLayer[type] === uuid,
+                moveImages: this.state.moveImages,
+            });
+        else
+            return e(Layer, {
+                key: uuid,
+                ref(elem) {
+                    if (elem)
+                        setLayerRef(uuid, elem);
+                },
+                component: LayerStack.layerTypes[type],
+            });
     }
 
     render() {
+        const contextMenu = this.context;
+        const setState = this.setState.bind(this);
+        const state = this.state;
+        contextMenu.addDefaultItems("layer", () => [
+            e("button", {
+                className: state.moveImages ? "active" : "",
+                onClick() {
+                    setState((state) => ({moveImages: ! state.moveImages}));
+                    contextMenu.close();
+                },
+            }, "Move images"),
+        ]);
+
         const layers = Object.entries(this.props.layers).sort(LayerStack.layerSort);
         const level0 = layers.findIndex(LayerStack.level0);
         const elems = layers.map(this.createElem.bind(this));
@@ -50,6 +80,11 @@ export class LayerStack extends React.Component {
     }
 }
 LayerStack.defaultProps = {
+    selectedLayer: {
+        image: "background-images",
+        tiles: "tiles",
+        character: "characters",
+    },
     children: [null],
     setLayerRef(layer, ref) {},
     layers: {
@@ -90,4 +125,40 @@ class Layer extends React.Component {
 }
 Layer.defaultProps = {
     component: "div",
+};
+
+class ImageLayer extends Layer {
+    render() {
+        const setState = this.setState.bind(this);
+
+        if (this.props.moveImages)
+            return e(React.Fragment, {}, [
+                super.render(),
+                e("div", {
+                    style: {zIndex: 10},
+                },
+                Object.entries(this.state.data).map(([key, child]) =>
+                    e(ImageHitbox, {
+                        ...child,
+                        setImage(image) {
+                            setState((state) => ({
+                                data: {
+                                    ...state.data,
+                                    [key]: {
+                                        ...state.data[key],
+                                        ...image,
+                                    },
+                                },
+                            }));
+                        },
+                    })
+                )),
+            ]);
+        else
+            return super.render();
+    }
+}
+ImageLayer.defaultProps = {
+    component: "div",
+    moveImages: false,
 };

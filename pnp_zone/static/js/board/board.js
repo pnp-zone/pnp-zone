@@ -194,6 +194,7 @@ export default class Board extends React.Component {
                     setLayerRef: this.setLayerRef,
                     rerender: function () {}, // this function is a new one each board render
                                               // and therefore always triggers a layerstack render
+                    selectedLayer: this.props.selectedLayer,
                 }, [
                     e(PatchGrid, {
                         id: "grid",

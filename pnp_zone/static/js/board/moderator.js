@@ -68,22 +68,32 @@ const layerTypes = {
 };
 
 export function LayerList(props) {
-    const {layers} = props;
+    const {layers, setSelectedLayer} = props;
     return e("table", {},
         Object.entries(layers)
             .sort(layerSort)
-            .map(([uuid, {type, name}]) => e(TableRow, {key: uuid}, [
-                e("img", {src: layerTypes[type], className: "icon"}),
-                name,
-                /*e("img", {src: "/static/img/show.svg", className: "icon"}),
-                e("div", {className: "flex-vertical"}, [
-                    e("img", {src: "/static/img/up.svg", className: "icon"}),
-                    e("img", {src: "/static/img/down.svg", className: "icon"}),
-                ]),
-                e("img", {src: "/static/img/close.svg", className: "icon"}),*/
-            ]))
+            .map(([uuid, {type, name}]) =>
+                e(TableRow, {
+                    key: uuid,
+                    onClick() {
+                        setSelectedLayer(type, uuid);
+                    },
+                }, [
+                    e("img", {src: layerTypes[type], className: "icon"}),
+                    name,
+                    /*e("img", {src: "/static/img/show.svg", className: "icon"}),
+                    e("div", {className: "flex-vertical"}, [
+                        e("img", {src: "/static/img/up.svg", className: "icon"}),
+                        e("img", {src: "/static/img/down.svg", className: "icon"}),
+                    ]),
+                    e("img", {src: "/static/img/close.svg", className: "icon"}),*/
+                ])
+            )
     );
 }
+LayerList.defaultProps = {
+    setSelectedLayer(type, layer) {},
+};
 
 const Modes = {
     PAINT: "paint",

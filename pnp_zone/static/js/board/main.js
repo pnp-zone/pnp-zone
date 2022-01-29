@@ -10,6 +10,11 @@ function Main(props) {
     const {bbb, boards, isModerator} = props;
 
     const [board, setBoard] = React.useState(document.initialBoard);
+    const [selectedLayer, setSelectedLayer] = React.useState({
+        image: "background-images",
+        character: "characters",
+        tile: "tiles",
+    });
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
     const [openTab, setOpenTab] = React.useState(bbb !== "" ? 0 : -1);
@@ -26,13 +31,16 @@ function Main(props) {
                 if (typeof value === "function")
                     value = value(board);
                 setBoard({...board, ...value});
-            }
+            },
+            selectedLayer,
         }),
         ...(isModerator ? [
             e(CharacterModal, {
+                layer: selectedLayer.character,
                 layers: Object.fromEntries(Object.entries(board.layers).filter(([_, {type}]) => type === "character").map(([layer, {name}]) => [layer, name])),
             }),
             e(ImageModal, {
+                layer: selectedLayer.image,
                 layers: Object.fromEntries(Object.entries(board.layers).filter(([_, {type}]) => type === "image").map(([layer, {name}]) => [layer, name])),
             }),
         ] : undefined),
@@ -68,7 +76,13 @@ function Main(props) {
                 ],
                 [
                     "Layers",
-                    e(LayerList, {layers: board.layers}),
+                    e(LayerList, {
+                        layers: board.layers,
+                        setSelectedLayer(type, layer) {
+                            if (selectedLayer.hasOwnProperty(type))
+                                setSelectedLayer({...selectedLayer, [type]: layer});
+                        }
+                    }),
                 ],
             ] : []),
         ]),

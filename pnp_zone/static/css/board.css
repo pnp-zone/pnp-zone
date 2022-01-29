@@ -80,6 +80,7 @@
     --frameWidth: max(0.01vw, 1px);
 
     position: absolute;
+    z-index: inherit;
 }
 .hitbox-frame {
     position: absolute;
