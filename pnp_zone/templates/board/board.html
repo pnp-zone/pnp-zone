@@ -15,6 +15,7 @@
 <script>
     document.initialData = JSON.parse({{ initial_data | safe }});
     document.initialBoard = JSON.parse({{ initial_board | safe }});
+    document.static = {% static '' %}
 </script>
 <script src="{% static "js/board/main.js" %}" type="module"></script>
 <script>

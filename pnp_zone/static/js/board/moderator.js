@@ -7,11 +7,12 @@ import TextInput from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
 import Modal from "./modal.js";
 import {ColorPicker} from "./forms/colorpicker.js";
+import staticUrl from "../lib/static.js";
 const e = React.createElement;
 
 function TableRow(props) {
-    const {children} = props;
-    return e("tr", {}, children.map((element) => e("td", {}, [element])));
+    const {children, ...restProps} = props;
+    return e("tr", {...restProps}, children.map((element) => e("td", {key: element.key}, [element])));
 }
 
 export function BoardSwitch(props) {
@@ -59,38 +60,26 @@ function layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
 }
 
 const layerTypes = {
-    tile(props) {
-        return e("img", {
-            src: "/static/img/tiles.svg",
-        });
-    },
-    character(props) {
-        return e("img", {
-            src: "/static/img/character.svg",
-        });
-    },
-    image(props) {
-        return e("img", {
-            src: "/static/img/image.svg",
-        });
-    },
-    cursor(props) {
-        return e("img", {
-            src: "/static/img/cursor.svg",
-        });
-    },
+    tile: staticUrl("img/tiles.svg"),
+    character: staticUrl("img/character.svg"),
+    image: staticUrl("img/image.svg"),
+    cursor: staticUrl("img/cursor.svg"),
 };
 
 export function LayerList(props) {
     const {layers} = props;
-    return e("div", {},
+    return e("table", {},
         Object.entries(layers)
             .sort(layerSort)
-            .map(([uuid, {type, name}]) => e("div", {
-                className: "campaignItem",
-            }, [
-                e(layerTypes[type]),
+            .map(([uuid, {type, name}]) => e(TableRow, {key: uuid}, [
+                e("img", {src: layerTypes[type], className: "icon"}),
                 name,
+                /*e("img", {src: "/static/img/show.svg", className: "icon"}),
+                e("div", {className: "flex-vertical"}, [
+                    e("img", {src: "/static/img/up.svg", className: "icon"}),
+                    e("img", {src: "/static/img/down.svg", className: "icon"}),
+                ]),
+                e("img", {src: "/static/img/close.svg", className: "icon"}),*/
             ]))
     );
 }
@@ -248,6 +237,7 @@ export default class Moderator extends React.PureComponent {
             },
             image: {
                 url: "",
+                layer: null,
                 x: 0,
                 y: 0,
                 _isModalOpen: false,

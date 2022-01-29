@@ -168,6 +168,20 @@
 }
 .side-menu > .tabs {
 }
+.side-menu tr {
+    background-color: var(--highlighted-background-color);
+    transition: background-color 300ms;
+}
+.side-menu td {
+    padding: 0.5em 1em;
+}
+.side-menu img.icon {
+    width: 2em;
+    height: 2em;
+}
+.side-menu img {
+    filter: invert(100%);
+}
 
 .tab {
     cursor: pointer;
@@ -184,9 +198,9 @@
     margin-right: 0;
     padding-left: 2vw;
 }
-.tab .icon {
-    width: 24px;
-    height: 24px;
+.tab img.icon {
+    width: 1.5em;
+    height: 1.5em;
 }
 
 iframe {
