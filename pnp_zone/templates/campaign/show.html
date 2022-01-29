@@ -63,12 +63,14 @@
                         <td>{{ board.name }}</td>
                         <td>{{ board.last_modified }}</td>
                         <td>
-                            <form method="POST" action="/campaign/show/{{ cid }}/boards">
-                                {% csrf_token %}
-                                <input type="hidden" name="identifier" value="{{ board.identifier }}">
-                                <input type="hidden" name="action" value="delete">
-                                <button type="submit"><img src="{% static 'img/close.svg' %}" alt="Delete board"></button>
-                            </form>
+                            {% if board.id != lobby.id %}
+                                <form method="POST" action="/campaign/show/{{ cid }}/boards">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="identifier" value="{{ board.identifier }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <button type="submit"><img src="{% static 'img/close.svg' %}" alt="Delete board"></button>
+                                </form>
+                            {% endif %}
                         </td>
                     </tr>
                 {% endfor %}

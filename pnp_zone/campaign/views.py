@@ -102,7 +102,7 @@ class ManageBoardView(LoginRequiredMixin, View):
         if action == "create":
             Room.create_with_layers(name=name, campaign=campaign)
         elif action == "delete":
-            Room.objects.filter(identifier=identifier).delete()
+            Room.objects.exclude(id=campaign.lobby_id).filter(identifier=identifier).delete()
 
         return redirect(request.META["HTTP_REFERER"])
 
