@@ -42,7 +42,9 @@ function SliderPlot(props) {
         className: className
             + (ratioX !== undefined ? " horizontal" : "")
             + (ratioY !== undefined ? " vertical" : ""),
-        ref,
+        ref(elem) {
+            if (elem !== null) ref.current = elem;
+        },
         onMouseDown: drag.onMouseDown,
     }, [
         ratioX !== undefined ? e("div", {

@@ -22,6 +22,16 @@ class LayerAdmin(admin.ModelAdmin):
     list_display = ("name", "room", "identifier", "level")
 
 
+@admin.register(models.ImageLayer)
+class ImageLayerAdmin(LayerAdmin):
+    pass
+
+
+@admin.register(models.TileLayer)
+class TileLayerAdmin(LayerAdmin):
+    pass
+
+
 @admin.register(models.CharacterLayer)
-class CharacterLayerAdmin(admin.ModelAdmin):
+class CharacterLayerAdmin(LayerAdmin):
     pass

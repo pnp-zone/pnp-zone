@@ -21,7 +21,7 @@ function hc2rgb(hue, chroma) {
         rgb = [0, intermediate, chroma];
     else if (4 <= hue && hue < 5)
         rgb = [intermediate, 0, chroma];
-    else if (5 <= hue && hue < 6)
+    else if (5 <= hue && hue <= 6)
         rgb = [chroma, 0, intermediate];
     return rgb;
 }
