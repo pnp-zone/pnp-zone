@@ -103,9 +103,9 @@ class Tile(models.Model):
 class UserSession(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    board_x = models.IntegerField()
-    board_y = models.IntegerField()
-    board_scale = models.FloatField()
+    board_x = models.IntegerField(default=0, blank=True)
+    board_y = models.IntegerField(default=0, blank=True)
+    board_scale = models.FloatField(default=1, blank=True)
 
     class Meta:
         unique_together = ("room", "user")
