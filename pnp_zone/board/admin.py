@@ -15,3 +15,13 @@ clickable_url.__name__ = "url"
 class RoomAdmin(admin.ModelAdmin):
     readonly_fields = ("identifier", "last_modified")
     list_display = ("__str__", clickable_url, "last_modified")
+
+
+@admin.register(models.Layer)
+class LayerAdmin(admin.ModelAdmin):
+    list_display = ("name", "room", "identifier", "level")
+
+
+@admin.register(models.CharacterLayer)
+class CharacterLayerAdmin(admin.ModelAdmin):
+    pass

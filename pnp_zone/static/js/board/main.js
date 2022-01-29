@@ -1,7 +1,7 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import Moderator, {BoardSwitch, LayerList, Tiles} from "./moderator.js";
+import {BoardSwitch, CharacterModal, ImageModal, LayerList, Tiles} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
 import {TabList} from "./tabs.js";
 const e = React.createElement;
@@ -28,7 +28,14 @@ function Main(props) {
                 setBoard({...board, ...value});
             }
         }),
-        isModerator ? e(Moderator, {editMode, setEditMode}) : null,
+        ...(isModerator ? [
+            e(CharacterModal, {
+                layers: Object.fromEntries(Object.entries(board.layers).filter(([_, {type}]) => type === "character").map(([layer, {name}]) => [layer, name])),
+            }),
+            e(ImageModal, {
+                layers: Object.fromEntries(Object.entries(board.layers).filter(([_, {type}]) => type === "image").map(([layer, {name}]) => [layer, name])),
+            }),
+        ] : undefined),
         e(TabList, {
             open: openTab,
             setOpen: setOpenTab,

@@ -70,7 +70,10 @@ async def _process_switch(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_new_character(room: Room, account: AccountModel, data: Dict):
-    layer = CharacterLayer.objects.filter(room=room).first()
+    try:
+        layer = CharacterLayer.objects.get(room=room, identifier=data["layer"])
+    except ImageLayer.DoesNotExist:
+        raise EventError("Unknown layer")
     if layer.children.filter(x=data["x"], y=data["y"]).exists():
         raise EventError("This space is already occupied!")
     else:
@@ -89,14 +92,14 @@ def _process_new_character(room: Room, account: AccountModel, data: Dict):
 @register("character.move")
 @database_sync_to_async
 def _process_move_character(room: Room, account: AccountModel, data: Dict):
-    layer = CharacterLayer.objects.filter(room=room).first()
-    if layer.children.filter(x=data["x"], y=data["y"]).exists():
-        raise EventError("This space is already occupied!")
-
     try:
-        character = Character.objects.get(layer=layer, identifier=data["id"])
+        character = Character.objects.get(layer__room=room, identifier=data["id"])
+        layer = character.layer
     except Character.DoesNotExist:
         raise EventError(f"Unknown character")
+
+    if layer.children.filter(x=data["x"], y=data["y"]).exists():
+        raise EventError("This space is already occupied!")
 
     character.x = data["x"]
     character.y = data["y"]
@@ -111,9 +114,9 @@ def _process_move_character(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_character(room: Room, account: AccountModel, data: Dict):
-    layer = CharacterLayer.objects.filter(room=room).first()
     try:
-        character = Character.objects.get(identifier=data["id"], layer=layer)
+        character = Character.objects.get(identifier=data["id"], layer__room=room)
+        layer = character.layer
     except Character.DoesNotExist:
         raise EventError(f"Unknown character")
 
@@ -178,7 +181,10 @@ def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_new_image(room: Room, account: AccountModel, data: Dict):
-    layer = ImageLayer.objects.filter(room=room).first()
+    try:
+        layer = ImageLayer.objects.get(room=room, identifier=data["layer"])
+    except ImageLayer.DoesNotExist:
+        raise EventError("Unknown layer")
     room.save()  # Update last modified
     image = Image.objects.create(
         layer=layer,
@@ -203,9 +209,9 @@ def _process_change_image_layer(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_move_image(room: Room, account: AccountModel, data: Dict):
-    layer = ImageLayer.objects.filter(room=room).first()
     try:
-        image = Image.objects.get(layer=layer, identifier=data["id"])
+        image = Image.objects.get(layer__room=room, identifier=data["id"])
+        layer = image.layer
     except Image.DoesNotExist:
         raise EventError("Unknown image")
 
@@ -224,9 +230,9 @@ def _process_move_image(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_image(room: Room, account: AccountModel, data: Dict):
-    layer = ImageLayer.objects.filter(room=room).first()
     try:
-        image = Image.objects.get(layer=layer, identifier=data["id"])
+        image = Image.objects.get(layer__room=room, identifier=data["id"])
+        layer = image.layer
     except Image.DoesNotExist:
         raise EventError("Unknown image")
 
