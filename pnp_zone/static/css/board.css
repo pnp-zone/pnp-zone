@@ -169,11 +169,11 @@
 }
 .side-menu > .tabs {
 }
-.side-menu tr {
+.side-menu .layer-list tr {
     background-color: var(--highlighted-background-color);
     transition: background-color 300ms;
 }
-.side-menu td {
+.side-menu .layer-list td {
     padding: 0.5em 1em;
 }
 .side-menu img.icon {

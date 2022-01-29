@@ -1,9 +1,11 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import {BoardSwitch, CharacterModal, ImageModal, LayerList, Tiles} from "./moderator.js";
+import {BoardSwitch, CharacterModal, ImageModal, LayerList} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
-import {TabList} from "./tabs.js";
+import {TabList} from "./sidemenu/tabs.js";
+import UserTools from "./sidemenu/usertools.js";
+import Paintbrush from "./sidemenu/paintbrush.js";
 const e = React.createElement;
 
 function Main(props) {
@@ -65,10 +67,18 @@ function Main(props) {
                     })
                 ],
             ] : []),
+            [
+                "User Tools",
+                e(UserTools, {
+                    setPosition({x, y, scale}) {
+                        setBoard({...board, x, y, scale});
+                    },
+                }),
+            ],
             ...(isModerator ? [
                 [
                     e("img", {src: "/static/img/paintbrush.svg", className: "icon"}),
-                    e(Tiles, {})
+                    e(Paintbrush, {}),
                 ],
                 [
                     "Board",
