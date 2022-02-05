@@ -13,7 +13,7 @@ const layerTypes = {
     cursor: staticUrl("img/cursor.svg"),
 };
 
-function renderLayer([uuid, {type, name, level}]) {
+function renderLayer([uuid, {type, name}]) {
     if (uuid === null) {
         return e("tr", {}, [e("td", {colspan: 5}, [""])]);
     } else {
@@ -29,13 +29,22 @@ function renderLayer([uuid, {type, name, level}]) {
             e("div", {className: "flex-vertical"}, [
                 e("img", {
                     src: "/static/img/up.svg", className: "icon",
+                    onClick() {
+                        socket.send({type: "layer.move", id: uuid, up: true});
+                    }
                 }),
                 e("img", {
                     src: "/static/img/down.svg", className: "icon",
+                    onClick() {
+                        socket.send({type: "layer.move", id: uuid, up: false});
+                    }
                 }),
             ]),
             e("img", {
                 src: "/static/img/close.svg", className: "icon",
+                onClick() {
+                    socket.send({type: "layer.drop", id: uuid});
+                }
             }),
         ]);
     }

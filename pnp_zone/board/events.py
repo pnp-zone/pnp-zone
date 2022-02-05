@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Awaitable, Dict, Type
 
 from channels.db import database_sync_to_async
-from django.db.models import Q, Max
+from django.db.models import Q, Max, F, Min
 
 from accounts.models import AccountModel
 from board.models import Character, Tile, UserSession, Image, Room, CharacterLayer, TileLayer, ImageLayer, Layer
@@ -262,3 +262,55 @@ def _process_new_layer(room: Room, account: AccountModel, data: Dict):
 
     response = {"type": "layer.new", layer.identifier: layer.to_dict()}
     return Response(sender=response, room=response)
+
+
+@register("layer.move")
+@_moderators_only
+@database_sync_to_async
+def _process_move_layer(room: Room, account: AccountModel, data: Dict):
+    layers = Layer.objects.filter(room=room)
+    try:
+        layer = layers.get(identifier=data["id"])
+    except Layer.DoesNotExist:
+        raise EventError("Unknown layer")
+
+    if (data["up"] and layer.level == -1) or (not data["up"] and layer.level == 1):
+        if data["up"]:
+            layers.update(level=F("level") + 1)
+            layer.level += 2
+        else:
+            layers.update(level=F("level") - 1)
+            layer.level -= 2
+        layer.save()
+    else:
+        if data["up"]:
+            other = layers.filter(level__gt=layer.level).order_by("level").first()
+        else:
+            other = layers.filter(level__lt=layer.level).order_by("-level").first()
+
+        if other is None:
+            raise EventError("Layer is already at top/bottom")
+        else:
+            layer.level, other.level = other.level, layer.level
+            Layer.objects.bulk_update([layer, other], ["level"])
+
+    response = {"type": "layer.move", "levels": {layer.identifier: layer.level for layer in layers}}
+    return Response(sender=response, room=response)
+
+
+@register("layer.drop")
+@_moderators_only
+@database_sync_to_async
+def _process_drop_layer(room: Room, account: AccountModel, data: Dict):
+    try:
+        layer = Layer.objects.get(room=room, identifier=data["id"])
+    except Layer.DoesNotExist:
+        raise EventError("Unknown layer")
+
+    layer.delete()
+    if layer.level >= 0:
+        Layer.objects.filter(room=room, level__gt=layer.level).update(level=F("level")-1)
+    else:
+        Layer.objects.filter(room=room, level__lt=layer.level).update(level=F("level")+1)
+
+    return Response(sender=data, room=data)

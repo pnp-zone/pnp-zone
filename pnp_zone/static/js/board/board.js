@@ -51,6 +51,25 @@ export default class Board extends React.Component {
         socket.registerEvent("layer.new", (layers) => {
             this.props.setBoard((state) => ({layers: {...state.layers, ...layers}}));
         });
+        socket.registerEvent("layer.drop", ({id}) => {
+            this.props.setBoard((state) => {
+                const {[id]: deletedLayer, ...layers} = state.layers;
+                Object.entries(layers).filter(
+                    ([_, {level}]) => deletedLayer.level >= 0 ? level > deletedLayer.level : level < deletedLayer.level
+                ).forEach(
+                    ([id, _]) => {layers[id].level += deletedLayer.level >= 0 ? -1 : +1;}
+                );
+                return {layers};
+            });
+        });
+        socket.registerEvent("layer.move", ({levels}) => {
+            this.props.setBoard(({layers}) => {
+                for (const [uuid, level] of Object.entries(levels)) {
+                    layers[uuid].level = level;
+                }
+                return {layers};
+            });
+        });
         socket.registerEvent("layer.set", this.layerSetter.bind(this));
         socket.registerEvent("layer.delete", this.layerDeleter.bind(this));
         socket.registerEvent("switch", ({url}) => {
