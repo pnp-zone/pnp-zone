@@ -1,11 +1,13 @@
 import React from "../react.js";
 import ReactDOM from "../react-dom.js";
 import Board from "./board.js";
-import {BoardSwitch, CharacterModal, ImageModal, LayerList} from "./moderator.js";
+import {CharacterModal, ImageModal} from "./moderator.js";
 import {ContextMenuController} from "./contextmenu.js";
 import {TabList} from "./sidemenu/tabs.js";
 import UserTools from "./sidemenu/usertools.js";
 import Paintbrush from "./sidemenu/paintbrush.js";
+import {BoardSwitch} from "./sidemenu/boardlist.js";
+import {LayerList} from "./sidemenu/layerlist.js";
 const e = React.createElement;
 
 function Main(props) {

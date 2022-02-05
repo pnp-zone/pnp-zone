@@ -1,96 +1,11 @@
-import React from "../react.js";
+import React, {e} from "../react.js";
 import socket from "../socket.js";
 import TextInput from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
 import Modal from "./modal.js";
 import {ColorPicker} from "./forms/colorpicker.js";
-import staticUrl from "../lib/static.js";
 import Select from "./forms/select.js";
-const e = React.createElement;
-
-function TableRow(props) {
-    const {children, ...restProps} = props;
-    return e("tr", {...restProps}, children.map((element) => e("td", {key: element.key}, [element])));
-}
-
-export function BoardSwitch(props) {
-    const {boards} = props;
-    const [selected, setSelected] = React.useState(null);
-
-    return e("div", {}, [
-        e("div", {
-            className: "campaignRow",
-            style: {
-                margin: 0,
-            },
-        }, Object.entries(boards).map(([uuid, name]) =>
-            e("a", {
-                key: uuid,
-                className: "campaignItem" + (selected === uuid ? " campaignItem-hover" : ""),
-                onClick(event) { setSelected(selected === uuid ? null : uuid); event.preventDefault(); },
-            }, name)
-        )),
-        e("hr"),
-        selected === null ? null : e("div", {}, [
-            e("h1", {}, boards[selected]),
-            e("div", {}, [
-                e("button", {
-                    onClick() {
-                        const last = window.location.origin + window.location.pathname;
-                        const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
-                        socket.sendLocally({type: "switch", url,});
-                    },
-                }, "Switch"),
-                e("button", {
-                    onClick() {
-                        const last = window.location.origin + window.location.pathname;
-                        const url = last.replace(last.match(/.+\/([-0-9a-f]+)/)[1], selected);
-                        socket.send({type: "switch", url,});
-                    },
-                }, "Switch for all"),
-            ]),
-        ]),
-    ]);
-}
-
-function layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
-    return levelB - levelA;
-}
-
-const layerTypes = {
-    tile: staticUrl("img/tiles.svg"),
-    character: staticUrl("img/character.svg"),
-    image: staticUrl("img/image.svg"),
-    cursor: staticUrl("img/cursor.svg"),
-};
-
-export function LayerList(props) {
-    const {layers, setSelectedLayer} = props;
-    return e("table", {className: "layer-list"},
-        Object.entries(layers)
-            .sort(layerSort)
-            .map(([uuid, {type, name}]) =>
-                e(TableRow, {
-                    key: uuid,
-                    onClick() {
-                        setSelectedLayer(type, uuid);
-                    },
-                }, [
-                    e("img", {src: layerTypes[type], className: "icon"}),
-                    name,
-                    /*e("img", {src: "/static/img/show.svg", className: "icon"}),
-                    e("div", {className: "flex-vertical"}, [
-                        e("img", {src: "/static/img/up.svg", className: "icon"}),
-                        e("img", {src: "/static/img/down.svg", className: "icon"}),
-                    ]),
-                    e("img", {src: "/static/img/close.svg", className: "icon"}),*/
-                ])
-            )
-    );
-}
-LayerList.defaultProps = {
-    setSelectedLayer(type, layer) {},
-};
+import {TableRow} from "../lib/misc.js";
 
 export class ImageModal extends React.Component {
     static contextType = ContextMenu;

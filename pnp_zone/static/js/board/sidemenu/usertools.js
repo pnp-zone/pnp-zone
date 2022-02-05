@@ -1,12 +1,6 @@
-import React from "../../react.js";
+import React, {e} from "../../react.js";
 import socket from "../../socket.js";
 import TextInput from "../forms/textinput.js";
-const e = React.createElement;
-
-function TableRow(props) {
-    const {children, ...restProps} = props;
-    return e("tr", {...restProps}, children.map((element) => e("td", {key: element.key}, [element])));
-}
 
 export default function UserTools({setPosition}) {
     const [x, setX] = React.useState(0);
