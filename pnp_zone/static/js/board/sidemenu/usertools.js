@@ -1,6 +1,7 @@
 import React, {e} from "../../react.js";
 import socket from "../../socket.js";
 import TextInput from "../forms/textinput.js";
+import {TableRow} from "../../lib/misc.js";
 
 export default function UserTools({setPosition}) {
     const [x, setX] = React.useState(0);

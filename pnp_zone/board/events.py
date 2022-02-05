@@ -1,11 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Awaitable, Dict
+from typing import Any, Callable, Awaitable, Dict, Type
 
 from channels.db import database_sync_to_async
-from django.db.models import Q
+from django.db.models import Q, Max
 
 from accounts.models import AccountModel
-from board.models import Character, Tile, UserSession, Image, Room, CharacterLayer, TileLayer, ImageLayer
+from board.models import Character, Tile, UserSession, Image, Room, CharacterLayer, TileLayer, ImageLayer, Layer
 
 
 @dataclass
@@ -240,4 +240,25 @@ def _process_delete_image(room: Room, account: AccountModel, data: Dict):
     room.save()  # Update last modified
 
     response = {"type": "layer.delete", "layer": layer.identifier, "object": image.to_dict()}
+    return Response(sender=response, room=response)
+
+
+@register("layer.new")
+@_moderators_only
+@database_sync_to_async
+def _process_new_layer(room: Room, account: AccountModel, data: Dict):
+    try:
+        LayerModel: Type[Layer] = {
+            "tile": TileLayer,
+            "character": CharacterLayer,
+            "image": ImageLayer,
+        }[data["component_type"]]
+    except KeyError:
+        raise EventError("Unknown layer type")
+
+    level = Layer.objects.filter(room=room).aggregate(level=Max("level"))["level"] + 1
+
+    layer = LayerModel.objects.create(room=room, name=data["name"], level=level)
+
+    response = {"type": "layer.new", layer.identifier: layer.to_dict()}
     return Response(sender=response, room=response)

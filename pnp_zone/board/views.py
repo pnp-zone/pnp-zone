@@ -63,7 +63,7 @@ class BoardData(LoginRequiredMixin, View):
                     "type": "cursor",
                     "name": "Cursors",
                     "children": {},
-                }
+                },
             ),
             # User session
             "x": session.board_x,

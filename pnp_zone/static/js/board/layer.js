@@ -34,7 +34,10 @@ export class LayerStack extends React.Component {
 
     createElem([uuid, {type}]) {
         const {setLayerRef} = this.props;
-        if (type === "image")
+        if (uuid == null) {
+            return this.props.children;
+        }
+        else if (type === "image")
             return e(ImageLayer, {
                 key: uuid,
                 ref(elem) {
@@ -70,13 +73,13 @@ export class LayerStack extends React.Component {
             }, "Move images"),
         ]);
 
-        const layers = Object.entries(this.props.layers).sort(LayerStack.layerSort);
-        const level0 = layers.findIndex(LayerStack.level0);
-        const elems = layers.map(this.createElem.bind(this));
-        if (this.props.children.length > 0)
-            elems.splice(level0, 0, this.props.children[0]);
-
-        return e(React.Fragment, {}, elems)
+        const layerEntries = Object.entries(this.props.layers)
+        layerEntries.push([null, {level: 0}]);
+        return e(React.Fragment, {},
+            layerEntries
+                .sort(LayerStack.layerSort)
+                .map(this.createElem.bind(this))
+        );
     }
 }
 LayerStack.defaultProps = {

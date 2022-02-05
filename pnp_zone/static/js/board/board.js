@@ -48,6 +48,9 @@ export default class Board extends React.Component {
         this.resizer = new ResizeObserver(function(){this.props.setBoard({});}.bind(this));
 
         socket.registerEvent("error", ({message}) => { console.error(message); });
+        socket.registerEvent("layer.new", (layers) => {
+            this.props.setBoard((state) => ({layers: {...state.layers, ...layers}}));
+        });
         socket.registerEvent("layer.set", this.layerSetter.bind(this));
         socket.registerEvent("layer.delete", this.layerDeleter.bind(this));
         socket.registerEvent("switch", ({url}) => {

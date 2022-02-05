@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -36,20 +37,28 @@ class Room(models.Model):
         return self.name
 
 
+def not_zero(value):
+    if value == 0:
+        raise ValidationError("0 is not a valid level")
+
+
 class Layer(models.Model):
     component_type: str = NotImplemented
     children = NotImplemented  # Be sure to make the ForeignKey relation name be children
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     name = models.CharField(max_length=255, default="Unnamed layer", blank=True)
-    level = models.IntegerField()
+    level = models.IntegerField(validators=[not_zero])
 
     class Meta:
-        unique_together = ("room", "level"), ("room", "identifier")
+        unique_together = ("room", "identifier")
 
     def to_dict(self):
         return {"type": self.component_type, "level": self.level, "name": self.name,
                 "children": dict((child.identifier, child.to_dict()) for child in self.children.all())}
+
+    def __str__(self):
+        return f"{self.level} - {self.identifier[:8]}{'...' if len(self.identifier) > 8 else ''}"
 
 
 class CharacterLayer(Layer):
