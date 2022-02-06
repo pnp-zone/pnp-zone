@@ -11,6 +11,11 @@ const Modes = {
     ERASE: "erase",
     NONE: "none",
 };
+const ModeIcons = {
+    [Modes.PAINT]: "/static/img/paintbrush.svg",
+    [Modes.ERASE]: "/static/img/eraser.svg",
+    [Modes.NONE]: null,
+};
 
 export default class Paintbrush extends React.PureComponent {
 
@@ -35,9 +40,9 @@ export default class Paintbrush extends React.PureComponent {
     send() {
         if (this.state.mode === Modes.PAINT) {
             const {background, border} = this.state;
-            socket.send({type: "tiles.color", tiles: this.toSend, background, border,});
+            socket.send({type: "tiles.color", tiles: this.toSend, background, border, layer: this.props.layer});
         } else if (this.state.mode === Modes.ERASE) {
-            socket.send({type: "tiles.delete", tiles: this.toSend,});
+            socket.send({type: "tiles.delete", tiles: this.toSend, layer: this.props.layer});
         }
         this.toSend = [];
         this.sendTimeout = null;
@@ -60,9 +65,9 @@ export default class Paintbrush extends React.PureComponent {
             // Directly write tile to board
             if (this.state.mode === Modes.PAINT) {
                 const {background, border} = this.state;
-                socket.sendLocally({type: "layer.set", layer: "tiles", key: `${x} ${y}`, object: {x, y, background, border}});
+                socket.sendLocally({type: "layer.set", layer: this.props.layer, key: `${x} ${y}`, object: {x, y, background, border}});
             } else if (this.state.mode === Modes.ERASE) {
-                socket.sendLocally({type: "layer.delete", layer: "tiles", key: `${x} ${y}`});
+                socket.sendLocally({type: "layer.delete", layer: this.props.layer, key: `${x} ${y}`});
             }
         }
     }
@@ -94,26 +99,25 @@ export default class Paintbrush extends React.PureComponent {
         }
     }
 
+    renderModeSwitch(mode) {
+        const setState = this.setState.bind(this);
+        return e("button", {
+            key: `${mode}Mode`,
+            className: this.state.mode === mode ? "active" : "",
+            onClick() {setState((state) => ({mode: state.mode === mode ? Modes.NONE : mode}));},
+        }, [
+            e("img", {src: ModeIcons[mode], width: 32, height: 32})
+        ]);
+    }
+
     render() {
         const setState = this.setState.bind(this);
         const {background, border} = this.state;
         return e("div", {
             className: "margin",
         }, [
-            e("button", {
-                key: "paintMode",
-                className: this.state.mode === Modes.PAINT ? "active" : "",
-                onClick() {setState((state) => ({mode: state.mode === Modes.PAINT ? Modes.NONE : Modes.PAINT}));},
-            }, [
-                e("img", {src: "/static/img/paintbrush.svg", width: 32, height: 32})
-            ]),
-            e("button", {
-                key: "eraseMode",
-                className: this.state.mode === Modes.ERASE ? "active" : "",
-                onClick() {setState((state) => ({mode: state.mode === Modes.ERASE ? Modes.NONE : Modes.ERASE}));},
-            }, [
-                e("img", {src: "/static/img/eraser.svg", width: 32, height: 32})
-            ]),
+            this.renderModeSwitch(Modes.PAINT),
+            this.renderModeSwitch(Modes.ERASE),
             e("div", {
                 className: "flex-horizontal",
             }, [

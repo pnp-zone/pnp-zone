@@ -13,15 +13,15 @@ const layerTypes = {
     cursor: staticUrl("img/cursor.svg"),
 };
 
-function renderLayer([uuid, {type, name}]) {
+function renderLayer(setSelectedLayer, [uuid, {type, name}]) {
     if (uuid === null) {
         return e("tr", {}, [e("td", {colspan: 5}, [""])]);
     } else {
         return e(TableRow, {
             key: uuid,
-            /*onClick() {
+            onClick() {
                 setSelectedLayer(type, uuid);
-            },*/
+            },
         }, [
             e("img", {src: layerTypes[type], className: "icon"}),
             name,
@@ -57,7 +57,7 @@ export function LayerList(props) {
 
     return e("div", {className: "flex-vertical"}, [
         e("table", {className: "layer-list"},
-            layerEntries.sort(layerSort).map(renderLayer)
+            layerEntries.sort(layerSort).map(renderLayer.bind(null, setSelectedLayer))
         ),
         e("form", {
             onSubmit(event) {

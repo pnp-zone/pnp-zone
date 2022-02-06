@@ -134,7 +134,10 @@ def _process_delete_character(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_color_tile(room: Room, account: AccountModel, data: Dict):
-    layer = TileLayer.objects.filter(room=room).first()
+    try:
+        layer = TileLayer.objects.get(room=room, identifier=data["layer"])
+    except ImageLayer.DoesNotExist:
+        raise EventError("Unknown layer")
     # Create Qs and Tiles from data
     q = Q()
     tiles = []
@@ -163,7 +166,10 @@ def _process_color_tile(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
-    layer = TileLayer.objects.filter(room=room).first()
+    try:
+        layer = TileLayer.objects.get(room=room, identifier=data["layer"])
+    except ImageLayer.DoesNotExist:
+        raise EventError("Unknown layer")
     q = Q()
     for point in data["tiles"]:
         q = q | Q(x=point[0], y=point[1])

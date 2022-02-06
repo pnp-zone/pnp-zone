@@ -14,10 +14,21 @@ function Main(props) {
     const {bbb, boards, isModerator} = props;
 
     const [board, setBoard] = React.useState(document.initialBoard);
-    const [selectedLayer, setSelectedLayer] = React.useState({
-        image: "background-images",
-        character: "characters",
-        tile: "tiles",
+    const [selectedLayer, setSelectedLayer] = React.useState(() => {
+        const obj = {
+            image: "background-images",
+            character: "characters",
+            tile: "tiles",
+        };
+        for (const [type, uuid] of Object.entries(obj)) {
+            if (board.layers[uuid] === undefined)
+                obj[type] = null;
+        }
+        for (const [uuid, {type}] of Object.entries(board.layers)) {
+            if (obj[type] === null)
+                obj[type] = uuid;
+        }
+        return obj;
     });
     const [editMode, setEditMode] = React.useState(false);
     const [activeDrag, setActiveDrag] = React.useState(false);
@@ -80,7 +91,7 @@ function Main(props) {
             ...(isModerator ? [
                 [
                     e("img", {src: "/static/img/paintbrush.svg", className: "icon"}),
-                    e(Paintbrush, {}),
+                    e(Paintbrush, {layer: selectedLayer.tile}),
                 ],
                 [
                     "Board",
