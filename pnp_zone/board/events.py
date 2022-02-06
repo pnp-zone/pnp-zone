@@ -174,6 +174,16 @@ def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
     return Response(room=response)
 
 
+@register("background.color")
+@_moderators_only
+@database_sync_to_async
+def _process_color_background(room: Room, account: AccountModel, data: Dict):
+    room.defaultBackground = data["background"]
+    room.defaultBorder = data["border"]
+    room.save()
+    return Response(sender=data, room=data)
+
+
 # ----- #
 # Image #
 # ----- #

@@ -72,6 +72,7 @@ export default class Board extends React.Component {
         });
         socket.registerEvent("layer.set", this.layerSetter.bind(this));
         socket.registerEvent("layer.delete", this.layerDeleter.bind(this));
+        socket.registerEvent("background.color", this.props.setBoard);
         socket.registerEvent("switch", ({url}) => {
             fetch(`${url}/data`, {method: "GET"})
                 .then(response => response.json())

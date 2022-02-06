@@ -96,6 +96,7 @@ export default class Paintbrush extends React.PureComponent {
 
     render() {
         const setState = this.setState.bind(this);
+        const {background, border} = this.state;
         return e("div", {
             className: "margin",
         }, [
@@ -114,25 +115,34 @@ export default class Paintbrush extends React.PureComponent {
                 e("img", {src: "/static/img/eraser.svg", width: 32, height: 32})
             ]),
             e("div", {
-                key: "colorPicker",
-                className: "colorPicker",
+                className: "flex-horizontal",
             }, [
                 e("div", {
-                    key: "borderPreview",
-                    className: "hexagon",
-                    style: {"--color": this.state.border,},
+                    key: "tilePreview",
+                    className: "tilePreview",
+                }, [
+                    e("div", {
+                        key: "borderPreview",
+                        className: "hexagon",
+                        style: {"--color": this.state.border,},
+                        onClick() {
+                            setState({colorPicker: "border"});
+                        },
+                    }),
+                    e("div", {
+                        key: "backgroundPreview",
+                        className: "hexagon",
+                        style: {"--color": this.state.background,},
+                        onClick() {
+                            setState({colorPicker: "background"});
+                        },
+                    })
+                ]),
+                e("button", {
                     onClick() {
-                        setState({colorPicker: "border"});
-                    },
-                }),
-                e("div", {
-                    key: "backgroundPreview",
-                    className: "hexagon",
-                    style: {"--color": this.state.background,},
-                    onClick() {
-                        setState({colorPicker: "background"});
-                    },
-                })
+                        socket.send({type: "background.color", background, border});
+                    }
+                }, "Set as background")
             ]),
             e(ColorPicker, {
                 value: this.state[this.state.colorPicker],

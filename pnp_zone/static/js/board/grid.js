@@ -1,7 +1,4 @@
-import React from "../react.js";
-
-const e = React.createElement;
-
+import React, {e} from "../react.js";
 import Hexagon from "./hexagon.js";
 
 export const TILE_HEXAGON = new Hexagon(100);
@@ -96,11 +93,11 @@ const PatchCss = React.memo(function PatchCss(props) {
             }
 
             // Combine hexagons
-            borders.push(`<path fill='${border}' fill-rule='evenodd' d='${bigH.asPath} ${smallH.asPath}'></path>`);
+            borders.push(`<path d='${bigH.asPath} ${smallH.asPath}'></path>`);
         }
     }
     const viewBox = `0 0 ${TILE_WIDTH * size} ${TILE_HEIGHT * size}`;
-    const header = `<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}'>\n`;
+    const header = `<svg version='1.1' xmlns='http://www.w3.org/2000/svg' viewBox='${viewBox}' fill='${border}' fill-rule='evenodd'>\n`;
     const svg = header + borders.join("\n") + "\n</svg>";
 
     return e("style", {}, `.patch${size} {background-image: url("data:image/svg+xml,${encodeURIComponent(svg)}");

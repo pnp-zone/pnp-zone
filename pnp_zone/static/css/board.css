@@ -236,7 +236,7 @@ iframe {
     clip-path: inherit;
 }
 
-.colorPicker {
+.tilePreview {
     --width: 7em;
     --inner-width: calc(var(--width) * 0.8);
     width: var(--width);
@@ -244,14 +244,14 @@ iframe {
     margin: 5px;
     position: relative;
 }
-.colorPicker > .hexagon {
+.tilePreview > .hexagon {
     --border-width: 0px;
     --border-color: transparent;
 }
-.colorPicker > .hexagon:first-child {
+.tilePreview > .hexagon:first-child {
     --width: inherit;
 }
-.colorPicker > .hexagon:last-child {
+.tilePreview > .hexagon:last-child {
     --width: var(--inner-width);
 }
 
