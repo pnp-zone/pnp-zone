@@ -2,6 +2,7 @@ import React, {e} from "../../react.js";
 import staticUrl from "../../lib/static.js";
 import {TableRow} from "../../lib/misc.js";
 import socket from "../../socket.js";
+import {SortableList} from "./sortablelist.js";
 
 function layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
     return levelB - levelA;
@@ -26,20 +27,6 @@ function renderLayer(setSelectedLayer, [uuid, {type, name}]) {
             e("img", {src: layerTypes[type], className: "icon"}),
             name,
             e("img", {src: "/static/img/show.svg", className: "icon"}),
-            e("div", {className: "flex-vertical"}, [
-                e("img", {
-                    src: "/static/img/up.svg", className: "icon",
-                    onClick() {
-                        socket.send({type: "layer.move", id: uuid, up: true});
-                    }
-                }),
-                e("img", {
-                    src: "/static/img/down.svg", className: "icon",
-                    onClick() {
-                        socket.send({type: "layer.move", id: uuid, up: false});
-                    }
-                }),
-            ]),
             e("img", {
                 src: "/static/img/close.svg", className: "icon",
                 onClick() {
@@ -52,13 +39,22 @@ function renderLayer(setSelectedLayer, [uuid, {type, name}]) {
 
 export function LayerList(props) {
     const {layers, setSelectedLayer} = props;
-    const layerEntries = Object.entries(layers);
+    const layerEntries = Object.entries(layers).filter(([_, {type}]) => type !== "cursor");
     layerEntries.push([null, {level: 0}]);
+    const table = React.useRef();
 
     return e("div", {className: "flex-vertical"}, [
-        e("table", {className: "layer-list"},
-            layerEntries.sort(layerSort).map(renderLayer.bind(null, setSelectedLayer))
-        ),
+        e("table", {className: "layer-list", ref: table}, [
+            e(SortableList, {
+                domParent: table,
+                setIndex(key, index) {
+                    if (!isNaN(index))
+                        socket.send({type: "layer.move", layer: key, index});
+                },
+            },
+                layerEntries.sort(layerSort).map(renderLayer.bind(null, setSelectedLayer))
+            ),
+        ]),
         e("form", {
             onSubmit(event) {
                 event.preventDefault();

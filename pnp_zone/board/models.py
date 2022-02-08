@@ -21,9 +21,9 @@ class Room(models.Model):
     def create_with_layers(**kwargs):
         room = Room.objects.create(**kwargs)
         ImageLayer.objects.create(room=room, level=-1, identifier="background-images", name="Background Images")
-        TileLayer.objects.create(room=room, level=0, identifier="tiles", name="Colored Tiles")
-        ImageLayer.objects.create(room=room, level=1, identifier="foreground-images", name="Foreground Images")
-        CharacterLayer.objects.create(room=room, level=2, identifier="characters", name="Character Tokens")
+        TileLayer.objects.create(room=room, level=1, identifier="tiles", name="Colored Tiles")
+        ImageLayer.objects.create(room=room, level=2, identifier="foreground-images", name="Foreground Images")
+        CharacterLayer.objects.create(room=room, level=3, identifier="characters", name="Character Tokens")
         return room
 
     def get_absolute_url(self):
@@ -58,7 +58,8 @@ class Layer(models.Model):
                 "children": dict((child.identifier, child.to_dict()) for child in self.children.all())}
 
     def __str__(self):
-        return f"{self.level} - {self.identifier[:8]}{'...' if len(self.identifier) > 8 else ''}"
+        identifier = str(self.identifier)
+        return f"{self.level} - {identifier[:8]}{'...' if len(identifier) > 8 else ''}"
 
 
 class CharacterLayer(Layer):

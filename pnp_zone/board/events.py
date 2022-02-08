@@ -284,31 +284,31 @@ def _process_new_layer(room: Room, account: AccountModel, data: Dict):
 @_moderators_only
 @database_sync_to_async
 def _process_move_layer(room: Room, account: AccountModel, data: Dict):
-    layers = Layer.objects.filter(room=room)
-    try:
-        layer = layers.get(identifier=data["id"])
-    except Layer.DoesNotExist:
+    layers = Layer.objects.filter(room=room).order_by("-level")
+    sorted_layers = sorted([Layer(identifier=None, level=0)] + list(layers), key=lambda l: l.level, reverse=True)
+
+    # Perform move in sorted_layers
+    layer = None
+    for layer in sorted_layers:
+        if layer.identifier == data["layer"]:
+            break
+    if layer is not None:
+        sorted_layers.remove(layer)
+        sorted_layers.insert(data["index"], layer)
+    else:
         raise EventError("Unknown layer")
 
-    if (data["up"] and layer.level == -1) or (not data["up"] and layer.level == 1):
-        if data["up"]:
-            layers.update(level=F("level") + 1)
-            layer.level += 2
-        else:
-            layers.update(level=F("level") - 1)
-            layer.level -= 2
-        layer.save()
-    else:
-        if data["up"]:
-            other = layers.filter(level__gt=layer.level).order_by("level").first()
-        else:
-            other = layers.filter(level__lt=layer.level).order_by("-level").first()
+    # Update levels
+    sorted_layers.reverse()
+    for layer_zero, layer in enumerate(sorted_layers):
+        if layer.identifier is None:
+            break
+    for i, layer in enumerate(sorted_layers):
+        layer.level = i - layer_zero
 
-        if other is None:
-            raise EventError("Layer is already at top/bottom")
-        else:
-            layer.level, other.level = other.level, layer.level
-            Layer.objects.bulk_update([layer, other], ["level"])
+    # Push update to db
+    sorted_layers.remove(sorted_layers[layer_zero])
+    Layer.objects.bulk_update(sorted_layers, ["level"])
 
     response = {"type": "layer.move", "levels": {layer.identifier: layer.level for layer in layers}}
     return Response(sender=response, room=response)
