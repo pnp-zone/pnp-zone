@@ -38,52 +38,51 @@ function renderLayer(setSelectedLayer, [uuid, {type, name}]) {
 }
 
 export function LayerList(props) {
-    const {layers, setSelectedLayer} = props;
-    const layerEntries = Object.entries(layers).filter(([_, {type}]) => type !== "cursor");
+    const {layers: {cursors: _, ...layers}, setSelectedLayer} = props;
+    const layerEntries = Object.entries(layers);
     layerEntries.push([null, {level: 0}]);
     const table = React.useRef();
 
     return e("div", {className: "flex-vertical"}, [
-        e("table", {className: "layer-list", ref: table}, [
-            e(SortableList, {
-                domParent: table,
-                setIndex(key, index) {
-                    if (!isNaN(index))
-                        socket.send({type: "layer.move", layer: key, index});
-                },
-            },
-                layerEntries.sort(layerSort).map(renderLayer.bind(null, setSelectedLayer))
-            ),
-        ]),
         e("form", {
             onSubmit(event) {
                 event.preventDefault();
-                let [name, type] = event.target;
-                name = name.value;
-                type = type.value;
+                const {type: {value: type}, name: {value: name}} = event.target.elements;
                 socket.send({
                     type: "layer.new",
                     component_type: type,
                     name,
                 });
-            }
+            },
         }, [
-            e("table", {}, [
-                e(TableRow, {}, [
-                    e("label", {htmlFor: "layer-name"}, "Name"),
-                    e("input", {id: "layer-name", required: true}),
-                ]),
-                e(TableRow, {}, [
-                    e("label", {htmlFor: "layer-type"}, "Type"),
-                    e("select", {id: "layer-type"}, [
-                        e("option", {value: "character"}, "Character"),
-                        e("option", {value: "tile"}, "Tile"),
-                        e("option", {value: "image"}, "Image"),
+            e("table", {className: "layer-list"}, [
+                e("thead", {}, [
+                    e(TableRow, {colspans: {1: 3}}, [
+                        e("img", {src: layerTypes.cursor, className: "icon"}),
+                        "Cursors",
                     ]),
                 ]),
-                e(TableRow, {}, [
-                    e(React.Fragment),
-                    e("button", {type: "submit"}, "Add @ top"),
+                e("tbody", {ref: table}, [
+                    e(SortableList, {
+                        domParent: table,
+                        setIndex(key, index) {
+                            if (!isNaN(index))
+                                socket.send({type: "layer.move", layer: key, index});
+                        },
+                    },
+                        layerEntries.sort(layerSort).map(renderLayer.bind(null, setSelectedLayer))
+                    ),
+                ]),
+                e("tfoot", {}, [
+                    e(TableRow, {colspans: {2: 2}}, [
+                        e("select", {name: "type"}, [
+                            e("option", {value: "character"}, "Character"),
+                            e("option", {value: "tile"}, "Tile"),
+                            e("option", {value: "image"}, "Image"),
+                        ]),
+                        e("input", {name: "name"}),
+                        e("button", {type: "submit"}, "Add @ top"),
+                    ]),
                 ]),
             ]),
         ]),
