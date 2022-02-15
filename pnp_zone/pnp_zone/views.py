@@ -37,3 +37,7 @@ def permission_denied(request, exception: PermissionDenied):
 
 def page_not_found(request, exception: Http404):
     return render(request, template_name="error.html", context={"message": "Page not found"})
+
+
+def react_test(request):
+    return render(request, template_name="test.html")

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
-from pnp_zone.views import Login, Logout, permission_denied, page_not_found
+from pnp_zone.views import Login, Logout, permission_denied, page_not_found, react_test
 import dashboard.urls
 import board.urls
 import campaign.urls
@@ -33,6 +33,9 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
+    urlpatterns.append(
+        path("test", react_test),
+    )
     urlpatterns.extend(
         staticfiles_urlpatterns()
     )
