@@ -89,6 +89,54 @@ def _process_new_character(room: Room, account: AccountModel, data: Dict):
         return Response(sender=response, room=response)
 
 
+def yield_points(x, y, d_max=10):
+    """Generate points in a circle like manor"""
+    for d in range(0, d_max):
+        for sign_x, sign_y in [(1, -1), (1, 1), (-1, 1), (-1, -1)]:
+            for dx in range(d+1):
+                dy = d - dx
+                yield x + sign_x*dx, y + sign_y*dy
+
+
+@register("character.bulk")
+@_moderators_only
+@database_sync_to_async
+def _process_new_character_bulk(room: Room, account: AccountModel, data: Dict):
+    try:
+        layer = CharacterLayer.objects.get(room=room, identifier=data["layer"])
+    except ImageLayer.DoesNotExist:
+        raise EventError("Unknown layer")
+
+    x = data["x"]
+    y = data["y"]
+    color = data["color"]
+    name_template = data["name"]
+    try:
+        number = int(data["number"])
+    except ValueError:
+        raise EventError("number must be an integer")
+
+    characters = []
+    occupied = set(Character.objects.filter(layer=layer).values_list("x", "y"))
+    for pos in yield_points(x, y):
+        if pos in occupied:
+            continue
+
+        occupied.add(pos)
+        characters.append(
+            Character(layer=layer, x=pos[0], y=pos[1], name=name_template.format(i=len(characters)+1), color=color)
+        )
+        if len(characters) >= number:
+            break
+    Character.objects.bulk_create(characters)
+
+    room.save()  # Update last modified
+    response = {"type": "layer.set", "layer": layer.identifier, "objects": {
+        character.identifier: character.to_dict() for character in characters
+    }}
+    return Response(sender=response, room=response)
+
+
 @register("character.move")
 @database_sync_to_async
 def _process_move_character(room: Room, account: AccountModel, data: Dict):

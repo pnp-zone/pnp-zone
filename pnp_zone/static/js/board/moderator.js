@@ -126,6 +126,7 @@ export class CharacterModal extends React.Component {
             x: 0,
             y: 0,
             color: "hsla(0, 100%, 50%, 1)",
+            number: 1,
             _isOpen: false,
         };
     }
@@ -205,6 +206,24 @@ export class CharacterModal extends React.Component {
                     e(TableRow, {}, [
                         e(React.Fragment),
                         e("button", {action: "submit"}, "Add"),
+                    ]),
+                    e(TableRow, {}, [
+                        e("label", {htmlFor: "character-bulk-amount"}, "Amount"),
+                        e(TextInput, {
+                            id: "character-bulk-amount",
+                            value: this.state.number,
+                            setValue(number) { setState({number}); }
+                        }),
+                    ]),
+                    e(TableRow, {}, [
+                        e(React.Fragment),
+                        e("button", {
+                            type: "button",
+                            onClick() {
+                                socket.send({type: "character.bulk", ...state});
+                                setState({_isOpen: false});
+                            }
+                        }, "Add a bunch"),
                     ]),
                 ]),
             ]),
