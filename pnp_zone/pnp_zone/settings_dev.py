@@ -12,9 +12,6 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 
-import ldap
-from django_auth_ldap.config import LDAPSearch
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path.cwd()
 
@@ -26,7 +23,7 @@ BASE_DIR = Path.cwd()
 SECRET_KEY = 'change_me'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -85,47 +82,27 @@ ASGI_APPLICATION = "pnp_zone.routing.application"
 
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("localhost", 6379)],
-        },
-    },
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
 }
+
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pnp-zone',
-        'USER': 'pnp-zone',
-        'PASSWORD': 'change_me',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
-AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
-]
+AUTH_PASSWORD_VALIDATORS = []
 
 
 # Internationalization
@@ -157,32 +134,21 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = '/var/www/static'
 
-# LDAP
-AUTHENTICATION_BACKENDS = [
-    # "django_auth_ldap.backend.LDAPBackend",
-    "pnp_zone.custom_ldap_backend.CustomLDAPBackend",
-    "django.contrib.auth.backends.ModelBackend",
-]
+# Logging
 
-# If using LDAPS, start the uri with ldaps://
-AUTH_LDAP_SERVER_URI = "ldap://ldap.example.com"
-# When using LDAP with StartTLS set the following:
-# AUTH_LDAP_START_TLS = True
-
-# Self signed certs
-# ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
-
-AUTH_LDAP_BIND_DN = ""
-AUTH_LDAP_BIND_PASSWORD = ""
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    "cn=Members,dc=example,dc=com", ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
-
-AUTH_LDAP_USER_ATTR_MAP = {
-    "first_name": "givenName",
-    "last_name": "sn",
-    "email": "mail",
-    "display_name": "displayName",
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"}
+    },
+    "loggers": {
+        "django.db.backends": {
+            "handlers": ["console"],
+            "level": "ERROR",
+            "propagate": True,
+        },
+    },
 }
 
 # Integrations
