@@ -58,7 +58,7 @@ function Main(props) {
                 layer: selectedLayer.image,
                 layers: Object.fromEntries(Object.entries(board.layers).filter(([_, {type}]) => type === "image").map(([layer, {name}]) => [layer, name])),
             }),
-        ] : undefined),
+        ] : []),
         e(TabList, {
             open: openTab,
             setOpen: setOpenTab,
