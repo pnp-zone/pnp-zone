@@ -208,51 +208,54 @@ iframe {
     border: none;
 }
 
-.hexagon {
+.hexagon, .hexagon::before, .hexagon::after {
     --width: 100px;
     --height: calc(var(--width) * 2 / var(--sqrt3));
-    --color: white;
-    --border-width: calc(var(--width) / 50);
-    --border-color: black;
-	background-color: var(--border-color);
-	width: var(--width);
-    height: var(--height);
     position: absolute;
+    width: var(--width);
+    height: var(--height);
     left: calc(50% - 0.5 * var(--width));
     top: calc(50% - 0.5 * var(--height));
-    clip-path: polygon(0% 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%);
 }
 .hexagon::after {
-    --inner-width: calc(var(--width) - 2*var(--border-width));
-    --inner-height: calc(var(--inner-width) * 2 / var(--sqrt3));
     content: "";
     display: block;
+    background-color: var(--border-color);
+    clip-path: polygon(evenodd, 0 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0 27%, 2% 27%, 50% 3%, 98% 27%, 98% 73%, 50% 97%, 2% 73%, 2% 27%, 0 27%);
+}
+.hexagon {
+    --color: white;
+    --border-color: black;
     background-color: var(--color);
-    width: var(--inner-width);
-    height: var(--inner-height);
-    position: inherit;
-    left: calc(50% - 0.5 * var(--inner-width));
-    top: calc(50% - 0.5 * var(--inner-height));
-    clip-path: inherit;
+    clip-path: polygon(0 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%);
 }
 
 .tilePreview {
-    --width: 7em;
-    --inner-width: calc(var(--width) * 0.8);
-    width: var(--width);
-    height: calc(var(--width) * 2 / var(--sqrt3));
-    margin: 5px;
     position: relative;
+    width: 7em;
+    height: calc(7em * 2 / var(--sqrt3));
+    margin: 5px;
+    clip-path: polygon(0 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%);
+    background-image:
+            repeating-linear-gradient(45deg, gray 25%, transparent 25%, transparent 75%, gray 75%, gray),
+            repeating-linear-gradient(45deg, gray 25%, lightgray 25%, lightgray 75%, gray 75%, gray);
+    background-position: 0 0, 0.5em 0.5em;
+    background-size: 1em 1em;
 }
-.tilePreview > .hexagon {
-    --border-width: 0px;
-    --border-color: transparent;
+.tilePreview > div {
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    left: 0;
+    top: 0;
 }
-.tilePreview > .hexagon:first-child {
-    --width: inherit;
+.tilePreview > div:first-child {
+    clip-path: inherit;
+    background-color: var(--color);
 }
-.tilePreview > .hexagon:last-child {
-    --width: var(--inner-width);
+.tilePreview > div:last-child {
+    clip-path: polygon(evenodd, 0 25%, 50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0 30%, 10% 30%, 50% 10%, 90% 30%, 90% 70%, 50% 90%, 10% 70%, 10% 30%, 0 30%);
+    background-color: var(--color);
 }
 
 .color-picker {

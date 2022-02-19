@@ -134,19 +134,17 @@ export default class Paintbrush extends React.PureComponent {
                     className: "tilePreview",
                 }, [
                     e("div", {
-                        key: "borderPreview",
-                        className: "hexagon",
-                        style: {"--color": this.state.border,},
-                        onClick() {
-                            setState({colorPicker: "border"});
-                        },
-                    }),
-                    e("div", {
                         key: "backgroundPreview",
-                        className: "hexagon",
                         style: {"--color": this.state.background,},
                         onClick() {
                             setState({colorPicker: "background"});
+                        },
+                    }),
+                    e("div", {
+                        key: "borderPreview",
+                        style: {"--color": this.state.border,},
+                        onClick() {
+                            setState({colorPicker: "border"});
                         },
                     })
                 ]),
