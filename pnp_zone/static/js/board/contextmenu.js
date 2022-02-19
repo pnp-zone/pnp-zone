@@ -28,6 +28,7 @@ export class ContextMenuController extends React.Component {
             },
             handler(getItems) {
                 return function (event) {
+                    if (event.altKey) return;
                     if (!event.defaultPrevented) {
                         event.preventDefault();
                         setState((state) => {
