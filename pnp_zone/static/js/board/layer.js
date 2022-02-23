@@ -4,6 +4,7 @@ import Image, {ImageHitbox} from "./image.js";
 import {Tile} from "./grid.js";
 import {Cursor} from "./cursors.js";
 import ContextMenu from "./contextmenu.js";
+import {USER} from "./user.js";
 
 const e = React.createElement;
 
@@ -22,6 +23,15 @@ export class LayerStack extends React.Component {
         this.state = {
             moveImages: false,
         };
+        this.contextMenuItems = function() {
+            return e("button", {
+                className: this.state.moveImages ? "active" : "",
+                onClick: () => {
+                    this.setState((state) => ({moveImages: ! state.moveImages}));
+                    this.context.close();
+                },
+            }, "Move images");
+        }.bind(this);
     }
 
     static layerSort([_A, {["level"]: levelA}], [_B, {["level"]: levelB}]) {
@@ -61,17 +71,7 @@ export class LayerStack extends React.Component {
 
     render() {
         const contextMenu = this.context;
-        const setState = this.setState.bind(this);
-        const state = this.state;
-        contextMenu.addDefaultItems("layer", () => [
-            e("button", {
-                className: state.moveImages ? "active" : "",
-                onClick() {
-                    setState((state) => ({moveImages: ! state.moveImages}));
-                    contextMenu.close();
-                },
-            }, "Move images"),
-        ]);
+        contextMenu.addDefaultItems("layerStack", USER.isModerator ? this.contextMenuItems : undefined);
 
         const layerEntries = Object.entries(this.props.layers)
         layerEntries.push([null, {level: 0}]);

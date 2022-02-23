@@ -5,6 +5,7 @@ import {LEFT_BUTTON} from "../lib/mouse.js";
 import {Drag} from "./drag.js";
 import socket from "../socket.js";
 import ContextMenu from "./contextmenu.js";
+import {USER} from "./user.js";
 
 const e = React.createElement;
 
@@ -100,7 +101,7 @@ export default class Character extends React.Component {
                 cursor: this.state.isDragged ? "grabbing" : "",
             },
             onMouseDown: this.drag.onMouseDown,
-            onContextMenu: this.context.handler(this.contextMenuItems),
+            onContextMenu: USER.isModerator ? this.context.handler(this.contextMenuItems) : undefined,
             onMouseUp: this.onMouseUp,
         }, [
             e("div", {

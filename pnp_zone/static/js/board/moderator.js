@@ -141,7 +141,7 @@ export class CharacterModal extends React.Component {
         const state = this.state;
         const contextMenu = this.context;
 
-        contextMenu.addDefaultItems("moderator", (event) => [
+        contextMenu.addDefaultItems("characterModal", (event) => [
             e("button", {
                 onClick: () => {
                     setState({

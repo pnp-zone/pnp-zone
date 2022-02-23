@@ -32,15 +32,8 @@ export class ContextMenuController extends React.Component {
                     if (!event.defaultPrevented) {
                         event.preventDefault();
                         setState((state) => {
-                            const initialChildren = [];
-                            for (const key in state.defaultChildren) {
-                                if (state.defaultChildren.hasOwnProperty(key)) {
-                                    initialChildren.push(state.defaultChildren[key](event));
-                                }
-                            }
-
                             return {
-                                children: initialChildren,
+                                children: Object.values(state.defaultChildren).filter(Boolean).map(func => func(event)),
                                 x: event.clientX,
                                 y: event.clientY,
                                 visible: true,
@@ -61,12 +54,6 @@ export class ContextMenuController extends React.Component {
         };
     }
 
-    UNSAFE_componentWillUpdate(prevProps) {
-        if (prevProps.containerId !== this.props.containerId) {
-            this.container = document.getElementById(this.props.containerId);
-        }
-    }
-
     render() {
         const {children} = this.props;
         const {visible} = this.state;
@@ -85,6 +72,9 @@ export class ContextMenuController extends React.Component {
         ]);
     }
 }
+ContextMenuController.defaultProps = {
+    containerId: "contextmenu",  // Should be static
+};
 
 export class ContextMenuComponent extends React.Component {
     static contextType = ContextMenu;

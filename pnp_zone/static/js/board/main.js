@@ -8,10 +8,12 @@ import UserTools from "./sidemenu/usertools.js";
 import Paintbrush from "./sidemenu/paintbrush.js";
 import {BoardSwitch} from "./sidemenu/boardlist.js";
 import {LayerList} from "./sidemenu/layerlist.js";
+import {USER} from "./user.js";
 const e = React.createElement;
 
 function Main(props) {
     const {bbb, boards, isModerator} = props;
+    USER.isModerator = isModerator;
 
     const [board, setBoard] = React.useState(document.initialBoard);
     const [selectedLayer, setSelectedLayer] = React.useState(() => {
