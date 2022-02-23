@@ -1,6 +1,6 @@
 import React, {e} from "../react.js";
 import socket from "../socket.js";
-import TextInput from "./forms/textinput.js";
+import TextInput, {LazyInput} from "./forms/textinput.js";
 import ContextMenu from "./contextmenu.js";
 import Modal from "./modal.js";
 import {ColorPicker} from "./forms/colorpicker.js";
@@ -209,10 +209,10 @@ export class CharacterModal extends React.Component {
                     ]),
                     e(TableRow, {}, [
                         e("label", {htmlFor: "character-bulk-amount"}, "Amount"),
-                        e(TextInput, {
+                        e(LazyInput, {
                             id: "character-bulk-amount",
                             value: this.state.number,
-                            setValue(number) { setState({number}); }
+                            setValue(value) { setState({number: parseInt(value)}); }
                         }),
                     ]),
                     e(TableRow, {}, [

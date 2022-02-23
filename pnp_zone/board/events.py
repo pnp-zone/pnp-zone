@@ -111,10 +111,7 @@ def _process_new_character_bulk(room: Room, account: AccountModel, data: Dict):
     y = data["y"]
     color = data["color"]
     name_template = data["name"]
-    try:
-        number = int(data["number"])
-    except ValueError:
-        raise EventError("number must be an integer")
+    number = data["number"]
 
     characters = []
     occupied = set(Character.objects.filter(layer=layer).values_list("x", "y"))

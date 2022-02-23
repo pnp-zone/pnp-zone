@@ -2,7 +2,7 @@ import React from "../../react.js";
 import {LEFT_BUTTON} from "../../lib/mouse.js";
 import {Drag} from "../drag.js";
 import Color, {HSL, HSV, RGB} from "../../lib/color.js";
-import TextInput from "./textinput.js";
+import {LazyInput} from "./textinput.js";
 const e = React.createElement;
 
 function clamp(min, value, max) {
@@ -160,20 +160,4 @@ export class ColorPicker extends React.PureComponent {
             })
         ]);
     }
-}
-
-function LazyInput(props) {
-    const {value, setValue} = props;
-    const [v, setV] = React.useState(value);
-    React.useEffect(() => {
-        setV(value);
-    }, [value]);
-    return e("form", {
-        onSubmit(event) {
-            event.preventDefault();
-            setValue(v);
-        },
-    }, [
-        e(TextInput, {value: v, setValue: setV}),
-    ]);
 }
