@@ -2,7 +2,7 @@ import React from "../../react.js";
 const e = React.createElement;
 
 export default function TextInput(props) {
-    const {value, setValue, autoFocus, ...otherProps} = props;
+    const {value, setValue, autoFocus, maxLength, ...otherProps} = props;
     const callback = React.useCallback((element) => {
         if (element && autoFocus) {
             setTimeout(function () {element.focus();}, 10);
@@ -29,7 +29,7 @@ TextInput.defaultProps = {
 
 /**
  *  A lazy TextInput behaves like a TextInput with two changes:
- *  - setValue is only called when the user hits enter or leaves the input
+ *  - setValue is only called when the user leaves the input
  *  - the input's value is only set to props.value when it changes
  *
  *  The resulting behaviour is a TextInput who can perform conversions in setValue
@@ -52,19 +52,13 @@ export function LazyInput(props) {
     React.useEffect(() => {
         setV(value);
     }, [value]);
-    return e("form", {
-        onSubmit(event) {
-            event.preventDefault();
+    return e(TextInput, {
+        value: v,
+        setValue: setV,
+        onBlur() {
+            setV(value);
             setValue(v);
         },
-    }, [
-        e(TextInput, {
-            value: v,
-            setValue: setV,
-            onBlur() {
-                setValue(v);
-            },
-            ...otherProps,
-        }),
-    ]);
+        ...otherProps,
+    });
 }

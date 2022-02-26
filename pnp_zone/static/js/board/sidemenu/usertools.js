@@ -1,6 +1,6 @@
 import React, {e} from "../../react.js";
 import socket from "../../socket.js";
-import TextInput from "../forms/textinput.js";
+import {LazyInput} from "../forms/textinput.js";
 import {TableRow} from "../../lib/misc.js";
 
 export default function UserTools({setPosition}) {
@@ -28,39 +28,27 @@ export default function UserTools({setPosition}) {
         e("h2", {}, "Set board position:"),
         e("table", {}, [
             e(TableRow, {}, [
-                e("label", {
-                    htmlFor: "userToolsX",
-                }, [
-                    "X:",
-                ]),
-                e(TextInput, {
+                e("label", {htmlFor: "userToolsX"}, ["X:"]),
+                e(LazyInput, {
                     id: "userToolsX",
                     value: x,
-                    setValue: setX,
+                    setValue(x) {setX(parseFloat(x));},
                 }),
             ]),
             e(TableRow, {}, [
-                e("label", {
-                    htmlFor: "userToolsY",
-                }, [
-                    "Y:",
-                ]),
-                e(TextInput, {
+                e("label", {htmlFor: "userToolsY"}, ["Y:"]),
+                e(LazyInput, {
                     id: "userToolsY",
                     value: y,
-                    setValue: setY,
+                    setValue(y) {setY(parseFloat(y));},
                 }),
             ]),
             e(TableRow, {}, [
-                e("label", {
-                    htmlFor: "userToolsScale",
-                }, [
-                    "Scale:",
-                ]),
-                e(TextInput, {
+                e("label", {htmlFor: "userToolsScale"}, ["Scale:"]),
+                e(LazyInput, {
                     id: "userToolsScale",
                     value: scale,
-                    setValue: setScale,
+                    setValue(scale) {setScale(parseFloat(scale));},
                 }),
             ]),
             e(TableRow, {}, [

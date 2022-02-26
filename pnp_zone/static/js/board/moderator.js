@@ -85,6 +85,7 @@ export class ImageModal extends React.Component {
                                 setState({url: value});
                             },
                             autoFocus: true,
+                            maxLength: 255,
                         }),
                     ]),
                     e(TableRow, {}, [
@@ -180,6 +181,7 @@ export class CharacterModal extends React.Component {
                                 setState({name: value})
                             },
                             autoFocus: true,
+                            maxLength: 255,
                         }),
                     ]),
                     e(TableRow, {}, [
@@ -212,7 +214,7 @@ export class CharacterModal extends React.Component {
                         e(LazyInput, {
                             id: "character-bulk-amount",
                             value: this.state.number,
-                            setValue(value) { setState({number: parseInt(value)}); }
+                            setValue(value) { setState({number: parseFloat(value)}); },
                         }),
                     ]),
                     e(TableRow, {}, [
