@@ -27,7 +27,14 @@ def register(event_type: str):
 
 
 def _moderators_only(func):
+    """Decorate event handlers which should only be use by moderators"""
     func.moderators_only = True
+    return func
+
+
+def const(func):
+    """Decorate event handlers which don't modify the room and can be used in read only"""
+    func.const = True
     return func
 
 
@@ -36,6 +43,7 @@ class EventError(RuntimeError):
 
 
 @register("session")
+@const
 @database_sync_to_async
 def _process_session(room: Room, account: AccountModel, data: Dict):
     session, _ = UserSession.objects.get_or_create(room=room, user=account.user)
@@ -47,6 +55,7 @@ def _process_session(room: Room, account: AccountModel, data: Dict):
 
 
 @register("cursor")
+@const
 async def _process_cursor(room: Room, account: AccountModel, data: Dict):
     if account.display_name:
         name = account.display_name
@@ -58,6 +67,7 @@ async def _process_cursor(room: Room, account: AccountModel, data: Dict):
 
 
 @register("switch")
+@const
 @_moderators_only
 async def _process_switch(room: Room, account: AccountModel, data: Dict):
     return Response(sender=data, campaign=data)

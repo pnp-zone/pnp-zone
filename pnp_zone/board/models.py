@@ -17,6 +17,10 @@ class Room(models.Model):
     defaultBackground = models.CharField(max_length=255, default="white")
     last_modified = models.DateTimeField(auto_now=True)
 
+    @property
+    def read_only(self):
+        return False
+
     @staticmethod
     def create_with_layers(**kwargs):
         room = Room.objects.create(**kwargs)

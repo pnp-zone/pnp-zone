@@ -57,6 +57,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 await self.send_json({"type": "error", "message": f"'{event['type']}' can only be used by moderators"})
                 return
 
+            # Check if the action is allowed on the board
+            if self.room.read_only and not hasattr(handler, "const"):
+                await self.send_json({"type": "error", "message": f"'{event['type']}' can't be used in a read only room"})
+                return
+
             # Run the event handler
             try:
                 response: Response = await handler(self.room, self.account, event)
