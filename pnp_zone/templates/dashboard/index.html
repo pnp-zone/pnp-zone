@@ -19,7 +19,7 @@
         {% csrf_token %}
         <h2>Create campaign</h2>
         <label for="campaign_name">Name:</label>
-        <input id="campaign_name" name="name" required>
+        <input id="campaign_name" name="name" oninput="dbString(event);" required>
         <button>Submit</button>
     </form>
 {% endblock %}

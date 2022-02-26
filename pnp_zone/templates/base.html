@@ -39,5 +39,12 @@
             </div>
         </div>
     </div>
+    <script>
+        function dbString({target}) {
+            if (target.value.length > 255) {
+                target.value = target.value.substr(0, 255);
+            }
+        }
+    </script>
 </body>
 </html>

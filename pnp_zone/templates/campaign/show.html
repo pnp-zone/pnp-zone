@@ -79,7 +79,7 @@
                     <tr>
                         <form method="POST" action="/campaign/show/{{ cid }}/boards">
                             {% csrf_token %}
-                            <td><input name="name"></td>
+                            <td><input name="name" oninput="dbString(event);"></td>
                             <td><input type="hidden" name="action" value="create"></td>
                             <td><button type="submit">New board</button></td>
                         </form>
