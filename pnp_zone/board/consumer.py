@@ -47,9 +47,11 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
 
     async def receive_json(self, event, **kwargs):
         try:
-            # Wrap event data with matching event class
+            # Get event handler registered for received type
             if "type" not in event:
                 raise EventError("Missing type attribute")
+            if event["type"] not in event_handlers:
+                raise EventError(f"Unknown type: '{event['type']}'")
             handler = event_handlers[event["type"]]
 
             # Check if sender has required privileges
@@ -63,10 +65,7 @@ class BoardConsumer(AsyncJsonWebsocketConsumer):
                 return
 
             # Run the event handler
-            try:
-                response: Response = await handler(self.room, self.account, event)
-            except KeyError as err:
-                raise EventError(f"Missing attribute {err} for event '{event['type']}'")
+            response: Response = await handler(self.room, self.account, event)
 
             # Respond to sender
             if response.sender:

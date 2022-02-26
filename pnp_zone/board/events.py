@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Awaitable, Dict, Type
 
 from channels.db import database_sync_to_async
-from django.db.models import Q, Max, F, Min
+from django.db.models import Q, Max, F
 
 from accounts.models import AccountModel
 from board.models import Character, Tile, UserSession, Image, Room, CharacterLayer, TileLayer, ImageLayer, Layer
@@ -15,35 +15,81 @@ class Response:
     campaign: Any = None
 
 
+class EventError(RuntimeError):
+    pass
+
+
 EventHandler = Callable[[Room, AccountModel, Dict], Awaitable[Response]]
 event_handlers: Dict[str, EventHandler] = {}
 
 
 def register(event_type: str):
+    """Decorate event handlers to register them under an id"""
     def inner_register(event_handler: EventHandler) -> EventHandler:
         event_handlers[event_type] = event_handler
         return event_handler
     return inner_register
 
 
-def _moderators_only(func):
+def moderators_only(func: EventHandler) -> EventHandler:
     """Decorate event handlers which should only be use by moderators"""
     func.moderators_only = True
     return func
 
 
-def const(func):
+def const(func: EventHandler) -> EventHandler:
     """Decorate event handlers which don't modify the room and can be used in read only"""
     func.const = True
     return func
 
 
-class EventError(RuntimeError):
-    pass
+def type_checker(dtypes: Dict[str, Callable]):
+    """
+    Decorate event handlers to add simple type checking to them.
+
+    :params dtypes: A map of required arguments' names to their type converting function
+    :type dtypes: dict from string to function
+    """
+    def inner_type_checker(func: EventHandler) -> EventHandler:
+        def checked_func(room: Room, account: AccountModel, data: Dict) -> Awaitable[Response]:
+            for key, dtype in dtypes.items():
+                try:
+                    value = data[key]
+                except KeyError:
+                    raise EventError(f"Missing attribute '{key}'")
+                try:
+                    data[key] = dtype(value)
+                except ValueError as err:
+                    raise EventError(f"Couldn't convert {key}='{value if len(value) < 80 else value[:80] + '...'}' to {dtype.__name__}:\n{err}")
+            return func(room, account, data)
+        return checked_func
+    return inner_type_checker
+
+
+def db_str(obj) -> str:
+    """
+    Modified `str` to check length
+    """
+    string = str(obj)
+    if len(string) > 255:
+        raise ValueError("Sting too long (> 255)")
+    return string
+
+
+def board_layer(component_type: str) -> Type[Layer]:
+    try:
+        return {
+            "tile": TileLayer,
+            "character": CharacterLayer,
+            "image": ImageLayer,
+        }[component_type]
+    except KeyError:
+        raise ValueError(f"Unknown layer type: '{component_type}'\nChoose from: [tile, character, image]")
 
 
 @register("session")
 @const
+@type_checker({"x": int, "y": int, "scale": float})
 @database_sync_to_async
 def _process_session(room: Room, account: AccountModel, data: Dict):
     session, _ = UserSession.objects.get_or_create(room=room, user=account.user)
@@ -56,6 +102,7 @@ def _process_session(room: Room, account: AccountModel, data: Dict):
 
 @register("cursor")
 @const
+# Skipped type checking for performance. Also, it doesn't break db so...
 async def _process_cursor(room: Room, account: AccountModel, data: Dict):
     if account.display_name:
         name = account.display_name
@@ -68,7 +115,8 @@ async def _process_cursor(room: Room, account: AccountModel, data: Dict):
 
 @register("switch")
 @const
-@_moderators_only
+@moderators_only
+# Skipped type checking as it doesn't concern db so.
 async def _process_switch(room: Room, account: AccountModel, data: Dict):
     return Response(sender=data, campaign=data)
 
@@ -77,7 +125,8 @@ async def _process_switch(room: Room, account: AccountModel, data: Dict):
 # Character #
 # --------- #
 @register("character.new")
-@_moderators_only
+@moderators_only
+@type_checker({"x": int, "y": int, "name": db_str, "color": db_str})
 @database_sync_to_async
 def _process_new_character(room: Room, account: AccountModel, data: Dict):
     try:
@@ -109,7 +158,8 @@ def yield_points(x, y, d_max=10):
 
 
 @register("character.bulk")
-@_moderators_only
+@moderators_only
+@type_checker({"x": int, "y": int, "name": db_str, "color": db_str, "number": float})
 @database_sync_to_async
 def _process_new_character_bulk(room: Room, account: AccountModel, data: Dict):
     try:
@@ -145,6 +195,7 @@ def _process_new_character_bulk(room: Room, account: AccountModel, data: Dict):
 
 
 @register("character.move")
+@type_checker({"x": int, "y": int, "id": db_str})
 @database_sync_to_async
 def _process_move_character(room: Room, account: AccountModel, data: Dict):
     try:
@@ -166,7 +217,8 @@ def _process_move_character(room: Room, account: AccountModel, data: Dict):
 
 
 @register("character.delete")
-@_moderators_only
+@moderators_only
+@type_checker({"id": db_str})
 @database_sync_to_async
 def _process_delete_character(room: Room, account: AccountModel, data: Dict):
     try:
@@ -186,7 +238,8 @@ def _process_delete_character(room: Room, account: AccountModel, data: Dict):
 # Tile #
 # ---- #
 @register("tiles.color")
-@_moderators_only
+@moderators_only
+@type_checker({"layer": db_str, "background": db_str, "border": db_str, "tiles": list})
 @database_sync_to_async
 def _process_color_tile(room: Room, account: AccountModel, data: Dict):
     try:
@@ -218,7 +271,8 @@ def _process_color_tile(room: Room, account: AccountModel, data: Dict):
 
 
 @register("tiles.delete")
-@_moderators_only
+@moderators_only
+@type_checker({"layer": db_str, "tiles": list})
 @database_sync_to_async
 def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
     try:
@@ -236,7 +290,8 @@ def _process_delete_tile(room: Room, account: AccountModel, data: Dict):
 
 
 @register("background.color")
-@_moderators_only
+@moderators_only
+@type_checker({"background": db_str, "border": db_str})
 @database_sync_to_async
 def _process_color_background(room: Room, account: AccountModel, data: Dict):
     room.defaultBackground = data["background"]
@@ -249,7 +304,8 @@ def _process_color_background(room: Room, account: AccountModel, data: Dict):
 # Image #
 # ----- #
 @register("image.new")
-@_moderators_only
+@moderators_only
+@type_checker({"layer": db_str, "url": db_str, "x": int, "y": int, "width": int, "height": int})
 @database_sync_to_async
 def _process_new_image(room: Room, account: AccountModel, data: Dict):
     try:
@@ -270,14 +326,15 @@ def _process_new_image(room: Room, account: AccountModel, data: Dict):
 
 
 @register("image.change_layer")
-@_moderators_only
+@moderators_only
 @database_sync_to_async
 def _process_change_image_layer(room: Room, account: AccountModel, data: Dict):
     raise EventError("Deprecated")
 
 
 @register("image.move")
-@_moderators_only
+@moderators_only
+@type_checker({"id": db_str, "x": int, "y": int, "width": int, "height": int})
 @database_sync_to_async
 def _process_move_image(room: Room, account: AccountModel, data: Dict):
     try:
@@ -298,7 +355,8 @@ def _process_move_image(room: Room, account: AccountModel, data: Dict):
 
 
 @register("image.delete")
-@_moderators_only
+@moderators_only
+@type_checker({"id": db_str})
 @database_sync_to_async
 def _process_delete_image(room: Room, account: AccountModel, data: Dict):
     try:
@@ -315,28 +373,21 @@ def _process_delete_image(room: Room, account: AccountModel, data: Dict):
 
 
 @register("layer.new")
-@_moderators_only
+@moderators_only
+@type_checker({"component_type": board_layer, "name": db_str})
 @database_sync_to_async
 def _process_new_layer(room: Room, account: AccountModel, data: Dict):
-    try:
-        LayerModel: Type[Layer] = {
-            "tile": TileLayer,
-            "character": CharacterLayer,
-            "image": ImageLayer,
-        }[data["component_type"]]
-    except KeyError:
-        raise EventError("Unknown layer type")
-
     level = Layer.objects.filter(room=room).aggregate(level=Max("level"))["level"] + 1
 
-    layer = LayerModel.objects.create(room=room, name=data["name"], level=level)
+    layer = data["component_type"].objects.create(room=room, name=data["name"], level=level)
 
     response = {"type": "layer.new", layer.identifier: layer.to_dict()}
     return Response(sender=response, room=response)
 
 
 @register("layer.move")
-@_moderators_only
+@moderators_only
+@type_checker({"layer": db_str, "index": int})
 @database_sync_to_async
 def _process_move_layer(room: Room, account: AccountModel, data: Dict):
     layers = Layer.objects.filter(room=room).order_by("-level")
@@ -370,7 +421,8 @@ def _process_move_layer(room: Room, account: AccountModel, data: Dict):
 
 
 @register("layer.drop")
-@_moderators_only
+@moderators_only
+@type_checker({"id": db_str})
 @database_sync_to_async
 def _process_drop_layer(room: Room, account: AccountModel, data: Dict):
     try:
