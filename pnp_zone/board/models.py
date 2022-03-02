@@ -9,13 +9,28 @@ def uuid4():
     return str(uuid.uuid4())
 
 
-class Room(models.Model):
+class Clonable(models.Model):
+
+    class Meta:
+        abstract = True
+
+    def clone(self, **kwargs):
+        for field in self.__class__._meta.fields:
+            if field.unique:
+                continue
+            else:
+                kwargs.setdefault(field.name, getattr(self, field.name))
+        return self.__class__.objects.create(**kwargs)
+
+
+class Room(Clonable):
     name = models.CharField(max_length=255)
     identifier = models.CharField(max_length=255, unique=True, default=uuid4, blank=True)
     campaign = models.ForeignKey("campaign.CampaignModel", on_delete=models.CASCADE, related_name="rooms")
     defaultBorder = models.CharField(max_length=255, default="black")
     defaultBackground = models.CharField(max_length=255, default="white")
     last_modified = models.DateTimeField(auto_now=True)
+    replacing = models.ForeignKey("self", default=None, null=True, blank=True, on_delete=models.CASCADE)
 
     @property
     def read_only(self):
@@ -29,6 +44,15 @@ class Room(models.Model):
         ImageLayer.objects.create(room=room, level=2, identifier="foreground-images", name="Foreground Images")
         CharacterLayer.objects.create(room=room, level=3, identifier="characters", name="Character Tokens")
         return room
+
+    def backup(self):
+        backup = self.clone(replacing=self)
+        for LayerModel, ComponentModel in ((ImageLayer, Image), (CharacterLayer, Character), (TileLayer, Tile)):
+            for layer in LayerModel.objects.filter(room=self):
+                backup_layer = layer.clone(room=backup)
+                for component in ComponentModel.objects.filter(layer=layer):
+                    component.clone(layer=backup_layer)
+        return backup
 
     def get_absolute_url(self):
         return "/board/" + self.identifier
@@ -46,7 +70,7 @@ def not_zero(value):
         raise ValidationError("0 is not a valid level")
 
 
-class Layer(models.Model):
+class Layer(Clonable):
     component_type: str = NotImplemented
     children = NotImplemented  # Be sure to make the ForeignKey relation name be children
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
@@ -70,7 +94,7 @@ class CharacterLayer(Layer):
     component_type: str = "character"
 
 
-class Character(models.Model):
+class Character(Clonable):
     layer = models.ForeignKey(CharacterLayer, on_delete=models.CASCADE, related_name="children")
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     name = models.CharField(max_length=255, default="Unnamed")
@@ -93,7 +117,7 @@ class TileLayer(Layer):
     component_type: str = "tile"
 
 
-class Tile(models.Model):
+class Tile(Clonable):
     layer = models.ForeignKey(TileLayer, on_delete=models.CASCADE, related_name="children")
     x = models.IntegerField()
     y = models.IntegerField()
@@ -114,25 +138,11 @@ class Tile(models.Model):
         return {"x": self.x, "y": self.y, "background": self.background, "border": self.border}
 
 
-class UserSession(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    board_x = models.IntegerField(default=0, blank=True)
-    board_y = models.IntegerField(default=0, blank=True)
-    board_scale = models.FloatField(default=1, blank=True)
-
-    class Meta:
-        unique_together = ("room", "user")
-
-    def __str__(self):
-        return f"{self.user} in {self.room}"
-
-
 class ImageLayer(Layer):
     component_type: str = "image"
 
 
-class Image(models.Model):
+class Image(Clonable):
     layer = models.ForeignKey(ImageLayer, on_delete=models.CASCADE, related_name="children")
     identifier = models.CharField(max_length=255, default=uuid4, blank=True)
     url = models.CharField(max_length=255, default="")
@@ -150,3 +160,17 @@ class Image(models.Model):
     def to_dict(self):
         return {"id": self.identifier, "url": self.url,
                 "x": self.x, "y": self.y, "width": self.width, "height": self.height}
+
+
+class UserSession(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    board_x = models.IntegerField(default=0, blank=True)
+    board_y = models.IntegerField(default=0, blank=True)
+    board_scale = models.FloatField(default=1, blank=True)
+
+    class Meta:
+        unique_together = ("room", "user")
+
+    def __str__(self):
+        return f"{self.user} in {self.room}"
