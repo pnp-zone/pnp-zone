@@ -1,0 +1,12 @@
+[Database]
+Driver = "sqlite"
+Name = "pnp-zone.sqlite3"
+Host = "localhost"
+Port = 3006
+User = "pnp-zone"
+Password = ""
+
+[Generic]
+TemplatePath = "templates/"
+StaticPath = "static/"
+PluginPath = "plugins/"
