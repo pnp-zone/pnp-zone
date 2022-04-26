@@ -1,9 +1,0 @@
-from django.urls import path
-
-from board.views import *
-
-
-urlpatterns = [
-    path("<str:room>", BoardView.as_view()),
-    path("<str:room>/data", BoardData.as_view()),
-]
