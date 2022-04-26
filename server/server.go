@@ -8,6 +8,7 @@ import (
 	"github.com/myOmikron/echotools/execution"
 	"github.com/myOmikron/echotools/worker"
 	"github.com/pelletier/go-toml"
+	"github.com/pnp-zone/pnp-zone/conf"
 	"html/template"
 	"io/fs"
 	"io/ioutil"
@@ -15,7 +16,7 @@ import (
 )
 
 func StartServer(configPath string) {
-	config := &Config{}
+	config := &conf.Config{}
 
 	if configBytes, err := ioutil.ReadFile(configPath); errors.Is(err, fs.ErrNotExist) {
 		color.Printf(color.RED, "Config was not found at %s\n", configPath)

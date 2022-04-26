@@ -1,4 +1,4 @@
-package server
+package conf
 
 type Database struct {
 	Driver   string

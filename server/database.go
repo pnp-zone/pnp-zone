@@ -6,6 +6,7 @@ import (
 	"github.com/myOmikron/echotools/color"
 	"github.com/myOmikron/echotools/database"
 	"github.com/myOmikron/echotools/utilitymodels"
+	"github.com/pnp-zone/pnp-zone/conf"
 	"github.com/pnp-zone/pnp-zone/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -16,7 +17,7 @@ import (
 	"strconv"
 )
 
-func initializeDatabase(config *Config, plugins []*Plugin) (db *gorm.DB) {
+func initializeDatabase(config *conf.Config, plugins []*Plugin) (db *gorm.DB) {
 	var driver gorm.Dialector
 	switch config.Database.Driver {
 	case "sqlite":

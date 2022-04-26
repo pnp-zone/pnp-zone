@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/myOmikron/echotools/color"
 	"github.com/myOmikron/echotools/worker"
+	"github.com/pnp-zone/pnp-zone/conf"
 	"gorm.io/gorm"
 	"io/ioutil"
 	"path"
@@ -15,13 +16,13 @@ type Plugin struct {
 	Name           string
 	MigrationHook  func(db *gorm.DB) error
 	WorkerPoolHook func(wp *worker.Pool) error
-	RouterHook     func(e *echo.Echo, db *gorm.DB, config *Config) error
+	RouterHook     func(e *echo.Echo, db *gorm.DB, config *conf.Config) error
 }
 
 type MigrationHook = func() func(db *gorm.DB) error
-type RouterHook = func() func(e *echo.Echo, db *gorm.DB, config *Config) error
+type RouterHook = func() func(e *echo.Echo, db *gorm.DB, config *conf.Config) error
 
-func loadPlugins(config *Config) (plugins []*Plugin) {
+func loadPlugins(config *conf.Config) (plugins []*Plugin) {
 	plugins = make([]*Plugin, 0)
 
 	if files, err := ioutil.ReadDir(config.Generic.PluginPath); err != nil {
