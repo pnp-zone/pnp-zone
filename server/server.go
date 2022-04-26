@@ -8,7 +8,7 @@ import (
 	"github.com/myOmikron/echotools/execution"
 	"github.com/myOmikron/echotools/worker"
 	"github.com/pelletier/go-toml"
-	"github.com/pnp-zone/pnp-zone/conf"
+	"github.com/pnp-zone/common/conf"
 	"html/template"
 	"io/fs"
 	"io/ioutil"

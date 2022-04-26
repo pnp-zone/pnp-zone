@@ -8,6 +8,7 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/myOmikron/echotools v0.0.0-20220426213130-f37725443546
 	github.com/pelletier/go-toml v1.9.5
+	github.com/pnp-zone/common v0.0.0-20220426234513-5f4981bdf619
 	gorm.io/driver/mysql v1.3.3
 	gorm.io/driver/postgres v1.3.5
 	gorm.io/driver/sqlite v1.3.2

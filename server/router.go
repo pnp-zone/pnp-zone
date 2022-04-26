@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/myOmikron/echotools/color"
-	"github.com/pnp-zone/pnp-zone/conf"
+	"github.com/pnp-zone/common/conf"
 	"gorm.io/gorm"
 )
 

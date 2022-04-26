@@ -6,7 +6,7 @@ import (
 	"github.com/myOmikron/echotools/color"
 	"github.com/myOmikron/echotools/database"
 	"github.com/myOmikron/echotools/utilitymodels"
-	"github.com/pnp-zone/pnp-zone/conf"
+	"github.com/pnp-zone/common/conf"
 	"github.com/pnp-zone/pnp-zone/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
