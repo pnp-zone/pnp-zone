@@ -33,7 +33,7 @@ install:
 		ln -s /usr/lib/systemd/system/pnp-zone.service /etc/systemd/system/multi-user.target.wants/; \
 	fi
 	systemctl daemon-reload
-	systemctl enable matebot-web
+	systemctl enable pnp-zone
 	cp -r templates/ /var/lib/pnp-zone/
 	cp -r static/ /var/lib/pnp-zone/
 	cp example.config.toml /etc/pnp-zone/
