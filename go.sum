@@ -101,8 +101,8 @@ github.com/mattn/go-isatty v0.0.14 h1:yVuAays6BHfxijgZPzw+3Zlu5yQgKGP2/hcQbHb7S9
 github.com/mattn/go-isatty v0.0.14/go.mod h1:7GGIvUiUoEMVVmxf/4nioHXj79iQHKdU27kJ6hsGG94=
 github.com/mattn/go-sqlite3 v1.14.12 h1:TJ1bhYJPV44phC+IMu1u2K/i5RriLTPe+yc68XDJ1Z0=
 github.com/mattn/go-sqlite3 v1.14.12/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
-github.com/myOmikron/echotools v0.1.1 h1:pkC3zHBSnAxzYQNKdKTEXdC2c3pir7o1vm2GDDSTELc=
-github.com/myOmikron/echotools v0.1.1/go.mod h1:4o+BijMVGVXbbF+XBKMet6DbhWNlAp6oYusxzv7Bzjc=
+github.com/myOmikron/echotools v0.1.2 h1:2Xpnld+olmdGxKD4yEr4sWIFC2jyc0Sj6sIwWU7Q/eY=
+github.com/myOmikron/echotools v0.1.2/go.mod h1:4o+BijMVGVXbbF+XBKMet6DbhWNlAp6oYusxzv7Bzjc=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=
 github.com/pelletier/go-toml v1.9.5/go.mod h1:u1nR/EPcESfeI/szUZKdtJ0xRNbUoANCkoOuaOx1Y+c=
 github.com/pkg/errors v0.8.1 h1:iURUrRGxPUNPdy5/HRSm+Yj6okJ6UtLINN0Q9M4+h3I=

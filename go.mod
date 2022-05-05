@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/hellflame/argparse v1.8.0
 	github.com/labstack/echo/v4 v4.7.2
-	github.com/myOmikron/echotools v0.1.1
+	github.com/myOmikron/echotools v0.1.2
 	github.com/pelletier/go-toml v1.9.5
 	github.com/pnp-zone/common v0.2.0
 	gorm.io/driver/mysql v1.3.3
