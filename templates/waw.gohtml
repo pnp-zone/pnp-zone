@@ -1,0 +1,18 @@
+{{define "waw"}}
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .}}
+<body>
+<script>
+    (async function(){
+        const {default: init, Screen} = await import("/static/js/waw.js");
+        await init();
+        window.WAW = new Screen(document.body);
+        {{range .JsPaths}}
+        import("{{.}}");
+        {{end}}
+    })();
+</script>
+</body>
+</html>
+{{end}}
