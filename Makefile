@@ -16,6 +16,11 @@ clean:
 .PHONY: build
 build:
 	${GO} build -o ${OUT_DIR}/ ${FILE_DIR}/...
+	mkdir -p static/js static/css
+	cd waw/ && make
+	cp waw/build/waw.css static/css/
+	cp waw/build/waw.js static/js/
+	cp waw/build/waw_bg.wasm static/js/
 
 .PHONY: install
 install:
