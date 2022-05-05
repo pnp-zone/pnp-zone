@@ -6,7 +6,12 @@ Port = 3006
 User = "pnp-zone"
 Password = ""
 
-[Generic]
+[Server]
+ListenAddress = "127.0.0.1:8000"
+AllowedHosts = [
+    {Host = "127.0.0.1:8000", Https = false},
+]
+UseForwardedProtoHeader = true
 TemplatePath = "templates/"
 StaticPath = "static/"
 PluginPath = "plugins/"
