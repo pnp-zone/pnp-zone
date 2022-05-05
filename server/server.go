@@ -51,6 +51,12 @@ func StartServer(configPath string) {
 	})
 	wp.Start()
 
+	for _, plugin := range plugins {
+		if err := plugin.WorkerPoolHook(wp); err != nil {
+			return
+		}
+	}
+
 	// Web server
 	e := echo.New()
 	e.HideBanner = true
