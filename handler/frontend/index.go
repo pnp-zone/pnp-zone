@@ -1,4 +1,4 @@
-package handler
+package frontend
 
 import (
 	"github.com/labstack/echo/v4"

@@ -1,0 +1,23 @@
+{{define "login"}}
+<!DOCTYPE html>
+<html lang="en">
+{{template "head" .}}
+<body>
+    <div class="loginContent">
+        <div class="loginBox">
+            <img class="invert" alt="dungeon icon" src="{{.Static}}/img/dungeon.svg">
+            <form class="loginForm" method="POST" action="/handler/frontend/login">
+                <h2 class="text">Login</h2>
+                <label class="text" for="username">Username</label>
+                <input class="input" id="username" required>
+                <label class="text" for="password">Password</label>
+                <input class="input" type="password" id="password" required>
+                <button class="button">Login</button>
+                <hr>
+                <a class="button" href="/register">Register instead</a>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+{{end}}
