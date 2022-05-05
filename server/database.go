@@ -49,16 +49,7 @@ func initializeDatabase(config *conf.Config, plugins []*Plugin) (db *gorm.DB) {
 		&utilitymodels.User{},
 
 		&models.User{},
-
-		&models.Room{},
-		&models.Layer{},
-		&models.ImageLayer{},
-		&models.Image{},
-		&models.CharacterLayer{},
-		&models.Character{},
-		&models.TileLayer{},
-		&models.Tile{},
-		&models.UserBoardPosition{},
+		&models.Campaign{},
 	)
 
 	// Execute plugin migrations
