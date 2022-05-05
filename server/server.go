@@ -90,7 +90,7 @@ func StartServer(configPath string) {
 	defineRoutes(e, db, config, plugins)
 
 	// Start server
-	execution.SignalStart(e, "127.0.0.1:8080", &execution.Config{
+	execution.SignalStart(e, config.Server.ListenAddress, &execution.Config{
 		ReloadFunc: func() {
 			StartServer(configPath)
 		},
