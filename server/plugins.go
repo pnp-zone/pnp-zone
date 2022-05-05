@@ -25,12 +25,12 @@ type RouterHook = func() func(e *echo.Echo, db *gorm.DB, config *conf.Config) er
 func loadPlugins(config *conf.Config) (plugins []*Plugin) {
 	plugins = make([]*Plugin, 0)
 
-	if files, err := ioutil.ReadDir(config.Generic.PluginPath); err != nil {
+	if files, err := ioutil.ReadDir(config.Server.PluginPath); err != nil {
 		color.Printf(color.RED, "Error while reading plugins: %s\n", err.Error())
 	} else {
 		for _, file := range files {
 			if !file.IsDir() && strings.HasSuffix(file.Name(), ".so") {
-				if rawPlugin, err := plugin.Open(path.Join(config.Generic.PluginPath, file.Name())); err != nil {
+				if rawPlugin, err := plugin.Open(path.Join(config.Server.PluginPath, file.Name())); err != nil {
 					color.Printf(color.RED, "Error loading plugin %s: %s\n", file.Name(), err.Error())
 					continue
 				} else {
