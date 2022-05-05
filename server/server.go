@@ -4,8 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	emw "github.com/labstack/echo/v4/middleware"
 	"github.com/myOmikron/echotools/color"
 	"github.com/myOmikron/echotools/execution"
+	mw "github.com/myOmikron/echotools/middleware"
 	"github.com/myOmikron/echotools/worker"
 	"github.com/pelletier/go-toml"
 	"github.com/pnp-zone/common/conf"
@@ -13,6 +15,7 @@ import (
 	"io/fs"
 	"io/ioutil"
 	"os"
+	"time"
 )
 
 func StartServer(configPath string) {
@@ -59,6 +62,29 @@ func StartServer(configPath string) {
 	e.Renderer = renderer
 
 	// Middleware definition
+	e.Use(emw.Logger())
+	e.Use(emw.Recover())
+
+	allowedHosts := make([]mw.AllowedHost, 0)
+	for _, host := range config.Server.AllowedHosts {
+		allowedHosts = append(allowedHosts, mw.AllowedHost{
+			Host:  host.Host,
+			Https: host.Https,
+		})
+	}
+	secConfig := &mw.SecurityConfig{
+		AllowedHosts:            allowedHosts,
+		UseForwardedProtoHeader: config.Server.UseForwardedProtoHeader,
+	}
+	e.Use(mw.Security(secConfig))
+
+	cookieAge := time.Hour * 24
+	e.Use(mw.Session(db, &mw.SessionConfig{
+		CookieName:     "sessionid",
+		CookieAge:      &cookieAge,
+		CookiePath:     "/",
+		DisableLogging: false,
+	}))
 
 	// Router
 	defineRoutes(e, db, config, plugins)
