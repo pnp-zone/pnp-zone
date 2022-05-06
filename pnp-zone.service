@@ -13,8 +13,8 @@ WorkingDirectory=/var/lib/pnp-zone
 ConfigurationDirectory=pnp-zone
 
 ExecStart=/usr/local/bin/pnp-zone
-ExecReload=/usr/bin/kill -s HUP $MAINPID
-ExecStop=/usr/bin/kill -s INT $MAINPID
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s INT $MAINPID
 
 Restart=always
 RestartSec=3
