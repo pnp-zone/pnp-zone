@@ -39,6 +39,10 @@ make && make install
 To configure pnp-zone, copy `/etc/pnp-zone/example.config.toml` to `/etc/pnp-zone/config.toml` and modify 
 it to match your needs.
 
+**Note**:
+If you use the `X-Forwarded-Proto` Header, make sure to only add the header on the proxy, that is used
+for SSL offloading.
+
 After changing the configuration, pnp-zone has to be reloaded:
 ```bash
 systemctl reload pnp-zone
