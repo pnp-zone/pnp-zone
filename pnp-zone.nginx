@@ -28,7 +28,7 @@ server {
 	}
 
 	location /static/ {
-		root /var/lib/pnp-zone/
+		root /var/lib/pnp-zone/;
 		try_files $uri $uri/ =404;
 	}
 
