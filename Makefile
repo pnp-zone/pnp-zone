@@ -25,6 +25,7 @@ build:
 .PHONY: install
 install:
 	useradd -U -r pnp-zone |:
+	mkdir -p /usr/lib/systemd/system/ /usr/local/bin/
 	cp ${OUT_DIR}/pnp-zone /usr/local/bin/pnp-zone
 	cp pnp-zone.service /usr/lib/systemd/system/pnp-zone.service
 	if [ -L /etc/systemd/system/multi-user.target.wants/pnp-zone.service ] ; then \
