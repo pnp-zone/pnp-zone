@@ -4,12 +4,21 @@
 {{template "head" .}}
 <body>
 <script>
-    (async function(){
-        const {default: init, Screen} = await import("/static/js/waw.js");
-        await init();
-        window.WAW = new Screen(document.body);
+    (function(){
+        // Load a module, call init (default export) and return remaining exports
+        async function loadInitModule(url) {
+            const {default: init, ...module} = await import(url);
+            await init();
+            return module;
+        }
+
+        window.pnpZone = {
+            static: "/static/",
+            waw: loadInitModule("/static/js/waw.js").then(({Screen}) => new Screen(document.body)),
+        };
+
         {{range .JsPaths}}
-        import("{{.}}");
+        loadInitModule("{{.}}");
         {{end}}
     })();
 </script>
