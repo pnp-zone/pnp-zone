@@ -1,0 +1,8 @@
+# IDE
+.idea/
+
+# rorm
+.models.json
+
+# rust
+target/
